@@ -66,7 +66,7 @@ func (c *Collector) Collect(ctx context.Context, gridHash string, rg []modelprov
 	if err != nil {
 		return err
 	}
-	if _, err := io.Copy(lonOut, latIn); err != nil {
+	if _, err := io.Copy(lonOut, lonIn); err != nil {
 		return err
 	}
 	if err := lonOut.Close(); err != nil {
