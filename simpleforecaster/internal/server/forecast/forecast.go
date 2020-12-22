@@ -17,32 +17,37 @@ import (
 
 // Forecast gives the latest weather forecast for a location.
 type Forecast struct {
-	store   *collector.Client
-	groups  []string
-	workdir string
+	store  *collector.Client
+	groups []string
 
 	datasets map[string]*datagroup.Dataset
 	m        sync.RWMutex
 }
 
 // New initializes an object that can be queries for forecasts. It is self-updating.
-func New(blobURL string, groups []string, workdir string) (*Forecast, error) {
+func New(blobURL string, groups []string) (*Forecast, error) {
 	store, err := collector.NewClient(blobURL)
 	if err != nil {
 		return nil, err
 	}
 
+	f := newFromCollector(store, groups)
+
+	go f.run()
+
+	return f, nil
+}
+
+func newFromCollector(store *collector.Client, groups []string) *Forecast {
 	f := &Forecast{
 		store:    store,
 		groups:   groups,
-		workdir:  workdir,
 		datasets: make(map[string]*datagroup.Dataset),
 	}
 
 	f.update()
-	go f.run()
 
-	return f, nil
+	return f
 }
 
 // Get returns a forecast for the given latitude and longitude.
@@ -128,7 +133,7 @@ func (f *Forecast) load(ctx context.Context, group string, version int) {
 		log.Fatalln(err)
 	}
 
-	datagroup, err := datagroup.Download(ctx, f.store, meta, f.workdir)
+	datagroup, err := datagroup.Download(ctx, f.store, meta)
 	if err != nil {
 		log.Fatalln(err)
 	}

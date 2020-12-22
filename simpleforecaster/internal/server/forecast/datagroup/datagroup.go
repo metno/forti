@@ -21,7 +21,7 @@ type Dataset struct {
 }
 
 // Download creates and returns a Dataset from the given specification.
-func Download(ctx context.Context, source *collector.Client, datasetMeta *collector.DatasetMeta, workdir string) (*Dataset, error) {
+func Download(ctx context.Context, source *collector.Client, datasetMeta *collector.DatasetMeta) (*Dataset, error) {
 	hashes, err := source.GetHashes(ctx, datasetMeta)
 	if err != nil {
 		return nil, err
@@ -30,7 +30,7 @@ func Download(ctx context.Context, source *collector.Client, datasetMeta *collec
 	var readers []*simpledatagroup.Reader
 	var lookups []geo.Nearester
 
-	downloader := simpledatagroup.NewDownloader(source, workdir)
+	downloader := simpledatagroup.NewDownloader(source)
 
 	for _, hash := range hashes {
 		lookup, err := geo.Add(ctx, source, datasetMeta, hash)

@@ -16,14 +16,12 @@ import (
 func main() {
 	bucket := flag.String("blob", "file:///home/vegardb/local/forti/collected", "Read forecasts from the given bucket")
 	groups := flag.String("groups", "nordic", "Serve the given groups")
-	workdir := flag.String("workdir", "", "use the given folder as a workdir")
 	stats := flag.Bool("serve-stats", false, "serve prometheus stats")
 	flag.Parse()
 
 	conf := server.Configuration{
-		Bucket:  *bucket,
-		Groups:  strings.Split(*groups, ","),
-		Workdir: *workdir,
+		Bucket: *bucket,
+		Groups: strings.Split(*groups, ","),
 	}
 
 	if *stats {

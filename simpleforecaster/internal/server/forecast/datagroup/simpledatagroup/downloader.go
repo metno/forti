@@ -9,14 +9,12 @@ import (
 )
 
 type Downloader struct {
-	store   *collector.Client
-	workdir string
+	store *collector.Client
 }
 
-func NewDownloader(source *collector.Client, workdir string) *Downloader {
+func NewDownloader(source *collector.Client) *Downloader {
 	return &Downloader{
-		store:   source,
-		workdir: workdir,
+		store: source,
 	}
 }
 

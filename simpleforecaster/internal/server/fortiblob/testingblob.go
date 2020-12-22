@@ -54,7 +54,7 @@ func addMeta(blob *blob.Bucket, parameters map[string]int, group string, version
 	}
 	meta.PointCount = idx
 
-	w, err := blob.NewWriter(ctx, Path(group, version, hash, "meta.json"), nil)
+	w, err := blob.NewWriter(ctx, path(group, version, hash, "meta.json"), nil)
 	if err != nil {
 		panic(err)
 	}
@@ -81,7 +81,7 @@ func addData(blob *blob.Bucket, meta pointdata.MetaCollection, size int, group s
 			}
 		}
 	}
-	w, err := blob.NewWriter(ctx, Path(group, version, hash, "data"), nil)
+	w, err := blob.NewWriter(ctx, path(group, version, hash, "data"), nil)
 	if err != nil {
 		panic(err)
 	}
@@ -103,7 +103,7 @@ func addLocations(blob *blob.Bucket, group string, version int, hash string, lat
 func addRaw(blob *blob.Bucket, group string, version int, hash, name string, data []float32) {
 	ctx := context.Background()
 
-	w, err := blob.NewWriter(ctx, Path(group, version, hash, name), nil)
+	w, err := blob.NewWriter(ctx, path(group, version, hash, name), nil)
 	if err != nil {
 		panic(err)
 	}
