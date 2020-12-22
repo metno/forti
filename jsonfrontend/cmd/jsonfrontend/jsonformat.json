@@ -1,0 +1,68 @@
+{
+    "cut_forecast": true,
+    "http_headers": [
+        {
+            "key": "Content-Type",
+            "value": "application/json; charset=utf-8"
+        }
+    ],
+    "parameters": {
+        "instant": {
+            "offset": 0,
+            "parameters": {
+                "air_pressure_at_sea_level": "air_pressure_at_sea_level",
+                "air_temperature_2m": "air_temperature",
+                "dew_point_temperature_2m": "dew_point_temperature",
+                "cloud_area_fraction": "cloud_area_fraction",
+                "high_type_cloud_area_fraction": "cloud_area_fraction_high",
+                "low_type_cloud_area_fraction": "cloud_area_fraction_low",
+                "medium_type_cloud_area_fraction": "cloud_area_fraction_medium",
+                "fog_area_fraction": "fog_area_fraction",
+                "relative_humidity_2m": "relative_humidity",
+                "wind_from_direction_10m": "wind_from_direction",
+                "wind_speed_10m": "wind_speed",
+                "wind_speed_of_gust": "wind_speed_of_gust",
+                "ultraviolet_index_clear_sky": "ultraviolet_index_clear_sky",
+                "lwe_precipitation_rate": "precipitation_rate"
+            }
+        },
+        "next_1_hours": {
+            "offset": 1,
+            "summary": {
+                "symbol_code": "weather_symbol"
+            },
+            "parameters": {
+                "precipitation_amount_acc1h": "precipitation_amount",
+                "precipitation_amount_max1h": "precipitation_amount_max",
+                "precipitation_amount_min1h": "precipitation_amount_min",
+                "probability_of_precipitation_1h": "probability_of_precipitation",
+                "probability_of_thunder": "probability_of_thunder"
+            }
+        },
+        "next_6_hours": {
+            "offset": 6,
+            "summary": {
+                "symbol_code": "weather_symbol_6h"
+            },
+            "parameters": {
+                "air_temperature_2m_max6h": "air_temperature_max",
+                "air_temperature_2m_min6h": "air_temperature_min",
+                "precipitation_amount_acc6h": "precipitation_amount",
+                "precipitation_amount_max6h": "precipitation_amount_max",
+                "precipitation_amount_min6h": "precipitation_amount_min",
+                "probability_of_precipitation_6h": "probability_of_precipitation",
+                "ultraviolet_index_clear_sky_max6h": "ultraviolet_index_clear_sky_max"
+            }
+        },
+        "next_12_hours": {
+            "offset": 12,
+            "summary": {
+                "symbol_code": "weather_symbol_12h",
+                "symbol_confidence": "weather_symbol_confidence_12h"
+            },
+            "parameters": {
+                "probability_of_precipitation_12h": "probability_of_precipitation"
+            }
+        }
+    }
+}

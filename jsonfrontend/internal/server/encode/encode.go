@@ -1,0 +1,205 @@
+package encode
+
+import (
+	"sort"
+	"time"
+
+	"gitlab.met.no/forti/f2/jsonfrontend/internal/server/config"
+	"gitlab.met.no/forti/f2/jsonfrontend/pkg/jsonformat"
+	"gitlab.met.no/forti/f2/simpleforecaster/pkg/forecaster"
+	"gitlab.met.no/forti/f2/weathersymbol"
+)
+
+func Encode(location *forecaster.Location, forecast *forecaster.Forecast) (*jsonformat.GeoJSON, error) {
+
+	properties, err := getSerializationForecast(forecast)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get altitude
+	var altitude float32
+	for _, data := range forecast.Data {
+		for _, p := range data.ParameterMeta {
+			if len(p.Times) == 1 && p.Times[0].AsTime().Equal(time.Time{}) {
+				if p.Parameter == "altitude" {
+					altitude = data.Data[p.SliceFrom]
+				}
+			}
+		}
+	}
+
+	return &jsonformat.GeoJSON{
+		Type: "Feature",
+		Geometry: jsonformat.Geometry{
+			Type:        "Point",
+			Coordinates: []float32{location.Longitude, location.Latitude, altitude},
+		},
+		Properties: properties,
+	}, nil
+}
+
+func getSerializationForecast(forecast *forecaster.Forecast) (*jsonformat.Forecast, error) {
+
+	return &jsonformat.Forecast{
+		Meta:       getMeta(forecast),
+		Timeseries: getTimeSteps(forecast),
+	}, nil
+}
+
+func getMeta(forecast *forecaster.Forecast) jsonformat.Metadata {
+
+	myParameters := make(map[string]string)
+	for _, timeGroup := range config.Configuration.Parameters {
+		for internalParameter, externalParameter := range timeGroup.Parameters {
+			myParameters[internalParameter] = externalParameter
+		}
+	}
+
+	units := make(map[string]string)
+	for _, data := range forecast.Data {
+		for _, meta := range data.ParameterMeta {
+			external, ok := myParameters[meta.Parameter]
+			if ok {
+				units[external] = meta.Units
+			}
+		}
+	}
+
+	return jsonformat.Metadata{
+		UpdatedAt: forecast.Meta.UpdatedAt.AsTime().UTC(),
+		Units:     units,
+	}
+}
+
+func getTimeSteps(forecast *forecaster.Forecast) []jsonformat.TimeStep {
+
+	timesteps := make(map[time.Time]map[string]jsonformat.TimestepData)
+	for time, values := range GetForecast(forecast).Data {
+		for duration, data := range getTimeStep(values) {
+			t := time.Add(-duration)
+			step, ok := timesteps[t]
+			if !ok {
+				step = make(map[string]jsonformat.TimestepData)
+				timesteps[t] = step
+			}
+			step[data.Period] = data.Data
+		}
+	}
+
+	ret := make([]jsonformat.TimeStep, 0, len(timesteps))
+	for t, data := range timesteps {
+		ret = append(
+			ret,
+			jsonformat.TimeStep{
+				Time: t,
+				Data: data,
+			},
+		)
+	}
+
+	sort.Slice(ret,
+		func(i, j int) bool {
+			return ret[i].Time.Before(ret[j].Time)
+		},
+	)
+
+	if config.Configuration.CutForecast {
+		cutoffTime := time.Now().Truncate(time.Hour)
+		for i, data := range ret {
+			if !data.Time.Before(cutoffTime) {
+				ret = ret[i:]
+				break
+			}
+		}
+	}
+
+	return ret
+}
+
+type namedTimestep struct {
+	Period string
+	Data   jsonformat.TimestepData
+}
+
+func getTimeStep(values map[string]float32) map[time.Duration]namedTimestep {
+
+	ret := make(map[time.Duration]namedTimestep)
+
+	for timerange, timeGroup := range config.Configuration.Parameters {
+		timestepData := jsonformat.TimestepData{
+			Summary: getSummary(&timeGroup, values),
+			Details: make(jsonformat.ForecastDetails),
+		}
+
+		for internalParameter, value := range values {
+			if externalParameter, ok := timeGroup.Parameters[internalParameter]; ok {
+				timestepData.Details[externalParameter] = jsonformat.SingleDigitFloat(value)
+			}
+		}
+
+		duration := time.Duration(timeGroup.Offset) * time.Hour
+
+		if timestepData.Summary != nil || len(timestepData.Details) != 0 {
+			ret[duration] = namedTimestep{
+				Period: timerange,
+				Data:   timestepData,
+			}
+		}
+	}
+
+	return ret
+}
+
+func getSummary(timeGroup *config.TimeGroup, values map[string]float32) *jsonformat.Summary {
+	if timeGroup.Summary != nil {
+		hasSummary := false
+		var summary jsonformat.Summary
+
+		if value, ok := values[timeGroup.Summary.SymbolCode]; ok {
+			symbol := weathersymbol.FromValue(value)
+			summary.SymbolCode = symbol.Identifier()
+			hasSummary = true
+		}
+		if value, ok := values[timeGroup.Summary.SymbolConfidence]; ok {
+			switch value {
+			case 0:
+				summary.SymbolConfidence = "certain"
+			case 1:
+				summary.SymbolConfidence = "somewhat certain"
+			case 2:
+				summary.SymbolConfidence = "uncertain"
+			}
+		}
+		if hasSummary {
+			return &summary
+		}
+	}
+	return nil
+}
+
+type Forecast struct {
+	Data map[time.Time]map[string]float32 `json:"data"`
+}
+
+func GetForecast(forecast *forecaster.Forecast) *Forecast {
+	ret := Forecast{
+		Data: make(map[time.Time]map[string]float32),
+	}
+
+	for _, data := range forecast.Data {
+		for _, meta := range data.ParameterMeta {
+			for i, t := range meta.Times {
+				time := t.AsTime().UTC()
+				timestep, ok := ret.Data[time]
+				if !ok {
+					timestep = make(map[string]float32)
+					ret.Data[time] = timestep
+				}
+				timestep[meta.Parameter] = data.Data[int(meta.SliceFrom)+i]
+			}
+		}
+	}
+
+	return &ret
+}
