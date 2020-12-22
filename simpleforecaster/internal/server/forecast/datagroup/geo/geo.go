@@ -1,0 +1,120 @@
+// Package geo handles lookup from a latitude/longitude to an index in a
+// downloaded forecast file.
+// It uses a global cache to speed up loading.
+package geo
+
+import (
+	"context"
+	"fmt"
+	"sync"
+
+	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/geo/georeader"
+	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/geo/lookup"
+	"gitlab.met.no/forti/f2/upload/pkg/collector"
+)
+
+// Nearester returns the closest index to a given latitude/longitude.
+type Nearester interface {
+	Nearest(latitude, longitude float32) (geo lookup.GeoResponse, err error)
+}
+
+type cachedMaps struct {
+	geoMap   *lookup.GeoMap
+	useCount uint
+}
+
+type gvh struct {
+	Group   string
+	Version int
+	Hash    string
+}
+
+var idCache map[gvh]string
+var checkSumCache map[string]*cachedMaps
+var cacheMutex sync.Mutex
+
+func init() {
+	idCache = make(map[gvh]string)
+	checkSumCache = make(map[string]*cachedMaps)
+}
+
+// Add creates or returns a cached lookup object from the given reader and id.
+func Add(ctx context.Context, source *collector.Client, datasetMeta *collector.DatasetMeta, hash string) (Nearester, error) {
+
+	gridReader := georeader.New(source)
+
+	checksum, err := gridReader.Checksum(ctx, datasetMeta, hash)
+	if err != nil {
+		return nil, fmt.Errorf("unable to get checksum for %s/%d/%s: %w", datasetMeta.Group, datasetMeta.Version, hash, err)
+	}
+
+	cacheMutex.Lock()
+	defer cacheMutex.Unlock()
+
+	id := gvh{
+		Group:   datasetMeta.Group,
+		Version: datasetMeta.Version,
+		Hash:    hash,
+	}
+
+	if _, ok := idCache[id]; ok {
+		free(id)
+	}
+
+	cacheEntry, ok := checkSumCache[checksum]
+	if !ok {
+		return getData(ctx, gridReader, datasetMeta, hash, checksum)
+	}
+
+	idCache[id] = checksum
+	cacheEntry.useCount++
+	return cacheEntry.geoMap, nil
+}
+
+// getData fetches data directly from a model provider, and adds it to the cache
+func getData(ctx context.Context, gridReader *georeader.Reader, datasetMeta *collector.DatasetMeta, hash, checksum string) (Nearester, error) {
+	geoMap, err := gridReader.Get(ctx, datasetMeta, hash)
+	if err != nil {
+		return nil, err
+	}
+
+	id := gvh{
+		Group:   datasetMeta.Group,
+		Version: datasetMeta.Version,
+		Hash:    hash,
+	}
+
+	idCache[id] = checksum
+	checkSumCache[checksum] = &cachedMaps{
+		geoMap:   geoMap,
+		useCount: 1,
+	}
+	return geoMap, nil
+}
+
+// Free notifies the cache that the given id is no longer in use, and remove
+// it from the cache.
+// func Free(id gvh) {
+// 	cacheMutex.Lock()
+// 	defer cacheMutex.Unlock()
+// 	free(id)
+// }
+
+func free(id gvh) {
+	checksum, ok := idCache[id]
+	if !ok {
+		return
+	}
+	cachedMap, ok := checkSumCache[checksum]
+	if !ok {
+		// this is a bug
+		panic("idCache/checkSumCache mismatch")
+	}
+
+	cachedMap.useCount--
+	delete(idCache, id)
+	if cachedMap.useCount == 0 {
+		delete(checkSumCache, checksum)
+		cachedMap.geoMap.Free()
+	}
+}

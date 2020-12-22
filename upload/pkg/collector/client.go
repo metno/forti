@@ -112,7 +112,7 @@ func (c *Client) GetHashes(ctx context.Context, d *DatasetMeta) ([]string, error
 	return hashes, nil
 }
 
-func (c *Client) GetHashMeta(ctx context.Context, d *DatasetMeta, hash string) (*ParameterMeta, error) {
+func (c *Client) GetHashMeta(ctx context.Context, d *DatasetMeta, hash string) (*MetaCollection, error) {
 	path := fmt.Sprintf("%s/%d/%s/meta.json", d.Group, d.Version, hash)
 
 	r, err := c.bucket.NewReader(ctx, path, nil)
@@ -121,7 +121,7 @@ func (c *Client) GetHashMeta(ctx context.Context, d *DatasetMeta, hash string) (
 	}
 	defer r.Close()
 
-	var ret ParameterMeta
+	var ret MetaCollection
 	if err := json.NewDecoder(r).Decode(&ret); err != nil {
 		return nil, err
 	}
@@ -129,19 +129,24 @@ func (c *Client) GetHashMeta(ctx context.Context, d *DatasetMeta, hash string) (
 	return &ret, nil
 }
 
-func (c *Client) GetData(ctx context.Context, d *DatasetMeta, hash string) (io.ReadCloser, error) {
+type DataReader interface {
+	io.ReadCloser
+	Size() int64
+}
+
+func (c *Client) GetData(ctx context.Context, d *DatasetMeta, hash string) (DataReader, error) {
 	return c.getStream(ctx, fmt.Sprintf("%s/%d/%s/data", d.Group, d.Version, hash))
 }
 
-func (c *Client) GetLatitude(ctx context.Context, d *DatasetMeta, hash string) (io.ReadCloser, error) {
+func (c *Client) GetLatitude(ctx context.Context, d *DatasetMeta, hash string) (DataReader, error) {
 	return c.getStream(ctx, fmt.Sprintf("%s/%d/%s/latitude", d.Group, d.Version, hash))
 }
 
-func (c *Client) GetLongitude(ctx context.Context, d *DatasetMeta, hash string) (io.ReadCloser, error) {
+func (c *Client) GetLongitude(ctx context.Context, d *DatasetMeta, hash string) (DataReader, error) {
 	return c.getStream(ctx, fmt.Sprintf("%s/%d/%s/longitude", d.Group, d.Version, hash))
 }
 
-func (c *Client) getStream(ctx context.Context, path string) (io.ReadCloser, error) {
+func (c *Client) getStream(ctx context.Context, path string) (DataReader, error) {
 	r, err := c.bucket.NewReader(ctx, path, nil)
 	if err != nil {
 		return nil, err

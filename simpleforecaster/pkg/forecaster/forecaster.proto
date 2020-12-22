@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package forecaster;
+
+option go_package = "gitlab.met.no/forti/simpleforecaster/pkg/forecaster";
+
+
+service Forecaster {
+    rpc GetForecast (Location) returns (Forecast) {}
+}
+
+message Location {
+    float latitude = 1;
+    float longitude = 2;
+    Altitude altitude = 3;
+}
+
+message Altitude {
+    float value = 1;
+    bool override = 2;
+}
+
+message Forecast {
+    Meta meta = 1;
+    repeated PointDataCollection data = 2;
+}
+
+message Meta {
+    google.protobuf.Timestamp updatedAt = 1;
+    google.protobuf.Timestamp nextUpdate = 2;
+}
+
+message PointDataCollection {
+    repeated ParameterMeta parameterMeta = 1;
+    repeated float data = 2;
+}
+
+message ParameterMeta {
+    string parameter = 1;
+	string units = 2;
+    int32 sliceFrom = 3;
+	repeated google.protobuf.Timestamp times = 5;
+}

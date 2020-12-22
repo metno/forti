@@ -10,7 +10,6 @@ type DatasetMeta struct {
 
 // ParameterMeta contains metadata about a forecast for a single parameter
 type ParameterMeta struct {
-	Parameter string      `json:"parameter"`
 	Units     string      `json:"units"`
 	Times     []time.Time `json:"times"`
 	SliceFrom int         `json:"slice_from"`

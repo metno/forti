@@ -35,8 +35,7 @@ func makeTestingClient() *collector.Client {
 	paMeta := collector.MetaCollection{
 		Parameters: map[string]collector.ParameterMeta{
 			"foo": {
-				Parameter: "foo",
-				Units:     "uFoo",
+				Units: "uFoo",
 				Times: []time.Time{
 					time.Date(2020, 12, 24, 0, 0, 0, 0, time.UTC),
 					time.Date(2020, 12, 24, 1, 0, 0, 0, time.UTC),
@@ -45,7 +44,6 @@ func makeTestingClient() *collector.Client {
 				SliceFrom: 0,
 			},
 			"bar": {
-				Parameter: "bar",
 				Units:     "uBar",
 				Times:     nil,
 				SliceFrom: 3,
