@@ -10,4 +10,4 @@ IMAGE="${PREFIX}${NAME}:${VERSION}"
 
 docker build -t "$IMAGE" -f "$NAME/build/package/Dockerfile" .
 
-echo "$IMAGE"
+docker push "$IMAGE"
