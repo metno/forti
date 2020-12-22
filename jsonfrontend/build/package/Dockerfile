@@ -1,18 +1,21 @@
-# FROM golang:1.15
+FROM golang:1.15
 
-# COPY go.mod /src/go.mod
-# COPY go.sum /src/go.sum
-# WORKDIR /src
-# RUN go mod download
+COPY go.mod /src/go.mod
+COPY go.sum /src/go.sum
+WORKDIR /src
+RUN go mod download
 
-# COPY internal/ /src/internal/
-# COPY pkg/ /src/pkg/
-# COPY cmd/ /src/cmd
+COPY simpleforecaster/pkg/forecaster /src/simpleforecaster/pkg/forecaster
+COPY weathersymbol/ /src/weathersymbol/
+COPY jsonfrontend/internal /src/jsonfrontend/internal
+COPY jsonfrontend/pkg /src/jsonfrontend/pkg
 
-# RUN go test ./...
+RUN go test ./...
 
-# WORKDIR /src/cmd/jsonfrontend
-# RUN go build
+COPY jsonfrontend/cmd /src/jsonfrontend/cmd
+
+WORKDIR /src/jsonfrontend/cmd/jsonfrontend
+RUN go build
 
 
 FROM ubuntu:focal
@@ -21,8 +24,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 EXPOSE 8080
 
-COPY cmd/jsonfrontend/jsonformat.json /
-COPY cmd/jsonfrontend/jsonfrontend /usr/local/bin
-# COPY --from=0 /src/cmd/jsonfrontend/jsonfrontend /usr/local/bin
+COPY jsonfrontend/cmd/jsonfrontend/jsonformat.json /
+COPY --from=0 /src/jsonfrontend/cmd/jsonfrontend/jsonfrontend /usr/local/bin
 
 ENTRYPOINT [ "/usr/local/bin/jsonfrontend" ]

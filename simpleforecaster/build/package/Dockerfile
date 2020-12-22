@@ -35,13 +35,17 @@ COPY go.sum /src/go.sum
 WORKDIR /src
 RUN go mod download
 
-COPY internal/ /src/internal/
-COPY pkg/ /src/pkg/
-COPY cmd/ /src/cmd
+COPY upload/pkg /src/upload/pkg
+COPY upload/internal /src/upload/internal
+COPY simpleforecaster/pkg/ /src/simpleforecaster/pkg
+COPY simpleforecaster/internal/ /src/simpleforecaster/internal
+COPY simpleforecaster/test/ /src/simpleforecaster/test
 
 RUN go test ./...
 
-WORKDIR /src/cmd/simpleforecaster
+COPY simpleforecaster/cmd /src/simpleforecaster/cmd
+
+WORKDIR /src/simpleforecaster/cmd/simpleforecaster
 RUN go build
 
 
@@ -57,15 +61,12 @@ RUN curl -L -o /bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-hea
     sha256sum /bin/grpc_health_probe | grep -q c78e988a4aad5e9e599c6a69e681ac68579c000b8f0571593325ccbc0c1638b7 && \
     chmod +x /bin/grpc_health_probe
 
-VOLUME /models
-WORKDIR /
-
 EXPOSE 8080
 
 COPY --from=0 /usr/local/lib/libs2.so /usr/local/lib/
 RUN ldconfig
 
 
-COPY --from=0 /src/cmd/simpleforecaster/simpleforecaster /usr/local/bin
+COPY --from=0 /src/simpleforecaster/cmd/simpleforecaster/simpleforecaster /usr/local/bin
 
 ENTRYPOINT [ "/usr/local/bin/simpleforecaster" ]
