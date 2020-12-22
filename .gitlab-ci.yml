@@ -1,0 +1,8 @@
+build_docker: 
+  rules:
+    - if: '$CI_COMMIT_TAG'
+  variables:
+    IMAGE: fortiregistry.azurecr.io/$CI_JOB_NAME
+  script:
+    - docker login -u $azure_registry_username -p $azure_registry_password fortiregistry.azurecr.io
+    - docker push $(./build_docker.sh fortiregistry.azurecr.io $CI_COMMIT_TAG)

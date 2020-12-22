@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -euo pipefail
+
+PREFIX="$1"
+NAME=$(dirname $2)
+VERSION=$(basename $2)
+
+IMAGE="${PREFIX}${NAME}:${VERSION}"
+
+docker build -t "$IMAGE" -f "$NAME/build/package/Dockerfile" .
+
+echo "$IMAGE"
