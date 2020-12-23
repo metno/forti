@@ -7,3 +7,4 @@ build_docker:
     - export VERSION=$(echo correctedforecaster/0.1.0-test3 | sed 's-.*/--')
     - export IMAGE="fortiregistry.azurecr.io/$NAME:$VERSION"
     - docker build -t "$IMAGE" -f "$NAME/build/package/Dockerfile" .
+    - docker push "$IMAGE"
