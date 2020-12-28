@@ -25,7 +25,7 @@ type Server struct {
 func New(upstream string) (*Server, error) {
 	conn, err := grpc.Dial(upstream, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		return nil, fmt.Errorf("could not to upstream: %w", err)
+		return nil, fmt.Errorf("could not connect to upstream: %w", err)
 	}
 
 	return &Server{
