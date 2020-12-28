@@ -1,6 +1,7 @@
 package collector
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,7 +12,6 @@ import (
 	"time"
 
 	"gocloud.dev/blob"
-	"golang.org/x/net/context"
 )
 
 type Client struct {

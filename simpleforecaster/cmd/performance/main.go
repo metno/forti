@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -11,7 +12,6 @@ import (
 	"time"
 
 	"gitlab.met.no/forti/f2/simpleforecaster/pkg/forecaster"
-	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
 

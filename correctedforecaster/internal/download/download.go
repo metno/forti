@@ -16,7 +16,7 @@ import (
 func Get(ctx context.Context, fromBlob, toDir string) ([]string, error) {
 	if fromBlob == "" {
 		log.Printf("no blob address given - just using contents of folder %s as data source", toDir)
-		return listDir(toDir)
+		return ListDir(toDir)
 	}
 
 	bkt, err := blob.OpenBucket(ctx, fromBlob)
@@ -46,7 +46,7 @@ func Get(ctx context.Context, fromBlob, toDir string) ([]string, error) {
 	return files, nil
 }
 
-func listDir(dir string) ([]string, error) {
+func ListDir(dir string) ([]string, error) {
 	finfo, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return nil, err
@@ -59,6 +59,8 @@ func listDir(dir string) ([]string, error) {
 			files = append(files, fname)
 		}
 	}
+
+	sort.Strings(files)
 	return files, nil
 }
 

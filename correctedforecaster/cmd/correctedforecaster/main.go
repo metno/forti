@@ -1,13 +1,13 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log"
 	"time"
 
 	_ "gocloud.dev/blob/azureblob"
 	_ "gocloud.dev/blob/fileblob"
-	"golang.org/x/net/context"
 
 	"gitlab.met.no/forti/f2/correctedforecaster/internal/download"
 	"gitlab.met.no/forti/f2/correctedforecaster/internal/server"
