@@ -10,8 +10,8 @@ import (
 
 // UpdateTemperature performs corrections on air temperature variables, based
 // on the given difference in altitude.
-func UpdateTemperature(interpreted map[string]forecaster.InterpretedData, altitudeDiff int) {
-	correction := 0.006 * float32(altitudeDiff)
+func UpdateTemperature(interpreted map[string]forecaster.InterpretedData, altitudeDiff float32) {
+	correction := 0.006 * altitudeDiff
 
 	for parameter, data := range interpreted {
 		if isTemperature(parameter) {

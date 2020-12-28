@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"math"
 	"net"
 	"time"
 
@@ -116,11 +117,12 @@ func (s *Server) correct(request *forecaster.Location, forecast *forecaster.Fore
 				return fmt.Errorf("unable to lookup topography for location: %w", err)
 			}
 		}
+		realAltitude = float32(math.Round(float64(realAltitude)))
 	}
 
 	altitudeDiff := *modelAltitude - realAltitude
 	if altitudeDiff < -100 || altitudeDiff > 100 {
-		correction.UpdateTemperature(interpreted, int(altitudeDiff))
+		correction.UpdateTemperature(interpreted, altitudeDiff)
 		correction.UpdateDewpointTemperature(interpreted)
 		correction.UpdateSymbols(interpreted)
 		correction.UpdateSymbols6h(interpreted)
