@@ -67,7 +67,7 @@ func getMeta(forecast *forecaster.Forecast) jsonformat.Metadata {
 	}
 
 	return jsonformat.Metadata{
-		UpdatedAt: forecast.Meta.UpdatedAt.AsTime().UTC(),
+		UpdatedAt: time.Unix(forecast.Meta.UpdatedAt.Seconds, 0).UTC(),
 		Units:     units,
 	}
 }
