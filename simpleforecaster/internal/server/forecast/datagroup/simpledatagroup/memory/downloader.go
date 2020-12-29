@@ -1,24 +1,29 @@
-package simpledatagroup
+package memory
 
 import (
 	"context"
 	"encoding/binary"
 	"log"
 
+	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/simpledatagroup"
 	"gitlab.met.no/forti/f2/upload/pkg/collector"
 )
 
-type Downloader struct {
+func Download(ctx context.Context, source *collector.Client, datasetMeta *collector.DatasetMeta, hash string) (simpledatagroup.Reader, error) {
+	return newDownloader(source).Get(ctx, datasetMeta, hash)
+}
+
+type downloader struct {
 	store *collector.Client
 }
 
-func NewDownloader(source *collector.Client) *Downloader {
-	return &Downloader{
+func newDownloader(source *collector.Client) *downloader {
+	return &downloader{
 		store: source,
 	}
 }
 
-func (d *Downloader) Get(ctx context.Context, datasetMeta *collector.DatasetMeta, hash string) (*Reader, error) {
+func (d *downloader) Get(ctx context.Context, datasetMeta *collector.DatasetMeta, hash string) (simpledatagroup.Reader, error) {
 
 	metaCollection, err := d.store.GetHashMeta(ctx, datasetMeta, hash)
 	if err != nil {
@@ -30,13 +35,13 @@ func (d *Downloader) Get(ctx context.Context, datasetMeta *collector.DatasetMeta
 		return nil, err
 	}
 
-	return &Reader{
+	return &MemoryReader{
 		MetaCollection: *metaCollection,
 		data:           data,
 	}, nil
 }
 
-func (d *Downloader) getData(ctx context.Context, meta *collector.DatasetMeta, hash string) ([]int16, error) {
+func (d *downloader) getData(ctx context.Context, meta *collector.DatasetMeta, hash string) ([]int16, error) {
 	src, err := d.store.GetData(ctx, meta, hash)
 	if err != nil {
 		return nil, err

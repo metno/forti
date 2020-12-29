@@ -1,4 +1,4 @@
-package simpledatagroup
+package memory
 
 import (
 	"context"
@@ -17,14 +17,14 @@ func Test(t *testing.T) {
 	ctx := context.Background()
 	_, filename, _, _ := runtime.Caller(0)
 	log.Println(filename)
-	testPath := filepath.Clean(filepath.Dir(filename) + "/../../../../../test/data")
+	testPath := filepath.Clean(filepath.Dir(filename) + "/../../../../../../test/data")
 
 	store, err := blob.OpenBucket(ctx, "file://"+testPath)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	d := NewDownloader(collector.NewClientFromBucket(store))
+	d := newDownloader(collector.NewClientFromBucket(store))
 
 	reader, err := d.Get(ctx,
 		&collector.DatasetMeta{

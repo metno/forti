@@ -8,6 +8,7 @@ import (
 
 	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/geo"
 	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/simpledatagroup"
+	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/simpledatagroup/memory"
 	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/pointdata"
 	"gitlab.met.no/forti/f2/upload/pkg/collector"
 )
@@ -16,8 +17,15 @@ import (
 type Dataset struct {
 	Meta pointdata.Meta
 
-	readers []*simpledatagroup.Reader
+	readers []simpledatagroup.Reader
 	lookups []geo.Nearester
+}
+
+var downloadFunc = memory.Download
+
+// SetDownloadFunction overrides the function to download data. It is meant for creating local tests.
+func SetDownloadFunction(f func(ctx context.Context, source *collector.Client, datasetMeta *collector.DatasetMeta, hash string) (simpledatagroup.Reader, error)) {
+	downloadFunc = f
 }
 
 // Download creates and returns a Dataset from the given specification.
@@ -27,10 +35,8 @@ func Download(ctx context.Context, source *collector.Client, datasetMeta *collec
 		return nil, err
 	}
 
-	var readers []*simpledatagroup.Reader
+	var readers []simpledatagroup.Reader
 	var lookups []geo.Nearester
-
-	downloader := simpledatagroup.NewDownloader(source)
 
 	for _, hash := range hashes {
 		lookup, err := geo.Add(ctx, source, datasetMeta, hash)
@@ -39,7 +45,7 @@ func Download(ctx context.Context, source *collector.Client, datasetMeta *collec
 		}
 		lookups = append(lookups, lookup)
 
-		reader, err := downloader.Get(ctx, datasetMeta, hash)
+		reader, err := downloadFunc(ctx, source, datasetMeta, hash)
 		if err != nil {
 			for _, r := range readers {
 				r.Close()
