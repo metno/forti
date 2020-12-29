@@ -131,6 +131,11 @@ func (f *Forecast) update() error {
 func (f *Forecast) load(ctx context.Context, group string, version int) {
 	log.Printf("available: %s/%d", group, version)
 
+	prometheusLabel := prometheus.Labels{"group": group}
+
+	fortiAvailableLatest.With(prometheusLabel).Set(float64(version))
+	fortiAvailableUpdated.With(prometheusLabel).Set(float64(time.Now().Unix()))
+
 	meta, err := f.store.GetMeta(ctx, group, version)
 	if err != nil {
 		log.Fatalln(err)
@@ -147,5 +152,9 @@ func (f *Forecast) load(ctx context.Context, group string, version int) {
 	}
 	f.datasets[group] = datagroup
 	f.m.Unlock()
+
+	fortiActiveLatest.With(prometheusLabel).Set(float64(version))
+	fortiActiveUpdated.With(prometheusLabel).Set(float64(time.Now().Unix()))
+
 	log.Printf("active: %s/%d", group, version)
 }
