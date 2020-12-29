@@ -81,6 +81,9 @@ func (f *Forecast) bestGroup(latitude, longitude float32) (*datagroup.Dataset, e
 	if selected == nil {
 		return nil, errors.New("no datasets available")
 	}
+
+	distanceHistogram.With(prometheus.Labels{"group": selected.Meta.Group}).Observe(float64(selectedDistance))
+
 	return selected, nil
 }
 
