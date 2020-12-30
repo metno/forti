@@ -2,7 +2,6 @@
 #include "gdal/gdal_priv.h"
 #include "gdal/ogr_spatialref.h"
 #include <cmath>
-#include <iostream>
 #include <cstdlib>
 
 extern "C"
@@ -24,10 +23,12 @@ extern "C"
         {
             return nullptr;
         }
+        src.SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
 
         const char *projection = l->dataset->GetProjectionRef();
         l->projection = projection;
         OGRSpatialReference ref(projection);
+        ref.SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
 
         return OGRCreateCoordinateTransformation(&src, &ref);
     }
@@ -125,9 +126,10 @@ const char *topo_mkgrid(struct TopoLookup *l, float *out, int size, double latit
     y -= size / 2;
 
     CPLErr err = l->band->RasterIO(GF_Read, x, y, size, size,
-                                    out, size, size, GDT_Float32,
-                                    0, 0);
-    if (err != CE_None) {
+                                   out, size, size, GDT_Float32,
+                                   0, 0);
+    if (err != CE_None)
+    {
         return "unable to create image";
     }
 
