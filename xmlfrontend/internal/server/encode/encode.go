@@ -9,12 +9,12 @@ import (
 	"sort"
 	"time"
 
-	"gitlab.met.no/forti/f2/simpleforecaster/pkg/forecaster"
+	"gitlab.met.no/forti/f2/internalprotocol"
 	"gitlab.met.no/forti/f2/xmlfrontend/internal/server/config"
 	"gitlab.met.no/forti/f2/xmlfrontend/pkg/xmlformat"
 )
 
-func Encode(location *forecaster.Location, forecast *forecaster.Forecast) (*xmlformat.ForecastDocument, error) {
+func Encode(location *internalprotocol.Location, forecast *internalprotocol.Forecast) (*xmlformat.ForecastDocument, error) {
 	doc := xmlformat.ForecastDocument{
 		XMLName: xml.Name{Local: "weatherdata"},
 		Product: &xmlformat.ProductElement{
@@ -37,7 +37,7 @@ func Encode(location *forecaster.Location, forecast *forecaster.Forecast) (*xmlf
 	if sorted[0].Time == undef {
 		altitude, ok := sorted[0].Values["altitude"]
 		if ok {
-			location.Altitude = &forecaster.Altitude{
+			location.Altitude = &internalprotocol.Altitude{
 				Value: altitude,
 			}
 		}
@@ -66,7 +66,7 @@ type parsedForecast struct {
 	Values map[string]float32
 }
 
-func sortByTime(forecast *forecaster.Forecast) []parsedForecast {
+func sortByTime(forecast *internalprotocol.Forecast) []parsedForecast {
 	sorted := make(map[time.Time]map[string]float32)
 
 	for _, data := range forecast.Data {
@@ -98,14 +98,14 @@ func sortByTime(forecast *forecaster.Forecast) []parsedForecast {
 	return ret
 }
 
-func getProductElement(location *forecaster.Location, forecast []parsedForecast) *xmlformat.ProductElement {
+func getProductElement(location *internalprotocol.Location, forecast []parsedForecast) *xmlformat.ProductElement {
 	return &xmlformat.ProductElement{
 		Class: "pointData",
 		Time:  getTimeElements(location, forecast),
 	}
 }
 
-func getTimeElements(location *forecaster.Location, forecast []parsedForecast) []xmlformat.TimeElement {
+func getTimeElements(location *internalprotocol.Location, forecast []parsedForecast) []xmlformat.TimeElement {
 	ret := make([]xmlformat.TimeElement, 0, len(forecast))
 
 	for _, f := range forecast {
@@ -116,7 +116,7 @@ func getTimeElements(location *forecaster.Location, forecast []parsedForecast) [
 	return ret
 }
 
-func getElementsForTimestep(location *forecaster.Location, forecast *parsedForecast) []xmlformat.TimeElement {
+func getElementsForTimestep(location *internalprotocol.Location, forecast *parsedForecast) []xmlformat.TimeElement {
 
 	var ret []xmlformat.TimeElement
 
@@ -150,7 +150,7 @@ func getElementsForTimestep(location *forecaster.Location, forecast *parsedForec
 	return ret
 }
 
-func getLocationElement(location *forecaster.Location, forecast *parsedForecast, elements *config.DataElement) xmlformat.LocationElement {
+func getLocationElement(location *internalprotocol.Location, forecast *parsedForecast, elements *config.DataElement) xmlformat.LocationElement {
 	var altitude int
 	if location.Altitude != nil {
 		altitude = int(math.Round(float64(location.Altitude.Value)))

@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"time"
 
-	"gitlab.met.no/forti/f2/simpleforecaster/pkg/forecaster"
+	"gitlab.met.no/forti/f2/internalprotocol"
 	"gitlab.met.no/forti/f2/xmlfrontend/internal/server/config"
 	"gitlab.met.no/forti/f2/xmlfrontend/internal/server/encode"
 	"google.golang.org/grpc"
@@ -19,7 +19,7 @@ import (
 
 type Server struct {
 	conn   *grpc.ClientConn
-	client forecaster.ForecasterClient
+	client internalprotocol.ForecasterClient
 }
 
 func New(upstream string) (*Server, error) {
@@ -30,7 +30,7 @@ func New(upstream string) (*Server, error) {
 
 	return &Server{
 		conn:   conn,
-		client: forecaster.NewForecasterClient(conn),
+		client: internalprotocol.NewForecasterClient(conn),
 	}, nil
 }
 
@@ -75,7 +75,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getLocation(r *http.Request) (*forecaster.Location, error) {
+func getLocation(r *http.Request) (*internalprotocol.Location, error) {
 	q := r.URL.Query()
 	latitude, err := getParam(q, "lat", -90, 90)
 	if err != nil {
@@ -86,7 +86,7 @@ func getLocation(r *http.Request) (*forecaster.Location, error) {
 		return nil, err
 	}
 
-	location := forecaster.Location{
+	location := internalprotocol.Location{
 		Latitude:  latitude,
 		Longitude: longitude,
 	}
@@ -96,7 +96,7 @@ func getLocation(r *http.Request) (*forecaster.Location, error) {
 		if err != nil {
 			return nil, err
 		}
-		location.Altitude = &forecaster.Altitude{
+		location.Altitude = &internalprotocol.Altitude{
 			Value:    altitude,
 			Override: true,
 		}

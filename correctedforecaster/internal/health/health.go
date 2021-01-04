@@ -3,17 +3,17 @@ package health
 import (
 	"context"
 
-	"gitlab.met.no/forti/f2/simpleforecaster/pkg/forecaster"
+	"gitlab.met.no/forti/f2/internalprotocol"
 	"google.golang.org/grpc/health/grpc_health_v1"
 )
 
 // Server implements grpc's health check protocol: https://github.com/grpc/grpc/blob/v1.15.0/doc/health-checking.md
 type Server struct {
-	client forecaster.ForecasterClient
+	client internalprotocol.ForecasterClient
 }
 
 // NewServer creates a new server.
-func NewServer(client forecaster.ForecasterClient) *Server {
+func NewServer(client internalprotocol.ForecasterClient) *Server {
 	return &Server{
 		client: client,
 	}
@@ -26,7 +26,7 @@ func (h *Server) Check(ctx context.Context, request *grpc_health_v1.HealthCheckR
 		status = grpc_health_v1.HealthCheckResponse_SERVICE_UNKNOWN
 	}
 
-	location := forecaster.Location{
+	location := internalprotocol.Location{
 		Latitude:  60,
 		Longitude: 10,
 	}

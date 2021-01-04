@@ -4,13 +4,13 @@ import (
 	"sort"
 	"time"
 
+	"gitlab.met.no/forti/f2/internalprotocol"
 	"gitlab.met.no/forti/f2/jsonfrontend/internal/server/config"
 	"gitlab.met.no/forti/f2/jsonfrontend/pkg/jsonformat"
-	"gitlab.met.no/forti/f2/simpleforecaster/pkg/forecaster"
 	"gitlab.met.no/forti/f2/weathersymbol"
 )
 
-func Encode(location *forecaster.Location, forecast *forecaster.Forecast) (*jsonformat.GeoJSON, error) {
+func Encode(location *internalprotocol.Location, forecast *internalprotocol.Forecast) (*jsonformat.GeoJSON, error) {
 
 	properties, err := getSerializationForecast(forecast)
 	if err != nil {
@@ -39,7 +39,7 @@ func Encode(location *forecaster.Location, forecast *forecaster.Forecast) (*json
 	}, nil
 }
 
-func getSerializationForecast(forecast *forecaster.Forecast) (*jsonformat.Forecast, error) {
+func getSerializationForecast(forecast *internalprotocol.Forecast) (*jsonformat.Forecast, error) {
 
 	return &jsonformat.Forecast{
 		Meta:       getMeta(forecast),
@@ -47,7 +47,7 @@ func getSerializationForecast(forecast *forecaster.Forecast) (*jsonformat.Foreca
 	}, nil
 }
 
-func getMeta(forecast *forecaster.Forecast) jsonformat.Metadata {
+func getMeta(forecast *internalprotocol.Forecast) jsonformat.Metadata {
 
 	myParameters := make(map[string]string)
 	for _, timeGroup := range config.Configuration.Parameters {
@@ -72,7 +72,7 @@ func getMeta(forecast *forecaster.Forecast) jsonformat.Metadata {
 	}
 }
 
-func getTimeSteps(forecast *forecaster.Forecast) []jsonformat.TimeStep {
+func getTimeSteps(forecast *internalprotocol.Forecast) []jsonformat.TimeStep {
 
 	timesteps := make(map[time.Time]map[string]jsonformat.TimestepData)
 	for time, values := range GetForecast(forecast).Data {
@@ -182,7 +182,7 @@ type Forecast struct {
 	Data map[time.Time]map[string]float32 `json:"data"`
 }
 
-func GetForecast(forecast *forecaster.Forecast) *Forecast {
+func GetForecast(forecast *internalprotocol.Forecast) *Forecast {
 	ret := Forecast{
 		Data: make(map[time.Time]map[string]float32),
 	}

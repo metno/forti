@@ -35,9 +35,9 @@ COPY go.sum /src/go.sum
 WORKDIR /src
 RUN go mod download
 
+COPY internalprotocol /src/internalprotocol
 COPY upload/pkg /src/upload/pkg
 COPY upload/internal /src/upload/internal
-COPY simpleforecaster/pkg/ /src/simpleforecaster/pkg
 COPY simpleforecaster/internal/ /src/simpleforecaster/internal
 COPY simpleforecaster/test/ /src/simpleforecaster/test
 

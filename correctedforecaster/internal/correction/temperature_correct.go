@@ -4,13 +4,13 @@ import (
 	"math"
 	"strings"
 
-	"gitlab.met.no/forti/f2/simpleforecaster/pkg/forecaster"
+	"gitlab.met.no/forti/f2/internalprotocol"
 	"gitlab.met.no/forti/f2/weathersymbol"
 )
 
 // UpdateTemperature performs corrections on air temperature variables, based
 // on the given difference in altitude.
-func UpdateTemperature(interpreted map[string]forecaster.InterpretedData, altitudeDiff float32) {
+func UpdateTemperature(interpreted map[string]internalprotocol.InterpretedData, altitudeDiff float32) {
 	correction := 0.006 * altitudeDiff
 
 	for parameter, data := range interpreted {
@@ -24,14 +24,14 @@ func UpdateTemperature(interpreted map[string]forecaster.InterpretedData, altitu
 
 // UpdateSymbols modifies a symbol to take into account any changes in
 // temperature after the symbol was generated.
-func UpdateSymbols(interpreted map[string]forecaster.InterpretedData) {
+func UpdateSymbols(interpreted map[string]internalprotocol.InterpretedData) {
 	symbols, ok := interpreted["weather_symbol"]
 	if !ok {
 		return
 	}
 	instant := "air_temperature_2m"
 
-	sorted := forecaster.SortByTime(interpreted, instant)
+	sorted := internalprotocol.SortByTime(interpreted, instant)
 
 	for i, t := range symbols.Times {
 		values, ok := sorted[t]
@@ -50,7 +50,7 @@ func UpdateSymbols(interpreted map[string]forecaster.InterpretedData) {
 
 // UpdateSymbols6h modifies 6-hourly weather symbols, in the same way as
 // UpdateSymbols does.
-func UpdateSymbols6h(interpreted map[string]forecaster.InterpretedData) {
+func UpdateSymbols6h(interpreted map[string]internalprotocol.InterpretedData) {
 	symbols, ok := interpreted["weather_symbol_6h"]
 	if !ok {
 		return
@@ -59,7 +59,7 @@ func UpdateSymbols6h(interpreted map[string]forecaster.InterpretedData) {
 	max := "air_temperature_2m_max6h"
 	instant := "air_temperature_2m"
 
-	sorted := forecaster.SortByTime(interpreted, min, max, instant)
+	sorted := internalprotocol.SortByTime(interpreted, min, max, instant)
 
 	for i, t := range symbols.Times {
 		values, ok := sorted[t]
@@ -87,7 +87,7 @@ func UpdateSymbols6h(interpreted map[string]forecaster.InterpretedData) {
 
 // UpdateDewpointTemperature recalculates dew point temperature, based on
 // relative humidity and air temperature.
-func UpdateDewpointTemperature(interpreted map[string]forecaster.InterpretedData) {
+func UpdateDewpointTemperature(interpreted map[string]internalprotocol.InterpretedData) {
 	dewPoint, ok := interpreted["dew_point_temperature_2m"]
 	if !ok {
 		return
@@ -95,7 +95,7 @@ func UpdateDewpointTemperature(interpreted map[string]forecaster.InterpretedData
 
 	temperature := "air_temperature_2m"
 	humidity := "relative_humidity_2m"
-	sorted := forecaster.SortByTime(interpreted, humidity, temperature)
+	sorted := internalprotocol.SortByTime(interpreted, humidity, temperature)
 
 	for i, t := range dewPoint.Times {
 		timestep, ok := sorted[t]

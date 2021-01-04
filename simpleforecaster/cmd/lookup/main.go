@@ -7,9 +7,8 @@ import (
 	"log"
 	"time"
 
+	"gitlab.met.no/forti/f2/internalprotocol"
 	"google.golang.org/grpc"
-
-	"gitlab.met.no/forti/f2/simpleforecaster/pkg/forecaster"
 )
 
 func main() {
@@ -24,12 +23,12 @@ func main() {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
-	c := forecaster.NewForecasterClient(conn)
+	c := internalprotocol.NewForecasterClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
-	request := forecaster.Location{
+	request := internalprotocol.Location{
 		Latitude:  float32(*latitude),
 		Longitude: float32(*longitude),
 	}

@@ -5,7 +5,7 @@ COPY go.sum /src/go.sum
 WORKDIR /src
 RUN go mod download
 
-COPY simpleforecaster/pkg/forecaster /src/simpleforecaster/pkg/forecaster
+COPY internalprotocol /src/internalprotocol
 COPY weathersymbol/ /src/weathersymbol/
 COPY xmlfrontend/internal /src/xmlfrontend/internal
 COPY xmlfrontend/pkg /src/xmlfrontend/pkg

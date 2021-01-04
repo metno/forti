@@ -2,9 +2,9 @@ syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
 
-package forecaster;
+package internalprotocol;
 
-option go_package = "gitlab.met.no/forti/simpleforecaster/pkg/forecaster";
+option go_package = "gitlab.met.no/forti/simpleforecaster/pkg/internalprotocol";
 
 
 service Forecaster {

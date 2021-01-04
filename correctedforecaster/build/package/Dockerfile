@@ -22,7 +22,7 @@ COPY go.sum /src/go.sum
 WORKDIR /src
 RUN go mod download
 
-COPY simpleforecaster/pkg/forecaster /src/simpleforecaster/pkg/forecaster
+COPY internalprotocol /src/internalprotocol
 COPY weathersymbol/ /src/weathersymbol/
 COPY correctedforecaster/internal/ /src/correctedforecaster/internal/
 

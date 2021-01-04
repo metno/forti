@@ -10,11 +10,10 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health/grpc_health_v1"
 
-	"gitlab.met.no/forti/f2/simpleforecaster/pkg/forecaster"
-
 	"gitlab.met.no/forti/f2/correctedforecaster/internal/correction"
 	"gitlab.met.no/forti/f2/correctedforecaster/internal/health"
 	"gitlab.met.no/forti/f2/correctedforecaster/internal/lookup"
+	"gitlab.met.no/forti/f2/internalprotocol"
 )
 
 func Run(upstream string, topographyFiles []string) error {
@@ -29,18 +28,18 @@ func Run(upstream string, topographyFiles []string) error {
 	}
 
 	s := grpc.NewServer()
-	forecaster.RegisterForecasterServer(s, server)
+	internalprotocol.RegisterForecasterServer(s, server)
 	grpc_health_v1.RegisterHealthServer(s, health.NewServer(server.client))
 	return s.Serve(lis)
 }
 
 type Server struct {
-	forecaster.UnimplementedForecasterServer
+	internalprotocol.UnimplementedForecasterServer
 
 	topo *lookup.Collection
 
 	conn   *grpc.ClientConn
-	client forecaster.ForecasterClient
+	client internalprotocol.ForecasterClient
 }
 
 func New(upstream string, topographyFiles []string) (*Server, error) {
@@ -49,7 +48,7 @@ func New(upstream string, topographyFiles []string) (*Server, error) {
 		return nil, fmt.Errorf("could not to upstream: %w", err)
 	}
 
-	client := forecaster.NewForecasterClient(conn)
+	client := internalprotocol.NewForecasterClient(conn)
 
 	topo := lookup.NewCollection()
 	if err := topo.Add(topographyFiles...); err != nil {
@@ -63,9 +62,9 @@ func New(upstream string, topographyFiles []string) (*Server, error) {
 	}, nil
 }
 
-func waitForUpstream(client forecaster.ForecasterClient) {
+func waitForUpstream(client internalprotocol.ForecasterClient) {
 	var ctx context.Context
-	request := forecaster.Location{
+	request := internalprotocol.Location{
 		Latitude:  60,
 		Longitude: 10,
 	}
@@ -82,7 +81,7 @@ func (s *Server) Close() error {
 	return s.conn.Close()
 }
 
-func (s *Server) GetForecast(ctx context.Context, in *forecaster.Location) (*forecaster.Forecast, error) {
+func (s *Server) GetForecast(ctx context.Context, in *internalprotocol.Location) (*internalprotocol.Forecast, error) {
 	forecast, err := s.client.GetForecast(ctx, in)
 	if err != nil {
 		return nil, fmt.Errorf("unable to get forecast from upstream: %w", err)
@@ -95,9 +94,9 @@ func (s *Server) GetForecast(ctx context.Context, in *forecaster.Location) (*for
 	return forecast, nil
 }
 
-func (s *Server) correct(request *forecaster.Location, forecast *forecaster.Forecast) error {
+func (s *Server) correct(request *internalprotocol.Location, forecast *internalprotocol.Forecast) error {
 
-	interpreted := forecaster.InterpretValues(forecast)
+	interpreted := internalprotocol.InterpretValues(forecast)
 
 	modelAltitude, ok := getAltitude(interpreted)
 	if !ok {
@@ -132,7 +131,7 @@ func (s *Server) correct(request *forecaster.Location, forecast *forecaster.Fore
 	return nil
 }
 
-func getAltitude(interpreted map[string]forecaster.InterpretedData) (*float32, bool) {
+func getAltitude(interpreted map[string]internalprotocol.InterpretedData) (*float32, bool) {
 	altitude, ok := interpreted["altitude"]
 	if !ok {
 		return nil, false

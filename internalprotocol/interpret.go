@@ -1,4 +1,4 @@
-package forecaster
+package internalprotocol
 
 import "time"
 

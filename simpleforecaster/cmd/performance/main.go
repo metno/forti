@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.met.no/forti/f2/simpleforecaster/pkg/forecaster"
+	"gitlab.met.no/forti/f2/internalprotocol"
 	"google.golang.org/grpc"
 )
 
@@ -52,7 +52,7 @@ func main() {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
-	c := forecaster.NewForecasterClient(conn)
+	c := internalprotocol.NewForecasterClient(conn)
 
 	start := time.Now()
 	var wait sync.WaitGroup
@@ -86,11 +86,11 @@ func main() {
 	fmt.Printf("req/sec: %v\n", float32(count)/(float32(timeToRun)/float32(time.Second)))
 }
 
-func randomRequest(client forecaster.ForecasterClient) (time.Duration, error) {
+func randomRequest(client internalprotocol.ForecasterClient) (time.Duration, error) {
 
 	latitude := (rand.Float32() * 180) - 90
 	longitude := (rand.Float32() * 360) - 180
-	request := forecaster.Location{
+	request := internalprotocol.Location{
 		Latitude:  latitude,
 		Longitude: longitude,
 	}
@@ -103,7 +103,7 @@ func randomRequest(client forecaster.ForecasterClient) (time.Duration, error) {
 	end := time.Now()
 
 	if err == nil {
-		interpreted := forecaster.InterpretValues(forecast)
+		interpreted := internalprotocol.InterpretValues(forecast)
 		ta, ok := interpreted["air_temperature_2m"]
 		if !ok {
 			log.Println("missing ta")
