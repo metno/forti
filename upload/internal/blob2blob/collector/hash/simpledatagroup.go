@@ -10,7 +10,7 @@ import (
 	"math"
 	"time"
 
-	"gitlab.met.no/forti/f2/upload/internal/modelprovider"
+	"gitlab.met.no/forti/f2/upload/internal/blob2blob/modelprovider"
 	"gitlab.met.no/forti/f2/upload/pkg/collector"
 )
 
