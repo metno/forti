@@ -8,9 +8,9 @@ import (
 	"io"
 	"log"
 
-	"gitlab.met.no/forti/f2/upload/internal/collector/hash"
-	"gitlab.met.no/forti/f2/upload/internal/collector/upload"
-	"gitlab.met.no/forti/f2/upload/internal/modelprovider"
+	"gitlab.met.no/forti/f2/upload/internal/blob2blob/collector/hash"
+	"gitlab.met.no/forti/f2/upload/internal/blob2blob/modelprovider"
+	"gitlab.met.no/forti/f2/upload/internal/upload"
 	"gitlab.met.no/forti/f2/upload/pkg/collector"
 	"gocloud.dev/blob"
 )
