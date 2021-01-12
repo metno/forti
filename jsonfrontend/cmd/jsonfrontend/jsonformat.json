@@ -6,6 +6,9 @@
             "value": "application/json; charset=utf-8"
         }
     ],
+    "meta": {
+        "radar_coverage": "precipitation_status"
+    },
     "parameters": {
         "instant": {
             "offset": 0,
