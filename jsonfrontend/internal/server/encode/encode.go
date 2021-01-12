@@ -17,34 +17,39 @@ func Encode(location *internalprotocol.Location, forecast *internalprotocol.Fore
 		return nil, err
 	}
 
-	// Get altitude
-	var altitude float32
-	for _, data := range forecast.Data {
-		for _, p := range data.ParameterMeta {
-			if len(p.Times) == 1 && p.Times[0].AsTime().Equal(time.Time{}) {
-				if p.Parameter == "altitude" {
-					altitude = data.Data[p.SliceFrom]
-				}
-			}
-		}
-	}
-
 	return &jsonformat.GeoJSON{
 		Type: "Feature",
 		Geometry: jsonformat.Geometry{
-			Type:        "Point",
-			Coordinates: []float32{location.Longitude, location.Latitude, altitude},
+			Type: "Point",
+			Coordinates: []float32{
+				location.Longitude,
+				location.Latitude,
+				getAltitude(forecast),
+			},
 		},
 		Properties: properties,
 	}, nil
 }
 
 func getSerializationForecast(forecast *internalprotocol.Forecast) (*jsonformat.Forecast, error) {
-
 	return &jsonformat.Forecast{
 		Meta:       getMeta(forecast),
 		Timeseries: getTimeSteps(forecast),
 	}, nil
+}
+
+func getAltitude(forecast *internalprotocol.Forecast) float32 {
+	for _, data := range forecast.Data {
+		for _, p := range data.ParameterMeta {
+			if len(p.Times) == 1 && p.Times[0].AsTime().Equal(time.Time{}) {
+				if p.Parameter == "altitude" {
+					return data.Data[p.SliceFrom]
+				}
+			}
+		}
+	}
+	// no altitude in forecast - return 0
+	return 0
 }
 
 func getMeta(forecast *internalprotocol.Forecast) jsonformat.Metadata {
@@ -67,9 +72,33 @@ func getMeta(forecast *internalprotocol.Forecast) jsonformat.Metadata {
 	}
 
 	return jsonformat.Metadata{
-		UpdatedAt: time.Unix(forecast.Meta.UpdatedAt.Seconds, 0).UTC(),
-		Units:     units,
+		UpdatedAt:     time.Unix(forecast.Meta.UpdatedAt.Seconds, 0).UTC(),
+		Units:         units,
+		RadarCoverage: getRadarCoverage(forecast),
 	}
+}
+
+func getRadarCoverage(forecast *internalprotocol.Forecast) string {
+	if config.Configuration.Meta.RadarCoverage == "" {
+		return ""
+	}
+	for _, data := range forecast.Data {
+		for _, meta := range data.ParameterMeta {
+			if meta.Parameter == config.Configuration.Meta.RadarCoverage {
+				switch data.Data[meta.SliceFrom] {
+				case 0:
+					return "ok"
+				case 1:
+					return "temporarily unavailable"
+				case 2:
+					return "no coverage"
+				default:
+					return "unknown"
+				}
+			}
+		}
+	}
+	return "unknown"
 }
 
 func getTimeSteps(forecast *internalprotocol.Forecast) []jsonformat.TimeStep {

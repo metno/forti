@@ -27,12 +27,17 @@ func Initialize(filename string) error {
 type Elements struct {
 	CutForecast bool                 `json:"cut_forecast,omitempty"`
 	HTTPHeaders []HTTPHeader         `json:"http_headers"`
+	Meta        Meta                 `json:"meta,omitempty"`
 	Parameters  map[string]TimeGroup `json:"parameters"`
 }
 
 type HTTPHeader struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
+}
+
+type Meta struct {
+	RadarCoverage string `json:"radar_coverage,omitempty"`
 }
 
 type TimeGroup struct {
