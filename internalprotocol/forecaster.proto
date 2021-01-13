@@ -22,7 +22,13 @@ message Altitude {
     bool override = 2;
 }
 
+enum ForecastStatus {
+    OK = 0;
+    OutsideAllGrids = 1;
+}
+
 message Forecast {
+    ForecastStatus forecastStatus = 3;
     Meta meta = 1;
     repeated PointDataCollection data = 2;
 }

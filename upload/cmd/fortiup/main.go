@@ -8,6 +8,7 @@ import (
 
 	"gitlab.met.no/forti/f2/upload/internal/nc/store"
 	"gitlab.met.no/forti/f2/upload/internal/upload"
+	"gitlab.met.no/forti/f2/upload/pkg/collector"
 
 	"gocloud.dev/blob"
 	_ "gocloud.dev/blob/fileblob"
@@ -18,6 +19,8 @@ func main() {
 	version := flag.Int("version", 0, "version to store")
 	bucket := flag.String("bucket", "file:///tmp/forti/", "store into the given bucket")
 	ttl := flag.String("time-until-next", "1h", "expected time until next update is available")
+	wkt := flag.String("wkt", "", "specify geographic area for forecast")
+	srs := flag.String("srs", "", "Spatial reference system for wkt")
 	flag.Parse()
 	files := flag.Args()
 
@@ -43,7 +46,22 @@ func main() {
 	}
 	u := upload.New(b)
 
-	if err := store.Store(ctx, u, *group, *version, files, timeUntilNext); err != nil {
+	meta := collector.DatasetMeta{
+		Group:         *group,
+		Version:       *version,
+		TimeUntilNext: timeUntilNext,
+	}
+	if *wkt != "" {
+		if *srs == "" {
+			log.Fatalln("-srs must be set if -wkt is set")
+		}
+		meta.Area = &collector.GeographicArea{
+			WKT: *wkt,
+			SRS: *srs,
+		}
+	}
+
+	if err := store.Store(ctx, u, &meta, files); err != nil {
 		log.Fatalln(err)
 	}
 }

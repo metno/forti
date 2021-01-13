@@ -2,6 +2,7 @@ package server
 
 import (
 	context "context"
+	"errors"
 	"net"
 
 	"google.golang.org/grpc"
@@ -38,7 +39,7 @@ func Run(conf *Configuration) error {
 
 type grpcServer struct {
 	internalprotocol.UnimplementedForecasterServer
-	internalprotocol *forecast.Forecast
+	forecast *forecast.Forecast
 }
 
 func newGrpcServer(conf *Configuration) (*grpcServer, error) {
@@ -48,14 +49,19 @@ func newGrpcServer(conf *Configuration) (*grpcServer, error) {
 	}
 
 	return &grpcServer{
-		internalprotocol: forecast,
+		forecast: forecast,
 	}, nil
 }
 
 func (s *grpcServer) GetForecast(ctx context.Context, in *internalprotocol.Location) (*internalprotocol.Forecast, error) {
 
-	pointData, err := s.internalprotocol.Get(in.Latitude, in.Longitude)
+	pointData, err := s.forecast.Get(in.Latitude, in.Longitude)
 	if err != nil {
+		if errors.Is(err, forecast.ErrOutsideAllGrids) {
+			return &internalprotocol.Forecast{
+				ForecastStatus: internalprotocol.ForecastStatus_OutsideAllGrids,
+			}, nil
+		}
 		return nil, err
 	}
 

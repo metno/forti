@@ -2,7 +2,6 @@ package encode
 
 import (
 	"encoding/xml"
-	"errors"
 	"fmt"
 	"log"
 	"math"
@@ -14,7 +13,7 @@ import (
 	"gitlab.met.no/forti/f2/xmlfrontend/pkg/xmlformat"
 )
 
-func Encode(location *internalprotocol.Location, forecast *internalprotocol.Forecast) (*xmlformat.ForecastDocument, error) {
+func Encode(location *internalprotocol.Location, forecast *internalprotocol.Forecast) *xmlformat.ForecastDocument {
 	doc := xmlformat.ForecastDocument{
 		XMLName: xml.Name{Local: "weatherdata"},
 		Product: &xmlformat.ProductElement{
@@ -29,9 +28,6 @@ func Encode(location *internalprotocol.Location, forecast *internalprotocol.Fore
 	nextRun := forecast.Meta.NextUpdate.AsTime().UTC().Round(time.Second)
 
 	sorted := sortByTime(forecast)
-	if len(sorted) == 0 {
-		return nil, errors.New("empty forecast")
-	}
 
 	var undef time.Time
 	if sorted[0].Time == undef {
@@ -45,20 +41,22 @@ func Encode(location *internalprotocol.Location, forecast *internalprotocol.Fore
 
 	doc.Product = getProductElement(location, sorted)
 
-	doc.Meta = &xmlformat.MetaElement{
-		Models: []xmlformat.ModelElement{
-			{
-				Name:     "met_public_forecast",
-				Termin:   runEnded.Round(time.Hour),
-				Runended: runEnded,
-				Nextrun:  nextRun,
-				From:     doc.Product.Time[0].To,
-				To:       doc.Product.Time[len(doc.Product.Time)-1].To,
+	if len(doc.Product.Time) > 0 {
+		doc.Meta = &xmlformat.MetaElement{
+			Models: []xmlformat.ModelElement{
+				{
+					Name:     "met_public_forecast",
+					Termin:   runEnded.Round(time.Hour),
+					Runended: runEnded,
+					Nextrun:  nextRun,
+					From:     doc.Product.Time[0].To,
+					To:       doc.Product.Time[len(doc.Product.Time)-1].To,
+				},
 			},
-		},
+		}
 	}
 
-	return &doc, nil
+	return &doc
 }
 
 type parsedForecast struct {

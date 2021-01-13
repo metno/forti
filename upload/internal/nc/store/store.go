@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"strings"
-	"time"
 
 	"gitlab.met.no/forti/f2/upload/internal/nc/store/collect"
 	"gitlab.met.no/forti/f2/upload/internal/nc/store/netcdf"
@@ -14,8 +13,8 @@ import (
 	"gitlab.met.no/forti/f2/upload/pkg/collector"
 )
 
-func Store(ctx context.Context, u *upload.Uploader, group string, version int, files []string, timeUntilNext time.Duration) error {
-	hashes, err := getHashes(group, version, files)
+func Store(ctx context.Context, u *upload.Uploader, meta *collector.DatasetMeta, files []string) error {
+	hashes, err := getHashes(meta.Group, meta.Version, files)
 	if err != nil {
 		return err
 	}
@@ -24,7 +23,7 @@ func Store(ctx context.Context, u *upload.Uploader, group string, version int, f
 	for hash, files := range hashes {
 		go func(hash string, files []string) {
 			log.Println("store hash ", hash)
-			storeResult <- storeHash(ctx, u, group, version, hash, files)
+			storeResult <- storeHash(ctx, u, meta.Group, meta.Version, hash, files)
 			log.Println("stored ", hash)
 		}(hash, files)
 	}
@@ -34,12 +33,7 @@ func Store(ctx context.Context, u *upload.Uploader, group string, version int, f
 		}
 	}
 
-	meta := collector.DatasetMeta{
-		Group:         group,
-		Version:       version,
-		TimeUntilNext: timeUntilNext,
-	}
-	if err := u.SetDatasetMeta(ctx, &meta); err != nil {
+	if err := u.SetDatasetMeta(ctx, meta); err != nil {
 		return err
 	}
 

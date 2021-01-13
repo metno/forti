@@ -14,6 +14,7 @@ import (
 	"gitlab.met.no/forti/f2/correctedforecaster/internal/health"
 	"gitlab.met.no/forti/f2/correctedforecaster/internal/lookup"
 	"gitlab.met.no/forti/f2/internalprotocol"
+	"gitlab.met.no/forti/f2/parameters/radar"
 )
 
 func Run(upstream string, topographyFiles []string) error {
@@ -87,6 +88,10 @@ func (s *Server) GetForecast(ctx context.Context, in *internalprotocol.Location)
 		return nil, fmt.Errorf("unable to get forecast from upstream: %w", err)
 	}
 
+	if forecast.ForecastStatus != internalprotocol.ForecastStatus_OK {
+		return forecast, nil
+	}
+
 	if err := s.correct(in, forecast); err != nil {
 		return nil, err
 	}
@@ -95,9 +100,17 @@ func (s *Server) GetForecast(ctx context.Context, in *internalprotocol.Location)
 }
 
 func (s *Server) correct(request *internalprotocol.Location, forecast *internalprotocol.Forecast) error {
-
 	interpreted := internalprotocol.InterpretValues(forecast)
+	if err := s.correctWithBetterTopography(request, interpreted); err != nil {
+		return err
+	}
+	if err := s.correctWithRadarStatus(request, interpreted, forecast); err != nil {
+		return err
+	}
+	return nil
+}
 
+func (s *Server) correctWithBetterTopography(request *internalprotocol.Location, interpreted map[string]internalprotocol.InterpretedData) error {
 	modelAltitude, ok := getAltitude(interpreted)
 	if !ok {
 		return nil
@@ -137,4 +150,22 @@ func getAltitude(interpreted map[string]internalprotocol.InterpretedData) (*floa
 		return nil, false
 	}
 	return &altitude.Values[0], true
+}
+
+// correctWithRadarStatus removes all values for lwe_precipitation_rate if radar coverage is not ok.
+func (s *Server) correctWithRadarStatus(request *internalprotocol.Location, interpreted map[string]internalprotocol.InterpretedData, forecast *internalprotocol.Forecast) error {
+	if status, ok := interpreted["precipitation_status"]; ok {
+		if radar.Coverage(status.Values[0]) != radar.OK {
+			for _, d := range forecast.Data {
+				for _, m := range d.ParameterMeta {
+					if m.Parameter == "lwe_precipitation_rate" {
+						// This should cause all lookups to be of size 0
+						m.Times = nil
+						return nil
+					}
+				}
+			}
+		}
+	}
+	return nil
 }

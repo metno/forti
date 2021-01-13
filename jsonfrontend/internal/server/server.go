@@ -55,6 +55,11 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if data.ForecastStatus == internalprotocol.ForecastStatus_OutsideAllGrids {
+		http.NotFound(w, r)
+		return
+	}
+
 	for _, header := range config.Configuration.HTTPHeaders {
 		w.Header().Add(header.Key, header.Value)
 	}

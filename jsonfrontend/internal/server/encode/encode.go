@@ -7,7 +7,8 @@ import (
 	"gitlab.met.no/forti/f2/internalprotocol"
 	"gitlab.met.no/forti/f2/jsonfrontend/internal/server/config"
 	"gitlab.met.no/forti/f2/jsonfrontend/pkg/jsonformat"
-	"gitlab.met.no/forti/f2/weathersymbol"
+	"gitlab.met.no/forti/f2/parameters/radar"
+	"gitlab.met.no/forti/f2/parameters/weathersymbol"
 )
 
 func Encode(location *internalprotocol.Location, forecast *internalprotocol.Forecast) (*jsonformat.GeoJSON, error) {
@@ -85,20 +86,12 @@ func getRadarCoverage(forecast *internalprotocol.Forecast) string {
 	for _, data := range forecast.Data {
 		for _, meta := range data.ParameterMeta {
 			if meta.Parameter == config.Configuration.Meta.RadarCoverage {
-				switch data.Data[meta.SliceFrom] {
-				case 0:
-					return "ok"
-				case 1:
-					return "temporarily unavailable"
-				case 2:
-					return "no coverage"
-				default:
-					return "unknown"
-				}
+				c := radar.Coverage(data.Data[meta.SliceFrom])
+				return c.String()
 			}
 		}
 	}
-	return "unknown"
+	return radar.UnknownCoverage.String()
 }
 
 func getTimeSteps(forecast *internalprotocol.Forecast) []jsonformat.TimeStep {
