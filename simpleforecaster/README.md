@@ -5,11 +5,11 @@ Serves unmodified data from a forecast. The term 'simple' refers to the data not
 ## Serving data
 
 ```mermaid
-graph LR
-server --> forecast
-forecast -> datagroup
-datagroup --> geo
-datagroup --> simpledatagroup
+graph LR;
+server --> forecast;
+forecast -> datagroup;
+datagroup --> geo;
+datagroup --> simpledatagroup;
 ```
 
 Four components are mainly involved in serving data: 
