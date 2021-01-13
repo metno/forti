@@ -7,7 +7,7 @@ Serves unmodified data from a forecast. The term 'simple' refers to the data not
 ```mermaid
 graph LR;
 server --> forecast;
-forecast -> datagroup;
+forecast --> datagroup;
 datagroup --> geo;
 datagroup --> simpledatagroup;
 ```
