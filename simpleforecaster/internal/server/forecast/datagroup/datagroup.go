@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/geo"
+	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/geo/area"
 	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/simpledatagroup"
 	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/simpledatagroup/memory"
 	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/pointdata"
@@ -17,6 +18,7 @@ import (
 type Dataset struct {
 	Meta pointdata.Meta
 
+	Area    *area.Area
 	readers []simpledatagroup.Reader
 	lookups []geo.Nearester
 }
@@ -55,6 +57,14 @@ func Download(ctx context.Context, source *collector.Client, datasetMeta *collec
 		readers = append(readers, reader)
 	}
 
+	var geographicArea *area.Area
+	if datasetMeta.Area != nil {
+		geographicArea, err = area.New(*datasetMeta.Area)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	readyTime := time.Now().UTC()
 	return &Dataset{
 		Meta: pointdata.Meta{
@@ -63,6 +73,7 @@ func Download(ctx context.Context, source *collector.Client, datasetMeta *collec
 			UpdatedAt:  readyTime,
 			NextUpdate: readyTime.Add(datasetMeta.TimeUntilNext),
 		},
+		Area:    geographicArea,
 		readers: readers,
 		lookups: lookups,
 	}, nil

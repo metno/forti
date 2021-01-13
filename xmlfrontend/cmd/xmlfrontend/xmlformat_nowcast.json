@@ -1,0 +1,27 @@
+{
+    "cut_forecast": false,
+    "http_headers": [
+        {
+            "key": "Content-Type",
+            "value": "application/xml; charset=utf-8"
+        }
+    ],
+    "elements": [
+        {
+            "offset": "0h",
+            "parameters": [
+                {
+                    "name": "precipitation",
+                    "ncName": "lwe_precipitation_rate",
+                    "valueName": "value",
+                    "attrs": [
+                        {
+                            "name": "unit",
+                            "value": "mm/h"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

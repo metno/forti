@@ -43,6 +43,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		//log.Println(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	ctx, cancel := context.WithTimeout(r.Context(), 1500*time.Millisecond)
@@ -55,15 +56,18 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if data.ForecastStatus == internalprotocol.ForecastStatus_OutsideAllGrids {
+		http.NotFound(w, r)
+		return
+	}
+
 	for _, header := range config.Configuration.HTTPHeaders {
 		w.Header().Add(header.Key, header.Value)
 	}
 
-	// output := encode.GetForecast(data)
-	output, err := encode.Encode(location, data)
-	if err != nil {
-		log.Println(err)
-		http.Error(w, "service unavailable", http.StatusServiceUnavailable)
+	output := encode.Encode(location, data)
+	if len(output.Product.Time) == 0 {
+		http.NotFound(w, r)
 		return
 	}
 

@@ -11,6 +11,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup"
+	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/geo/area"
 	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/pointdata"
 	"gitlab.met.no/forti/f2/upload/pkg/collector"
 )
@@ -50,7 +51,10 @@ func newFromCollector(store *collector.Client, groups []string) *Forecast {
 	return f
 }
 
-// Get returns a forecast for the given latitude and longitude.
+// ErrOutsideAllGrids is returned by Forecast.Get if no grids can be found for the given latitude and longitude.
+var ErrOutsideAllGrids = errors.New("outside all grids")
+
+// Get returns a forecast for the given latitude and longitude. Returns ErrOutsideAllGrids if outside all grids.
 func (f *Forecast) Get(latitude, longitude float32) (*pointdata.PointData, error) {
 	f.m.RLock()
 	defer f.m.RUnlock()
@@ -58,6 +62,13 @@ func (f *Forecast) Get(latitude, longitude float32) (*pointdata.PointData, error
 	best, err := f.bestGroup(latitude, longitude)
 	if err != nil {
 		return nil, err
+	}
+
+	if best.Area != nil && !best.Area.Contains(area.LatLon{
+		Latitude:  float64(latitude),
+		Longitude: float64(longitude),
+	}) {
+		return nil, ErrOutsideAllGrids
 	}
 
 	groupCounter.With(prometheus.Labels{"group": best.Meta.Group}).Inc()

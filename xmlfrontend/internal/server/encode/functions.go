@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"gitlab.met.no/forti/f2/weathersymbol"
+	"gitlab.met.no/forti/f2/parameters/weathersymbol"
 )
 
 var functions = map[string]func(value float32, allValues *map[string]float32) (string, error){

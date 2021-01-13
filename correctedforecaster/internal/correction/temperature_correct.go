@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"gitlab.met.no/forti/f2/internalprotocol"
-	"gitlab.met.no/forti/f2/weathersymbol"
+	"gitlab.met.no/forti/f2/parameters/weathersymbol"
 )
 
 // UpdateTemperature performs corrections on air temperature variables, based
