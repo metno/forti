@@ -26,7 +26,7 @@ Determines what is the correct group (and version) to serve data from. Forwards 
 
 Each object of type `datagroup.Dataset` serves data for a single group/verision. They maintain a list of grids (aka "hashes") for its group.
 
-Handles requests for a given latitute/longitude pair. For each hash, lookup the correct index, and find relevant data.
+Handles requests for a given latitute/longitude pair. For each hash, lookup the correct index from `geo`, and find relevant data from `simpledatagroup`.
 
 ### geo
 
