@@ -11,10 +11,10 @@ import (
 	"time"
 
 	"gitlab.met.no/forti/f2/upload/internal/blob2blob/modelprovider"
-	"gitlab.met.no/forti/f2/upload/pkg/collector"
+	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
 
-func collectSimpleDataGroup(ctx context.Context, out io.Writer, source *modelprovider.Client, group string, version int, meta []modelprovider.Meta) (*collector.MetaCollection, error) {
+func collectSimpleDataGroup(ctx context.Context, out io.Writer, source *modelprovider.Client, group string, version int, meta []modelprovider.Meta) (*fortiblob.MetaCollection, error) {
 	readers := make(map[string]io.Reader)
 
 	for _, m := range meta {
@@ -41,13 +41,13 @@ func collectSimpleDataGroup(ctx context.Context, out io.Writer, source *modelpro
 		return nil, err
 	}
 
-	pMeta := make(map[string]collector.ParameterMeta)
+	pMeta := make(map[string]fortiblob.ParameterMeta)
 	var elements int
 	for _, m := range meta {
 		if len(m.Times) == 0 {
 			m.Times = append(m.Times, time.Time{})
 		}
-		idx := collector.ParameterMeta{
+		idx := fortiblob.ParameterMeta{
 			SliceFrom: elements,
 			Times:     m.Times,
 			Units:     m.Units,
@@ -56,7 +56,7 @@ func collectSimpleDataGroup(ctx context.Context, out io.Writer, source *modelpro
 		elements += len(m.Times)
 	}
 
-	return &collector.MetaCollection{
+	return &fortiblob.MetaCollection{
 		Parameters: pMeta,
 		PointCount: elements,
 	}, nil

@@ -10,10 +10,10 @@ import (
 	"gitlab.met.no/forti/f2/upload/internal/nc/store/collect"
 	"gitlab.met.no/forti/f2/upload/internal/nc/store/netcdf"
 	"gitlab.met.no/forti/f2/upload/internal/upload"
-	"gitlab.met.no/forti/f2/upload/pkg/collector"
+	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
 
-func Store(ctx context.Context, u *upload.Uploader, meta *collector.DatasetMeta, files []string) error {
+func Store(ctx context.Context, u *upload.Uploader, meta *fortiblob.DatasetMeta, files []string) error {
 	hashes, err := getHashes(meta.Area, meta.Version, files)
 	if err != nil {
 		return err
@@ -91,7 +91,7 @@ func openFiles(files []string) (map[string]netcdf.File, error) {
 	return ncfiles, nil
 }
 
-func storeData(ctx context.Context, u *upload.Uploader, area string, version int, hash string, vars []*netcdf.Variable) (*collector.MetaCollection, error) {
+func storeData(ctx context.Context, u *upload.Uploader, area string, version int, hash string, vars []*netcdf.Variable) (*fortiblob.MetaCollection, error) {
 	out, err := u.GetDataStream(ctx, area, version, hash)
 	if err != nil {
 		return nil, err

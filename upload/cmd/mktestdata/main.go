@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.met.no/forti/f2/upload/pkg/collector"
+	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
 
 func main() {
@@ -77,9 +77,9 @@ func extractFloats(text string) ([]float32, error) {
 	return out, nil
 }
 
-func writeMeta(path, parameters string) (*collector.MetaCollection, error) {
-	meta := collector.MetaCollection{
-		Parameters: make(map[string]collector.ParameterMeta),
+func writeMeta(path, parameters string) (*fortiblob.MetaCollection, error) {
+	meta := fortiblob.MetaCollection{
+		Parameters: make(map[string]fortiblob.ParameterMeta),
 	}
 
 	re := regexp.MustCompile(`([a-z0-9_]+)=(\d+)`)
@@ -98,7 +98,7 @@ func writeMeta(path, parameters string) (*collector.MetaCollection, error) {
 		for i := 0; i < count; i++ {
 			times = append(times, startTime.Add(time.Duration(i)*time.Hour))
 		}
-		pm := collector.ParameterMeta{
+		pm := fortiblob.ParameterMeta{
 			Units:     "u_" + match[1],
 			Times:     times,
 			SliceFrom: meta.PointCount,
@@ -123,7 +123,7 @@ func writeMeta(path, parameters string) (*collector.MetaCollection, error) {
 	return &meta, err
 }
 
-func writeData(path string, meta *collector.MetaCollection, lat, lon []float32) error {
+func writeData(path string, meta *fortiblob.MetaCollection, lat, lon []float32) error {
 	totalSize := len(lat) * meta.PointCount
 
 	data := make([]int16, totalSize)
@@ -167,7 +167,7 @@ func setComplete(workdir, group string, version int) error {
 		return err
 	}
 
-	doc := collector.DatasetMeta{
+	doc := fortiblob.DatasetMeta{
 		Area:          group,
 		Version:       version,
 		TimeUntilNext: time.Hour,

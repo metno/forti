@@ -13,12 +13,12 @@ import (
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/fortidb"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/fortidb/index/area"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/pointdata"
-	"gitlab.met.no/forti/f2/upload/pkg/collector"
+	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
 
 // Forecast gives the latest weather forecast for a location.
 type Forecast struct {
-	store *collector.Client
+	store *fortiblob.Client
 	areas []string
 
 	datasets map[string]*fortidb.Dataset
@@ -27,7 +27,7 @@ type Forecast struct {
 
 // New initializes an object that can be queries for forecasts. It is self-updating.
 func New(blobURL string, areas []string) (*Forecast, error) {
-	store, err := collector.NewClient(blobURL)
+	store, err := fortiblob.NewClient(blobURL)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func New(blobURL string, areas []string) (*Forecast, error) {
 	return f, nil
 }
 
-func newFromCollector(store *collector.Client, areas []string) *Forecast {
+func newFromCollector(store *fortiblob.Client, areas []string) *Forecast {
 	f := &Forecast{
 		store:    store,
 		areas:    areas,

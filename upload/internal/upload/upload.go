@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 
-	"gitlab.met.no/forti/f2/upload/pkg/collector"
+	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 	"gocloud.dev/blob"
 )
 
@@ -33,7 +33,7 @@ func (u *Uploader) GetLongitudeStream(ctx context.Context, area string, version 
 	return u.bucket.NewWriter(ctx, key, nil)
 }
 
-func (u *Uploader) SetHashMeta(ctx context.Context, meta *collector.MetaCollection, area string, version int, hash string) error {
+func (u *Uploader) SetHashMeta(ctx context.Context, meta *fortiblob.MetaCollection, area string, version int, hash string) error {
 	key := fmt.Sprintf("%s/%d/%s/meta.json", area, version, hash)
 	w, err := u.bucket.NewWriter(ctx, key, nil)
 	if err != nil {
@@ -45,7 +45,7 @@ func (u *Uploader) SetHashMeta(ctx context.Context, meta *collector.MetaCollecti
 	return w.Close()
 }
 
-func (u *Uploader) SetDatasetMeta(ctx context.Context, meta *collector.DatasetMeta) error {
+func (u *Uploader) SetDatasetMeta(ctx context.Context, meta *fortiblob.DatasetMeta) error {
 	key := fmt.Sprintf("%s/%d/complete.json", meta.Area, meta.Version)
 	w, err := u.bucket.NewWriter(ctx, key, nil)
 	if err != nil {

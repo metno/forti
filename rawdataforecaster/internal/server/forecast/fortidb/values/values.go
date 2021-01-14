@@ -4,12 +4,12 @@ package values
 import (
 	"io"
 
-	"gitlab.met.no/forti/f2/upload/pkg/collector"
+	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
 
 // PointDataCollection contains forecast information for a single point
 type PointDataCollection struct {
-	ParameterMeta map[string]collector.ParameterMeta
+	ParameterMeta map[string]fortiblob.ParameterMeta
 	Data          []float32
 }
 

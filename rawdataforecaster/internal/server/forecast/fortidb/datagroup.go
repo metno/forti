@@ -11,7 +11,7 @@ import (
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/fortidb/values"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/fortidb/values/memory"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/pointdata"
-	"gitlab.met.no/forti/f2/upload/pkg/collector"
+	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
 
 // Dataset contains a forecast for a single area.
@@ -26,12 +26,12 @@ type Dataset struct {
 var downloadFunc = memory.Download
 
 // SetDownloadFunction overrides the function to download data. It is meant for creating local tests.
-func SetDownloadFunction(f func(ctx context.Context, source *collector.Client, datasetMeta *collector.DatasetMeta, hash string) (values.Reader, error)) {
+func SetDownloadFunction(f func(ctx context.Context, source *fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, hash string) (values.Reader, error)) {
 	downloadFunc = f
 }
 
 // Download creates and returns a Dataset from the given specification.
-func Download(ctx context.Context, source *collector.Client, datasetMeta *collector.DatasetMeta) (*Dataset, error) {
+func Download(ctx context.Context, source *fortiblob.Client, datasetMeta *fortiblob.DatasetMeta) (*Dataset, error) {
 	hashes, err := source.GetHashes(ctx, datasetMeta)
 	if err != nil {
 		return nil, err

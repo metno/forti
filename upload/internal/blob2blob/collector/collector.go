@@ -11,7 +11,7 @@ import (
 	"gitlab.met.no/forti/f2/upload/internal/blob2blob/collector/hash"
 	"gitlab.met.no/forti/f2/upload/internal/blob2blob/modelprovider"
 	"gitlab.met.no/forti/f2/upload/internal/upload"
-	"gitlab.met.no/forti/f2/upload/pkg/collector"
+	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 	"gocloud.dev/blob"
 )
 
@@ -62,7 +62,7 @@ func Get(ctx context.Context, blobIn, blobOut, group string, version int) error 
 		}
 	}
 
-	meta := collector.DatasetMeta{
+	meta := fortiblob.DatasetMeta{
 		Area:          group,
 		Version:       version,
 		TimeUntilNext: dataset.TimeUntilNext,

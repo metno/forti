@@ -12,20 +12,20 @@ import (
 	"io"
 
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/fortidb/index/lookup"
-	"gitlab.met.no/forti/f2/upload/pkg/collector"
+	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
 
 // Reader connects to a model provider, and gets geo data from it
 type Reader struct {
-	source *collector.Client
+	source *fortiblob.Client
 }
 
-func New(source *collector.Client) *Reader {
+func New(source *fortiblob.Client) *Reader {
 	return &Reader{source: source}
 }
 
 // Get creates a new GeoMap object from the given id
-func (r *Reader) Get(ctx context.Context, datasetMeta *collector.DatasetMeta, hash string) (*lookup.GeoMap, error) {
+func (r *Reader) Get(ctx context.Context, datasetMeta *fortiblob.DatasetMeta, hash string) (*lookup.GeoMap, error) {
 	latitude, err := r.source.GetLatitude(ctx, datasetMeta, hash)
 	if err != nil {
 		return nil, err
@@ -50,7 +50,7 @@ func (r *Reader) Get(ctx context.Context, datasetMeta *collector.DatasetMeta, ha
 }
 
 // Checksum returns a short string that uniquely idenitfies the given set of lat/lon for the given id
-func (r *Reader) Checksum(ctx context.Context, datasetMeta *collector.DatasetMeta, hash string) (string, error) {
+func (r *Reader) Checksum(ctx context.Context, datasetMeta *fortiblob.DatasetMeta, hash string) (string, error) {
 	checksumStream := md5.New()
 
 	latitude, err := r.source.GetLatitude(ctx, datasetMeta, hash)

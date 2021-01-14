@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"gitlab.met.no/forti/f2/upload/internal/nc/store/netcdf"
-	"gitlab.met.no/forti/f2/upload/pkg/collector"
+	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
 
-func Collect(ctx context.Context, variables []*netcdf.Variable, out io.Writer) (*collector.MetaCollection, error) {
+func Collect(ctx context.Context, variables []*netcdf.Variable, out io.Writer) (*fortiblob.MetaCollection, error) {
 	ret, err := getMetaCollection(ctx, variables)
 	if err != nil {
 		return nil, err
@@ -28,9 +28,9 @@ func Collect(ctx context.Context, variables []*netcdf.Variable, out io.Writer) (
 	return ret, nil
 }
 
-func getMetaCollection(ctx context.Context, variables []*netcdf.Variable) (*collector.MetaCollection, error) {
-	ret := collector.MetaCollection{
-		Parameters: make(map[string]collector.ParameterMeta),
+func getMetaCollection(ctx context.Context, variables []*netcdf.Variable) (*fortiblob.MetaCollection, error) {
+	ret := fortiblob.MetaCollection{
+		Parameters: make(map[string]fortiblob.ParameterMeta),
 		PointCount: 0,
 	}
 
@@ -56,7 +56,7 @@ func getMetaCollection(ctx context.Context, variables []*netcdf.Variable) (*coll
 			times = append(times, time.Time{})
 		}
 
-		ret.Parameters[v.Name] = collector.ParameterMeta{
+		ret.Parameters[v.Name] = fortiblob.ParameterMeta{
 			Units:     units,
 			Times:     times,
 			SliceFrom: ret.PointCount,

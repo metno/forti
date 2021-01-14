@@ -6,24 +6,24 @@ import (
 	"log"
 
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/fortidb/values"
-	"gitlab.met.no/forti/f2/upload/pkg/collector"
+	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
 
-func Download(ctx context.Context, source *collector.Client, datasetMeta *collector.DatasetMeta, hash string) (values.Reader, error) {
+func Download(ctx context.Context, source *fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, hash string) (values.Reader, error) {
 	return newDownloader(source).Get(ctx, datasetMeta, hash)
 }
 
 type downloader struct {
-	store *collector.Client
+	store *fortiblob.Client
 }
 
-func newDownloader(source *collector.Client) *downloader {
+func newDownloader(source *fortiblob.Client) *downloader {
 	return &downloader{
 		store: source,
 	}
 }
 
-func (d *downloader) Get(ctx context.Context, datasetMeta *collector.DatasetMeta, hash string) (values.Reader, error) {
+func (d *downloader) Get(ctx context.Context, datasetMeta *fortiblob.DatasetMeta, hash string) (values.Reader, error) {
 
 	metaCollection, err := d.store.GetHashMeta(ctx, datasetMeta, hash)
 	if err != nil {
@@ -41,7 +41,7 @@ func (d *downloader) Get(ctx context.Context, datasetMeta *collector.DatasetMeta
 	}, nil
 }
 
-func (d *downloader) getData(ctx context.Context, meta *collector.DatasetMeta, hash string) ([]int16, error) {
+func (d *downloader) getData(ctx context.Context, meta *fortiblob.DatasetMeta, hash string) ([]int16, error) {
 	src, err := d.store.GetData(ctx, meta, hash)
 	if err != nil {
 		return nil, err

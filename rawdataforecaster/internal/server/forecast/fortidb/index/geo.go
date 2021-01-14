@@ -10,7 +10,7 @@ import (
 
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/fortidb/index/georeader"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/fortidb/index/lookup"
-	"gitlab.met.no/forti/f2/upload/pkg/collector"
+	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
 
 // Nearester returns the closest index to a given latitude/longitude.
@@ -39,7 +39,7 @@ func init() {
 }
 
 // Add creates or returns a cached lookup object from the given reader and id.
-func Add(ctx context.Context, source *collector.Client, datasetMeta *collector.DatasetMeta, hash string) (Nearester, error) {
+func Add(ctx context.Context, source *fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, hash string) (Nearester, error) {
 
 	gridReader := georeader.New(source)
 
@@ -72,7 +72,7 @@ func Add(ctx context.Context, source *collector.Client, datasetMeta *collector.D
 }
 
 // getData fetches data directly from a model provider, and adds it to the cache
-func getData(ctx context.Context, gridReader *georeader.Reader, datasetMeta *collector.DatasetMeta, hash, checksum string) (Nearester, error) {
+func getData(ctx context.Context, gridReader *georeader.Reader, datasetMeta *fortiblob.DatasetMeta, hash, checksum string) (Nearester, error) {
 	geoMap, err := gridReader.Get(ctx, datasetMeta, hash)
 	if err != nil {
 		return nil, err

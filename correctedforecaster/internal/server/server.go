@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"log"
 	"math"
 	"net"
 	"time"
@@ -131,6 +132,8 @@ func (s *Server) correctWithBetterTopography(request *internalprotocol.Location,
 		}
 		realAltitude = float32(math.Round(float64(realAltitude)))
 	}
+
+	log.Printf("model = %f topo = %f", *modelAltitude, realAltitude)
 
 	altitudeDiff := *modelAltitude - realAltitude
 	if altitudeDiff < -100 || altitudeDiff > 100 {

@@ -10,7 +10,7 @@ import (
 
 	_ "gocloud.dev/blob/fileblob"
 
-	"gitlab.met.no/forti/f2/upload/pkg/collector"
+	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 	"gocloud.dev/blob"
 )
 
@@ -27,8 +27,8 @@ func Test(t *testing.T) {
 
 	dataset, err := Download(
 		ctx,
-		collector.NewClientFromBucket(store),
-		&collector.DatasetMeta{
+		fortiblob.NewClientFromBucket(store),
+		&fortiblob.DatasetMeta{
 			Area:    "group_b",
 			Version: 2,
 		},

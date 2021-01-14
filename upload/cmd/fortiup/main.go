@@ -8,7 +8,7 @@ import (
 
 	"gitlab.met.no/forti/f2/upload/internal/nc/store"
 	"gitlab.met.no/forti/f2/upload/internal/upload"
-	"gitlab.met.no/forti/f2/upload/pkg/collector"
+	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 
 	"gocloud.dev/blob"
 	_ "gocloud.dev/blob/fileblob"
@@ -46,7 +46,7 @@ func main() {
 	}
 	u := upload.New(b)
 
-	meta := collector.DatasetMeta{
+	meta := fortiblob.DatasetMeta{
 		Area:          *area,
 		Version:       *version,
 		TimeUntilNext: timeUntilNext,
@@ -55,7 +55,7 @@ func main() {
 		if *srs == "" {
 			log.Fatalln("-srs must be set if -wkt is set")
 		}
-		meta.GeographicExtent = &collector.GeographicArea{
+		meta.GeographicExtent = &fortiblob.GeographicArea{
 			WKT: *wkt,
 			SRS: *srs,
 		}

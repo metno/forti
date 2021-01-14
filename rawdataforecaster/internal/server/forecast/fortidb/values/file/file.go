@@ -13,15 +13,15 @@ import (
 	"os"
 
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/fortidb/values"
-	"gitlab.met.no/forti/f2/upload/pkg/collector"
+	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
 
 type reader struct {
-	meta *collector.MetaCollection
+	meta *fortiblob.MetaCollection
 	file *os.File
 }
 
-func Download(ctx context.Context, source *collector.Client, datasetMeta *collector.DatasetMeta, hash string) (values.Reader, error) {
+func Download(ctx context.Context, source *fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, hash string) (values.Reader, error) {
 	meta, err := source.GetHashMeta(ctx, datasetMeta, hash)
 	if err != nil {
 		return nil, err

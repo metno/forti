@@ -6,12 +6,12 @@ import (
 	"testing"
 	"time"
 
-	"gitlab.met.no/forti/f2/upload/pkg/collector"
+	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 	"gocloud.dev/blob"
 	_ "gocloud.dev/blob/memblob"
 )
 
-func makeTestingClient() *collector.Client {
+func makeTestingClient() *fortiblob.Client {
 	ctx := context.Background()
 
 	bucket, err := blob.OpenBucket(ctx, "mem://test")
@@ -23,7 +23,7 @@ func makeTestingClient() *collector.Client {
 	area := "group_a"
 	version := 1
 
-	dsMeta := collector.DatasetMeta{
+	dsMeta := fortiblob.DatasetMeta{
 		Area:    area,
 		Version: version,
 	}
@@ -32,8 +32,8 @@ func makeTestingClient() *collector.Client {
 	}
 
 	hash := "hash1"
-	paMeta := collector.MetaCollection{
-		Parameters: map[string]collector.ParameterMeta{
+	paMeta := fortiblob.MetaCollection{
+		Parameters: map[string]fortiblob.ParameterMeta{
 			"foo": {
 				Units: "uFoo",
 				Times: []time.Time{
@@ -91,7 +91,7 @@ func makeTestingClient() *collector.Client {
 		panic(err)
 	}
 
-	return collector.NewClientFromBucket(bucket)
+	return fortiblob.NewClientFromBucket(bucket)
 }
 
 func Test(t *testing.T) {

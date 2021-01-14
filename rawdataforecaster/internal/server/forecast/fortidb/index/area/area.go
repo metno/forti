@@ -9,7 +9,7 @@ import (
 	"errors"
 	"unsafe"
 
-	"gitlab.met.no/forti/f2/upload/pkg/collector"
+	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
 
 // Area allows performing calculations on a geographic areas.
@@ -20,7 +20,7 @@ type Area struct {
 }
 
 // New creates a new Area struct, with the given Well-Known Text and Coordinate Reference System.
-func New(area collector.GeographicArea) (*Area, error) {
+func New(area fortiblob.GeographicArea) (*Area, error) {
 	projection, err := newProjector(area.SRS)
 	if err != nil {
 		return nil, err

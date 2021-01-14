@@ -4,12 +4,12 @@ import (
 	"errors"
 
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/fortidb/values"
-	"gitlab.met.no/forti/f2/upload/pkg/collector"
+	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
 
 // MemoryReader serves forecast data.
 type MemoryReader struct {
-	collector.MetaCollection
+	fortiblob.MetaCollection
 	data []int16
 }
 

@@ -7,7 +7,7 @@ import (
 
 	"gitlab.met.no/forti/f2/upload/internal/blob2blob/modelprovider"
 	"gitlab.met.no/forti/f2/upload/internal/upload"
-	"gitlab.met.no/forti/f2/upload/pkg/collector"
+	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
 
 type Collector struct {
@@ -75,7 +75,7 @@ func (c *Collector) Collect(ctx context.Context, gridHash string, rg []modelprov
 	return nil
 }
 
-func (c *Collector) collectData(ctx context.Context, group string, version int, hash string, rg []modelprovider.Meta) (*collector.MetaCollection, error) {
+func (c *Collector) collectData(ctx context.Context, group string, version int, hash string, rg []modelprovider.Meta) (*fortiblob.MetaCollection, error) {
 	out, err := c.sink.GetDataStream(ctx, group, version, hash)
 	if err != nil {
 		log.Fatalln(err)
