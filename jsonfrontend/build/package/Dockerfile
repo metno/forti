@@ -6,7 +6,7 @@ WORKDIR /src
 RUN go mod download
 
 COPY internalprotocol /src/internalprotocol
-COPY weathersymbol/ /src/weathersymbol/
+COPY parameters/ /src/parameters/
 COPY jsonfrontend/internal /src/jsonfrontend/internal
 COPY jsonfrontend/pkg /src/jsonfrontend/pkg
 

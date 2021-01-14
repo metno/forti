@@ -1,4 +1,4 @@
-// Package provides the latest forecast for a given location.
+// Package forecast provides the latest forecast for a given location.
 package forecast
 
 import (
