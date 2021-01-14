@@ -14,7 +14,7 @@ import (
 )
 
 func Store(ctx context.Context, u *upload.Uploader, meta *collector.DatasetMeta, files []string) error {
-	hashes, err := getHashes(meta.Group, meta.Version, files)
+	hashes, err := getHashes(meta.Area, meta.Version, files)
 	if err != nil {
 		return err
 	}
@@ -23,7 +23,7 @@ func Store(ctx context.Context, u *upload.Uploader, meta *collector.DatasetMeta,
 	for hash, files := range hashes {
 		go func(hash string, files []string) {
 			log.Println("store hash ", hash)
-			storeResult <- storeHash(ctx, u, meta.Group, meta.Version, hash, files)
+			storeResult <- storeHash(ctx, u, meta.Area, meta.Version, hash, files)
 			log.Println("stored ", hash)
 		}(hash, files)
 	}
@@ -40,7 +40,7 @@ func Store(ctx context.Context, u *upload.Uploader, meta *collector.DatasetMeta,
 	return nil
 }
 
-func storeHash(ctx context.Context, u *upload.Uploader, group string, version int, hash string, files []string) error {
+func storeHash(ctx context.Context, u *upload.Uploader, area string, version int, hash string, files []string) error {
 	ncfiles, err := openFiles(files)
 	if err != nil {
 		return err
@@ -60,16 +60,16 @@ func storeHash(ctx context.Context, u *upload.Uploader, group string, version in
 		variables = append(variables, v)
 	}
 
-	if err := storeLatLon(ctx, u, group, version, hash, ncfiles[variables[0].Name]); err != nil {
+	if err := storeLatLon(ctx, u, area, version, hash, ncfiles[variables[0].Name]); err != nil {
 		return err
 	}
 
-	meta, err := storeData(ctx, u, group, version, hash, variables)
+	meta, err := storeData(ctx, u, area, version, hash, variables)
 	if err != nil {
 		return err
 	}
 
-	if err := u.SetHashMeta(ctx, meta, group, version, hash); err != nil {
+	if err := u.SetHashMeta(ctx, meta, area, version, hash); err != nil {
 		return err
 	}
 
@@ -91,8 +91,8 @@ func openFiles(files []string) (map[string]netcdf.File, error) {
 	return ncfiles, nil
 }
 
-func storeData(ctx context.Context, u *upload.Uploader, group string, version int, hash string, vars []*netcdf.Variable) (*collector.MetaCollection, error) {
-	out, err := u.GetDataStream(ctx, group, version, hash)
+func storeData(ctx context.Context, u *upload.Uploader, area string, version int, hash string, vars []*netcdf.Variable) (*collector.MetaCollection, error) {
+	out, err := u.GetDataStream(ctx, area, version, hash)
 	if err != nil {
 		return nil, err
 	}
@@ -105,22 +105,22 @@ func storeData(ctx context.Context, u *upload.Uploader, group string, version in
 	return meta, out.Close()
 }
 
-func storeLatLon(ctx context.Context, u *upload.Uploader, group string, version int, hash string, file netcdf.File) error {
-	if err := storeLat(ctx, u, group, version, hash, file); err != nil {
+func storeLatLon(ctx context.Context, u *upload.Uploader, area string, version int, hash string, file netcdf.File) error {
+	if err := storeLat(ctx, u, area, version, hash, file); err != nil {
 		return err
 	}
-	if err := storeLon(ctx, u, group, version, hash, file); err != nil {
+	if err := storeLon(ctx, u, area, version, hash, file); err != nil {
 		return err
 	}
 	return nil
 }
 
-func storeLon(ctx context.Context, u *upload.Uploader, group string, version int, hash string, file netcdf.File) error {
+func storeLon(ctx context.Context, u *upload.Uploader, area string, version int, hash string, file netcdf.File) error {
 	values, err := getAllFromVariable(file, "lon")
 	if err != nil {
 		return err
 	}
-	out, err := u.GetLongitudeStream(ctx, group, version, hash)
+	out, err := u.GetLongitudeStream(ctx, area, version, hash)
 	if err != nil {
 		return err
 	}
@@ -132,12 +132,12 @@ func storeLon(ctx context.Context, u *upload.Uploader, group string, version int
 	return out.Close()
 }
 
-func storeLat(ctx context.Context, u *upload.Uploader, group string, version int, hash string, file netcdf.File) error {
+func storeLat(ctx context.Context, u *upload.Uploader, area string, version int, hash string, file netcdf.File) error {
 	values, err := getAllFromVariable(file, "lat")
 	if err != nil {
 		return err
 	}
-	out, err := u.GetLatitudeStream(ctx, group, version, hash)
+	out, err := u.GetLatitudeStream(ctx, area, version, hash)
 	if err != nil {
 		return err
 	}

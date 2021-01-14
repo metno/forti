@@ -17,7 +17,7 @@ import (
 
 func main() {
 	bucket := flag.String("blob", "file:///home/vegardb/local/forti/collected", "Read forecasts from the given bucket")
-	groups := flag.String("groups", "nordic", "Serve the given groups")
+	areas := flag.String("areas", "nordic", "Serve the given areas")
 	useFiles := flag.Bool("use-files", false, "Store data in local file system instead of in memory. This is meant for testing.")
 	stats := flag.Bool("serve-stats", false, "serve prometheus stats")
 	flag.Parse()
@@ -29,7 +29,7 @@ func main() {
 
 	conf := server.Configuration{
 		Bucket: *bucket,
-		Groups: strings.Split(*groups, ","),
+		Areas:  strings.Split(*areas, ","),
 	}
 
 	if *stats {

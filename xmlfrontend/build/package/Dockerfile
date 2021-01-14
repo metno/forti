@@ -24,7 +24,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 EXPOSE 8080
 
-COPY xmlfrontend/cmd/xmlfrontend/xmlformat.json /
+COPY xmlfrontend/cmd/xmlfrontend/xmlformat_forecast.json /xmlformat.json
 COPY --from=0 /src/xmlfrontend/cmd/xmlfrontend/xmlfrontend /usr/local/bin
 
 ENTRYPOINT [ "/usr/local/bin/xmlfrontend" ]

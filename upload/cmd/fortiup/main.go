@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	group := flag.String("group", "", "group to store")
+	area := flag.String("area", "", "area to store")
 	version := flag.Int("version", 0, "version to store")
 	bucket := flag.String("bucket", "file:///tmp/forti/", "store into the given bucket")
 	ttl := flag.String("time-until-next", "1h", "expected time until next update is available")
@@ -24,8 +24,8 @@ func main() {
 	flag.Parse()
 	files := flag.Args()
 
-	if *group == "" {
-		log.Fatalln("missing -group argument")
+	if *area == "" {
+		log.Fatalln("missing -area argument")
 	}
 	if *version == 0 {
 		log.Fatalln("missing -version argument")
@@ -47,7 +47,7 @@ func main() {
 	u := upload.New(b)
 
 	meta := collector.DatasetMeta{
-		Group:         *group,
+		Area:          *area,
 		Version:       *version,
 		TimeUntilNext: timeUntilNext,
 	}
@@ -55,7 +55,7 @@ func main() {
 		if *srs == "" {
 			log.Fatalln("-srs must be set if -wkt is set")
 		}
-		meta.Area = &collector.GeographicArea{
+		meta.GeographicExtent = &collector.GeographicArea{
 			WKT: *wkt,
 			SRS: *srs,
 		}

@@ -17,7 +17,7 @@ import (
 
 func main() {
 	workdir := flag.String("workdir", "/tmp", "where to place files")
-	group := flag.String("group", "group_a", "group to write")
+	area := flag.String("area", "group_a", "group to write")
 	version := flag.Int("version", 1, "version to write")
 	hash := flag.String("hash", "hash_a", "hash to write")
 	latitudes := flag.String("lat", "59,59,60,60", "longitudes")
@@ -25,7 +25,7 @@ func main() {
 	parameters := flag.String("parameters", "p1=2,p2=0", "parameters to set, use lik this: p1=<count>,p2=<count>")
 	flag.Parse()
 
-	path := fmt.Sprintf("%s/%s/%d/%s/", *workdir, *group, *version, *hash)
+	path := fmt.Sprintf("%s/%s/%d/%s/", *workdir, *area, *version, *hash)
 
 	if err := os.MkdirAll(path, os.ModeDir|0770); err != nil {
 		log.Fatalln(err)
@@ -60,7 +60,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	if err := setComplete(*workdir, *group, *version); err != nil {
+	if err := setComplete(*workdir, *area, *version); err != nil {
 		log.Fatalln(err)
 	}
 }
@@ -168,7 +168,7 @@ func setComplete(workdir, group string, version int) error {
 	}
 
 	doc := collector.DatasetMeta{
-		Group:         group,
+		Area:          group,
 		Version:       version,
 		TimeUntilNext: time.Hour,
 	}

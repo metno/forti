@@ -28,7 +28,7 @@ func Test(t *testing.T) {
 
 	reader, err := d.Get(ctx,
 		&collector.DatasetMeta{
-			Group:   "group_a",
+			Area:    "group_a",
 			Version: 1,
 		},
 		"hash_a",

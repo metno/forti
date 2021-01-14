@@ -23,18 +23,18 @@ type cachedMaps struct {
 	useCount uint
 }
 
-type gvh struct {
-	Group   string
+type avh struct {
+	Area    string
 	Version int
 	Hash    string
 }
 
-var idCache map[gvh]string
+var idCache map[avh]string
 var checkSumCache map[string]*cachedMaps
 var cacheMutex sync.Mutex
 
 func init() {
-	idCache = make(map[gvh]string)
+	idCache = make(map[avh]string)
 	checkSumCache = make(map[string]*cachedMaps)
 }
 
@@ -45,14 +45,14 @@ func Add(ctx context.Context, source *collector.Client, datasetMeta *collector.D
 
 	checksum, err := gridReader.Checksum(ctx, datasetMeta, hash)
 	if err != nil {
-		return nil, fmt.Errorf("unable to get checksum for %s/%d/%s: %w", datasetMeta.Group, datasetMeta.Version, hash, err)
+		return nil, fmt.Errorf("unable to get checksum for %s/%d/%s: %w", datasetMeta.Area, datasetMeta.Version, hash, err)
 	}
 
 	cacheMutex.Lock()
 	defer cacheMutex.Unlock()
 
-	id := gvh{
-		Group:   datasetMeta.Group,
+	id := avh{
+		Area:    datasetMeta.Area,
 		Version: datasetMeta.Version,
 		Hash:    hash,
 	}
@@ -78,8 +78,8 @@ func getData(ctx context.Context, gridReader *georeader.Reader, datasetMeta *col
 		return nil, err
 	}
 
-	id := gvh{
-		Group:   datasetMeta.Group,
+	id := avh{
+		Area:    datasetMeta.Area,
 		Version: datasetMeta.Version,
 		Hash:    hash,
 	}
@@ -100,7 +100,7 @@ func getData(ctx context.Context, gridReader *georeader.Reader, datasetMeta *col
 // 	free(id)
 // }
 
-func free(id gvh) {
+func free(id avh) {
 	checksum, ok := idCache[id]
 	if !ok {
 		return

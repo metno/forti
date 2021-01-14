@@ -18,23 +18,23 @@ func New(bucket *blob.Bucket) *Uploader {
 	return &Uploader{bucket}
 }
 
-func (u *Uploader) GetDataStream(ctx context.Context, group string, version int, hash string) (io.WriteCloser, error) {
-	key := fmt.Sprintf("%s/%d/%s/data", group, version, hash)
+func (u *Uploader) GetDataStream(ctx context.Context, area string, version int, hash string) (io.WriteCloser, error) {
+	key := fmt.Sprintf("%s/%d/%s/data", area, version, hash)
 	return u.bucket.NewWriter(ctx, key, nil)
 }
 
-func (u *Uploader) GetLatitudeStream(ctx context.Context, group string, version int, hash string) (io.WriteCloser, error) {
-	key := fmt.Sprintf("%s/%d/%s/latitude", group, version, hash)
+func (u *Uploader) GetLatitudeStream(ctx context.Context, area string, version int, hash string) (io.WriteCloser, error) {
+	key := fmt.Sprintf("%s/%d/%s/latitude", area, version, hash)
 	return u.bucket.NewWriter(ctx, key, nil)
 }
 
-func (u *Uploader) GetLongitudeStream(ctx context.Context, group string, version int, hash string) (io.WriteCloser, error) {
-	key := fmt.Sprintf("%s/%d/%s/longitude", group, version, hash)
+func (u *Uploader) GetLongitudeStream(ctx context.Context, area string, version int, hash string) (io.WriteCloser, error) {
+	key := fmt.Sprintf("%s/%d/%s/longitude", area, version, hash)
 	return u.bucket.NewWriter(ctx, key, nil)
 }
 
-func (u *Uploader) SetHashMeta(ctx context.Context, meta *collector.MetaCollection, group string, version int, hash string) error {
-	key := fmt.Sprintf("%s/%d/%s/meta.json", group, version, hash)
+func (u *Uploader) SetHashMeta(ctx context.Context, meta *collector.MetaCollection, area string, version int, hash string) error {
+	key := fmt.Sprintf("%s/%d/%s/meta.json", area, version, hash)
 	w, err := u.bucket.NewWriter(ctx, key, nil)
 	if err != nil {
 		return err
@@ -46,7 +46,7 @@ func (u *Uploader) SetHashMeta(ctx context.Context, meta *collector.MetaCollecti
 }
 
 func (u *Uploader) SetDatasetMeta(ctx context.Context, meta *collector.DatasetMeta) error {
-	key := fmt.Sprintf("%s/%d/complete.json", meta.Group, meta.Version)
+	key := fmt.Sprintf("%s/%d/complete.json", meta.Area, meta.Version)
 	w, err := u.bucket.NewWriter(ctx, key, nil)
 	if err != nil {
 		return err

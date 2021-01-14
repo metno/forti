@@ -52,22 +52,22 @@ func (c *Client) Latest(ctx context.Context) (map[string]int, error) {
 		if strings.HasSuffix(lo.Key, "/complete.json") {
 			elements := strings.Split(lo.Key, "/")
 			if len(elements) == 3 {
-				group := elements[0]
+				area := elements[0]
 				version, err := strconv.Atoi(elements[1])
 				if err != nil {
 					log.Printf("enountered unexpected key in store: %s", lo.Key)
 					continue
 				}
-				if version > ret[group] {
-					ret[group] = version
+				if version > ret[area] {
+					ret[area] = version
 				}
 			}
 		}
 	}
 }
 
-func (c *Client) GetMeta(ctx context.Context, group string, version int) (*DatasetMeta, error) {
-	path := fmt.Sprintf("%s/%d/complete.json", group, version)
+func (c *Client) GetMeta(ctx context.Context, area string, version int) (*DatasetMeta, error) {
+	path := fmt.Sprintf("%s/%d/complete.json", area, version)
 
 	r, err := c.bucket.NewReader(ctx, path, nil)
 	if err != nil {
@@ -87,7 +87,7 @@ func (c *Client) GetHashes(ctx context.Context, d *DatasetMeta) ([]string, error
 	var hashes []string
 	it := c.bucket.List(
 		&blob.ListOptions{
-			Prefix:    fmt.Sprintf("%s/%d/", d.Group, d.Version),
+			Prefix:    fmt.Sprintf("%s/%d/", d.Area, d.Version),
 			Delimiter: "/",
 		},
 	)
@@ -113,7 +113,7 @@ func (c *Client) GetHashes(ctx context.Context, d *DatasetMeta) ([]string, error
 }
 
 func (c *Client) GetHashMeta(ctx context.Context, d *DatasetMeta, hash string) (*MetaCollection, error) {
-	path := fmt.Sprintf("%s/%d/%s/meta.json", d.Group, d.Version, hash)
+	path := fmt.Sprintf("%s/%d/%s/meta.json", d.Area, d.Version, hash)
 
 	r, err := c.bucket.NewReader(ctx, path, nil)
 	if err != nil {
@@ -135,15 +135,15 @@ type DataReader interface {
 }
 
 func (c *Client) GetData(ctx context.Context, d *DatasetMeta, hash string) (DataReader, error) {
-	return c.getStream(ctx, fmt.Sprintf("%s/%d/%s/data", d.Group, d.Version, hash))
+	return c.getStream(ctx, fmt.Sprintf("%s/%d/%s/data", d.Area, d.Version, hash))
 }
 
 func (c *Client) GetLatitude(ctx context.Context, d *DatasetMeta, hash string) (DataReader, error) {
-	return c.getStream(ctx, fmt.Sprintf("%s/%d/%s/latitude", d.Group, d.Version, hash))
+	return c.getStream(ctx, fmt.Sprintf("%s/%d/%s/latitude", d.Area, d.Version, hash))
 }
 
 func (c *Client) GetLongitude(ctx context.Context, d *DatasetMeta, hash string) (DataReader, error) {
-	return c.getStream(ctx, fmt.Sprintf("%s/%d/%s/longitude", d.Group, d.Version, hash))
+	return c.getStream(ctx, fmt.Sprintf("%s/%d/%s/longitude", d.Area, d.Version, hash))
 }
 
 func (c *Client) getStream(ctx context.Context, path string) (DataReader, error) {

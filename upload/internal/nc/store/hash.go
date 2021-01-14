@@ -8,7 +8,7 @@ import (
 	"gitlab.met.no/forti/f2/upload/internal/nc/store/netcdf"
 )
 
-func getHashes(group string, version int, files []string) (map[string][]string, error) {
+func getHashes(area string, version int, files []string) (map[string][]string, error) {
 	hashes := make(map[string][]string)
 	for _, filename := range files {
 		f, err := netcdf.Open(filename)

@@ -1,4 +1,4 @@
-// Package fortidb handles forecasts for a single group (nordic, arctic, etc)
+// Package fortidb handles forecasts for a single area (nordic, arctic, etc)
 package fortidb
 
 import (
@@ -14,7 +14,7 @@ import (
 	"gitlab.met.no/forti/f2/upload/pkg/collector"
 )
 
-// Dataset contains a forecast for a single group.
+// Dataset contains a forecast for a single area.
 type Dataset struct {
 	Meta pointdata.Meta
 
@@ -58,8 +58,8 @@ func Download(ctx context.Context, source *collector.Client, datasetMeta *collec
 	}
 
 	var geographicArea *area.Area
-	if datasetMeta.Area != nil {
-		geographicArea, err = area.New(*datasetMeta.Area)
+	if datasetMeta.GeographicExtent != nil {
+		geographicArea, err = area.New(*datasetMeta.GeographicExtent)
 		if err != nil {
 			return nil, err
 		}
@@ -68,7 +68,7 @@ func Download(ctx context.Context, source *collector.Client, datasetMeta *collec
 	readyTime := time.Now().UTC()
 	return &Dataset{
 		Meta: pointdata.Meta{
-			Group:      datasetMeta.Group,
+			Area:       datasetMeta.Area,
 			Version:    datasetMeta.Version,
 			UpdatedAt:  readyTime,
 			NextUpdate: readyTime.Add(datasetMeta.TimeUntilNext),

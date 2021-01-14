@@ -20,11 +20,11 @@ func makeTestingClient() *collector.Client {
 	}
 	u := New(bucket)
 
-	group := "group_a"
+	area := "group_a"
 	version := 1
 
 	dsMeta := collector.DatasetMeta{
-		Group:   group,
+		Area:    area,
 		Version: version,
 	}
 	if err := u.SetDatasetMeta(ctx, &dsMeta); err != nil {
@@ -51,11 +51,11 @@ func makeTestingClient() *collector.Client {
 		},
 		PointCount: 4,
 	}
-	if err := u.SetHashMeta(ctx, &paMeta, group, version, hash); err != nil {
+	if err := u.SetHashMeta(ctx, &paMeta, area, version, hash); err != nil {
 		panic(err)
 	}
 
-	data, err := u.GetDataStream(ctx, group, version, hash)
+	data, err := u.GetDataStream(ctx, area, version, hash)
 	if err != nil {
 		panic(err)
 	}
@@ -69,7 +69,7 @@ func makeTestingClient() *collector.Client {
 		panic(err)
 	}
 
-	lat, err := u.GetLatitudeStream(ctx, group, version, hash)
+	lat, err := u.GetLatitudeStream(ctx, area, version, hash)
 	if err != nil {
 		panic(err)
 	}
@@ -80,7 +80,7 @@ func makeTestingClient() *collector.Client {
 		panic(err)
 	}
 
-	lon, err := u.GetLatitudeStream(ctx, group, version, hash)
+	lon, err := u.GetLatitudeStream(ctx, area, version, hash)
 	if err != nil {
 		panic(err)
 	}
@@ -104,10 +104,10 @@ func Test(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	group := "group_a"
-	version := latest[group]
+	area := "group_a"
+	version := latest[area]
 
-	datasetMeta, err := client.GetMeta(ctx, group, version)
+	datasetMeta, err := client.GetMeta(ctx, area, version)
 	if err != nil {
 		t.Fatal(err)
 	}

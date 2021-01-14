@@ -3,10 +3,10 @@ package collector
 import "time"
 
 type DatasetMeta struct {
-	Group         string          `json:"group"`
-	Version       int             `json:"version"`
-	TimeUntilNext time.Duration   `json:"time_until_next"`
-	Area          *GeographicArea `json:"area"`
+	Area             string          `json:"area"`
+	Version          int             `json:"version"`
+	TimeUntilNext    time.Duration   `json:"time_until_next"`
+	GeographicExtent *GeographicArea `json:"geographic_extent"`
 }
 
 // ParameterMeta contains metadata about a forecast for a single parameter

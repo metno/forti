@@ -2,12 +2,12 @@ package forecast
 
 import "github.com/prometheus/client_golang/prometheus"
 
-var groupCounter = prometheus.NewCounterVec(
+var areaCounter = prometheus.NewCounterVec(
 	prometheus.CounterOpts{
-		Name: "forti_requested_groups_total",
-		Help: "What groups are requested",
+		Name: "forti_requested_areas_total",
+		Help: "What areas are requested",
 	},
-	[]string{"group"},
+	[]string{"area"},
 )
 
 var distanceHistogram = prometheus.NewHistogramVec(
@@ -16,15 +16,15 @@ var distanceHistogram = prometheus.NewHistogramVec(
 		Help:    "Distance between requested and selected grid point",
 		Buckets: []float64{1_000, 5_000, 10_000, 25_000, 100_000},
 	},
-	[]string{"group"},
+	[]string{"area"},
 )
 
 var fortiAvailableLatest = prometheus.NewGaugeVec(
 	prometheus.GaugeOpts{
 		Name: "forti_available_latest",
-		Help: "Available version for each group (being loaded)",
+		Help: "Available version for each area (being loaded)",
 	},
-	[]string{"group"},
+	[]string{"area"},
 )
 
 var fortiAvailableUpdated = prometheus.NewGaugeVec(
@@ -34,15 +34,15 @@ var fortiAvailableUpdated = prometheus.NewGaugeVec(
 		Name:      "updated",
 		Help:      "Update time of latest version of a dataset",
 	},
-	[]string{"group"},
+	[]string{"area"},
 )
 
 var fortiActiveLatest = prometheus.NewGaugeVec(
 	prometheus.GaugeOpts{
 		Name: "forti_active_latest",
-		Help: "Active version for each group",
+		Help: "Active version for each area",
 	},
-	[]string{"group"},
+	[]string{"area"},
 )
 
 var fortiActiveUpdated = prometheus.NewGaugeVec(
@@ -52,12 +52,12 @@ var fortiActiveUpdated = prometheus.NewGaugeVec(
 		Name:      "updated",
 		Help:      "Update time of latest version of a dataset",
 	},
-	[]string{"group"},
+	[]string{"area"},
 )
 
 func init() {
 	prometheus.MustRegister(
-		groupCounter,
+		areaCounter,
 		distanceHistogram,
 		fortiActiveLatest,
 		fortiActiveUpdated,

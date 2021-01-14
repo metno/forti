@@ -1,5 +1,6 @@
 {
-  "group": "group_b",
+  "area": "group_b",
   "version": 2,
-  "time_until_next": 3600000000000
+  "time_until_next": 3600000000000,
+  "geographic_extent": null
 }

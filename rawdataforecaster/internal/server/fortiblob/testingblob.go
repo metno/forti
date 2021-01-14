@@ -21,18 +21,18 @@ func MakeTestingBlob() *blob.Bucket {
 	return bucket
 }
 
-func AddToBlob(bucket *blob.Bucket, group string, version int, hash string, parameters map[string]int, latitudes, longitudes []float32) {
+func AddToBlob(bucket *blob.Bucket, area string, version int, hash string, parameters map[string]int, latitudes, longitudes []float32) {
 	if len(latitudes) != len(longitudes) {
 		panic("latitudes and longitudes have different lengths")
 	}
 	locations := len(latitudes)
 
-	meta := addMeta(bucket, parameters, group, version, hash)
-	addData(bucket, meta, locations, group, version, hash)
-	addLocations(bucket, group, version, hash, latitudes, longitudes)
+	meta := addMeta(bucket, parameters, area, version, hash)
+	addData(bucket, meta, locations, area, version, hash)
+	addLocations(bucket, area, version, hash, latitudes, longitudes)
 }
 
-func addMeta(blob *blob.Bucket, parameters map[string]int, group string, version int, hash string) pointdata.MetaCollection {
+func addMeta(blob *blob.Bucket, parameters map[string]int, area string, version int, hash string) pointdata.MetaCollection {
 	ctx := context.Background()
 
 	meta := pointdata.MetaCollection{
@@ -54,7 +54,7 @@ func addMeta(blob *blob.Bucket, parameters map[string]int, group string, version
 	}
 	meta.PointCount = idx
 
-	w, err := blob.NewWriter(ctx, path(group, version, hash, "meta.json"), nil)
+	w, err := blob.NewWriter(ctx, path(area, version, hash, "meta.json"), nil)
 	if err != nil {
 		panic(err)
 	}
@@ -68,7 +68,7 @@ func addMeta(blob *blob.Bucket, parameters map[string]int, group string, version
 	return meta
 }
 
-func addData(blob *blob.Bucket, meta pointdata.MetaCollection, size int, group string, version int, hash string) {
+func addData(blob *blob.Bucket, meta pointdata.MetaCollection, size int, area string, version int, hash string) {
 	ctx := context.Background()
 
 	data := make([]int16, meta.PointCount*size)
@@ -81,7 +81,7 @@ func addData(blob *blob.Bucket, meta pointdata.MetaCollection, size int, group s
 			}
 		}
 	}
-	w, err := blob.NewWriter(ctx, path(group, version, hash, "data"), nil)
+	w, err := blob.NewWriter(ctx, path(area, version, hash, "data"), nil)
 	if err != nil {
 		panic(err)
 	}
@@ -95,15 +95,15 @@ func addData(blob *blob.Bucket, meta pointdata.MetaCollection, size int, group s
 	}
 }
 
-func addLocations(blob *blob.Bucket, group string, version int, hash string, latitudes, longitudes []float32) {
-	addRaw(blob, group, version, hash, "latitude", latitudes)
-	addRaw(blob, group, version, hash, "longitude", longitudes)
+func addLocations(blob *blob.Bucket, area string, version int, hash string, latitudes, longitudes []float32) {
+	addRaw(blob, area, version, hash, "latitude", latitudes)
+	addRaw(blob, area, version, hash, "longitude", longitudes)
 }
 
-func addRaw(blob *blob.Bucket, group string, version int, hash, name string, data []float32) {
+func addRaw(blob *blob.Bucket, area string, version int, hash, name string, data []float32) {
 	ctx := context.Background()
 
-	w, err := blob.NewWriter(ctx, path(group, version, hash, name), nil)
+	w, err := blob.NewWriter(ctx, path(area, version, hash, name), nil)
 	if err != nil {
 		panic(err)
 	}

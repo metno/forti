@@ -16,7 +16,7 @@ import (
 
 type Configuration struct {
 	Bucket string
-	Groups []string
+	Areas  []string
 }
 
 func Run(conf *Configuration) error {
@@ -43,7 +43,7 @@ type grpcServer struct {
 }
 
 func newGrpcServer(conf *Configuration) (*grpcServer, error) {
-	forecast, err := forecast.New(conf.Bucket, conf.Groups)
+	forecast, err := forecast.New(conf.Bucket, conf.Areas)
 	if err != nil {
 		return nil, err
 	}

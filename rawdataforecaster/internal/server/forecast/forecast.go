@@ -18,31 +18,31 @@ import (
 
 // Forecast gives the latest weather forecast for a location.
 type Forecast struct {
-	store  *collector.Client
-	groups []string
+	store *collector.Client
+	areas []string
 
 	datasets map[string]*fortidb.Dataset
 	m        sync.RWMutex
 }
 
 // New initializes an object that can be queries for forecasts. It is self-updating.
-func New(blobURL string, groups []string) (*Forecast, error) {
+func New(blobURL string, areas []string) (*Forecast, error) {
 	store, err := collector.NewClient(blobURL)
 	if err != nil {
 		return nil, err
 	}
 
-	f := newFromCollector(store, groups)
+	f := newFromCollector(store, areas)
 
 	go f.run()
 
 	return f, nil
 }
 
-func newFromCollector(store *collector.Client, groups []string) *Forecast {
+func newFromCollector(store *collector.Client, areas []string) *Forecast {
 	f := &Forecast{
 		store:    store,
-		groups:   groups,
+		areas:    areas,
 		datasets: make(map[string]*fortidb.Dataset),
 	}
 
@@ -59,7 +59,7 @@ func (f *Forecast) Get(latitude, longitude float32) (*pointdata.PointData, error
 	f.m.RLock()
 	defer f.m.RUnlock()
 
-	best, err := f.bestGroup(latitude, longitude)
+	best, err := f.bestArea(latitude, longitude)
 	if err != nil {
 		return nil, err
 	}
@@ -71,29 +71,29 @@ func (f *Forecast) Get(latitude, longitude float32) (*pointdata.PointData, error
 		return nil, ErrOutsideAllGrids
 	}
 
-	groupCounter.With(prometheus.Labels{"group": best.Meta.Group}).Inc()
+	areaCounter.With(prometheus.Labels{"area": best.Meta.Area}).Inc()
 
 	return best.Read(latitude, longitude)
 }
 
-func (f *Forecast) bestGroup(latitude, longitude float32) (*fortidb.Dataset, error) {
+func (f *Forecast) bestArea(latitude, longitude float32) (*fortidb.Dataset, error) {
 	selectedDistance := uint(math.MaxUint32)
 	var selected *fortidb.Dataset
-	for _, datagroup := range f.datasets {
-		distance, err := datagroup.DistanceTo(latitude, longitude)
+	for _, area := range f.datasets {
+		distance, err := area.DistanceTo(latitude, longitude)
 		if err != nil {
 			return nil, err
 		}
 		if distance < selectedDistance {
 			selectedDistance = distance
-			selected = datagroup
+			selected = area
 		}
 	}
 	if selected == nil {
 		return nil, errors.New("no datasets available")
 	}
 
-	distanceHistogram.With(prometheus.Labels{"group": selected.Meta.Group}).Observe(float64(selectedDistance))
+	distanceHistogram.With(prometheus.Labels{"area": selected.Meta.Area}).Observe(float64(selectedDistance))
 
 	return selected, nil
 }
@@ -116,38 +116,38 @@ func (f *Forecast) update() error {
 
 	f.m.RLock()
 	toAdd := make(map[string]int)
-	for _, group := range f.groups {
-		latestVersion := latest[group]
-		current, ok := f.datasets[group]
+	for _, area := range f.areas {
+		latestVersion := latest[area]
+		current, ok := f.datasets[area]
 		if !ok || current.Meta.Version < latestVersion {
-			toAdd[group] = latestVersion
+			toAdd[area] = latestVersion
 		}
 	}
 	f.m.RUnlock()
 
 	var wait sync.WaitGroup
-	for group, version := range toAdd {
+	for area, version := range toAdd {
 		wait.Add(1)
 		ctx := context.TODO()
-		go func(group string, version int) {
-			f.load(ctx, group, version)
+		go func(area string, version int) {
+			f.load(ctx, area, version)
 			wait.Done()
-		}(group, version)
+		}(area, version)
 	}
 	wait.Wait()
 
 	return nil
 }
 
-func (f *Forecast) load(ctx context.Context, group string, version int) {
-	log.Printf("available: %s/%d", group, version)
+func (f *Forecast) load(ctx context.Context, area string, version int) {
+	log.Printf("available: %s/%d", area, version)
 
-	prometheusLabel := prometheus.Labels{"group": group}
+	prometheusLabel := prometheus.Labels{"area": area}
 
 	fortiAvailableLatest.With(prometheusLabel).Set(float64(version))
 	fortiAvailableUpdated.With(prometheusLabel).Set(float64(time.Now().Unix()))
 
-	meta, err := f.store.GetMeta(ctx, group, version)
+	meta, err := f.store.GetMeta(ctx, area, version)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -158,14 +158,14 @@ func (f *Forecast) load(ctx context.Context, group string, version int) {
 	}
 
 	f.m.Lock()
-	if old, ok := f.datasets[group]; ok {
+	if old, ok := f.datasets[area]; ok {
 		old.Close()
 	}
-	f.datasets[group] = datagroup
+	f.datasets[area] = datagroup
 	f.m.Unlock()
 
 	fortiActiveLatest.With(prometheusLabel).Set(float64(version))
 	fortiActiveUpdated.With(prometheusLabel).Set(float64(time.Now().Unix()))
 
-	log.Printf("active: %s/%d", group, version)
+	log.Printf("active: %s/%d", area, version)
 }

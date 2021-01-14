@@ -30,7 +30,7 @@ func (p *PointData) GetData(parameter string) map[time.Time]float32 {
 }
 
 type Meta struct {
-	Group      string
+	Area       string
 	Version    int
 	UpdatedAt  time.Time
 	NextUpdate time.Time

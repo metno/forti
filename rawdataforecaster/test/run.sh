@@ -9,7 +9,7 @@ WORKDIR="./data"
 mkdir -p "$WORKDIR"
 
 $RUN 	-workdir $WORKDIR \
-	-group group_a \
+	-area group_a \
 	-version 1 \
 	-hash hash_a \
 	-parameters "p1=2,p2=0" \
@@ -17,13 +17,13 @@ $RUN 	-workdir $WORKDIR \
         -lon 1,2,1,2
 
 $RUN 	-workdir $WORKDIR \
-        -group group_b \
+        -area group_b \
         -version 2 \
         -hash hash_a \
 	 -parameters "foo=2,bar=1"
 
 $RUN 	-workdir $WORKDIR \
-        -group group_b \
+        -area group_b \
         -version 2 \
         -hash hash_b \
         -parameters "bik=4,bok=0"

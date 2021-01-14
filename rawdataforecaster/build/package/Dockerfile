@@ -15,7 +15,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y \
     gcc g++ pkg-config \
-    cmake libgflags-dev libgoogle-glog-dev libgtest-dev libssl-dev
+    cmake libgflags-dev libgoogle-glog-dev libgtest-dev libssl-dev \
+    libgeos-dev libproj-dev
+
 
 WORKDIR /src
 RUN git clone https://github.com/google/s2geometry.git && \
@@ -37,15 +39,14 @@ RUN go mod download
 
 COPY internalprotocol /src/internalprotocol
 COPY upload/pkg /src/upload/pkg
-COPY upload/internal /src/upload/internal
-COPY simpleforecaster/internal/ /src/simpleforecaster/internal
-COPY simpleforecaster/test/ /src/simpleforecaster/test
+COPY rawdataforecaster/internal/ /src/rawdataforecaster/internal
+COPY rawdataforecaster/test/ /src/rawdataforecaster/test
 
 RUN go test ./...
 
-COPY simpleforecaster/cmd /src/simpleforecaster/cmd
+COPY rawdataforecaster/cmd /src/rawdataforecaster/cmd
 
-WORKDIR /src/simpleforecaster/cmd/simpleforecaster
+WORKDIR /src/rawdataforecaster/cmd/rawdataforecaster
 RUN go build
 
 
@@ -55,6 +56,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y \
     libgflags2.2 libgoogle-glog0v5 libssl1.1 \
+    libgeos-3.8.0 libproj15 \
     curl
 
 RUN curl -L -o /bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v0.3.6/grpc_health_probe-linux-amd64 && \
@@ -67,6 +69,6 @@ COPY --from=0 /usr/local/lib/libs2.so /usr/local/lib/
 RUN ldconfig
 
 
-COPY --from=0 /src/simpleforecaster/cmd/simpleforecaster/simpleforecaster /usr/local/bin
+COPY --from=0 /src/rawdataforecaster/cmd/rawdataforecaster/rawdataforecaster /usr/local/bin
 
-ENTRYPOINT [ "/usr/local/bin/simpleforecaster" ]
+ENTRYPOINT [ "/usr/local/bin/rawdataforecaster" ]

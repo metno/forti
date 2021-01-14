@@ -27,7 +27,7 @@ func Test(t *testing.T) {
 	reader, err := Download(ctx,
 		collector.NewClientFromBucket(store),
 		&collector.DatasetMeta{
-			Group:   "group_a",
+			Area:    "group_a",
 			Version: 1,
 		},
 		"hash_a",

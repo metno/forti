@@ -29,7 +29,7 @@ func Test(t *testing.T) {
 		ctx,
 		collector.NewClientFromBucket(store),
 		&collector.DatasetMeta{
-			Group:   "group_b",
+			Area:    "group_b",
 			Version: 2,
 		},
 	)

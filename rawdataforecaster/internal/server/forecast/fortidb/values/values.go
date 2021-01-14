@@ -1,4 +1,4 @@
-// Package values handles forecasts with a single group, version and spatial resolution.
+// Package values handles forecasts with a single area, version and spatial resolution.
 package values
 
 import (

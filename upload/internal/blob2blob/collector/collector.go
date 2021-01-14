@@ -63,7 +63,7 @@ func Get(ctx context.Context, blobIn, blobOut, group string, version int) error 
 	}
 
 	meta := collector.DatasetMeta{
-		Group:         group,
+		Area:          group,
 		Version:       version,
 		TimeUntilNext: dataset.TimeUntilNext,
 	}
