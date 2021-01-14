@@ -6,8 +6,8 @@ import (
 	"math"
 	"time"
 
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/geo"
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/geo/area"
+	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/index"
+	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/index/area"
 	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/values"
 	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/values/memory"
 	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/pointdata"
@@ -20,7 +20,7 @@ type Dataset struct {
 
 	Area    *area.Area
 	readers []values.Reader
-	lookups []geo.Nearester
+	lookups []index.Nearester
 }
 
 var downloadFunc = memory.Download
@@ -38,10 +38,10 @@ func Download(ctx context.Context, source *collector.Client, datasetMeta *collec
 	}
 
 	var readers []values.Reader
-	var lookups []geo.Nearester
+	var lookups []index.Nearester
 
 	for _, hash := range hashes {
-		lookup, err := geo.Add(ctx, source, datasetMeta, hash)
+		lookup, err := index.Add(ctx, source, datasetMeta, hash)
 		if err != nil {
 			return nil, err
 		}

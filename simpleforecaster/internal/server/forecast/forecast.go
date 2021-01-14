@@ -11,7 +11,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup"
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/geo/area"
+	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/index/area"
 	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/pointdata"
 	"gitlab.met.no/forti/f2/upload/pkg/collector"
 )

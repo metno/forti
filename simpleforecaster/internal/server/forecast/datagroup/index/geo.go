@@ -1,21 +1,21 @@
-// Package geo handles lookup from a latitude/longitude to an index in a
+// Package index handles lookup from a latitude/longitude to an index in a
 // downloaded forecast file.
 // It uses a global cache to speed up loading.
-package geo
+package index
 
 import (
 	"context"
 	"fmt"
 	"sync"
 
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/geo/georeader"
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/geo/lookup"
+	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/index/georeader"
+	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/index/lookup"
 	"gitlab.met.no/forti/f2/upload/pkg/collector"
 )
 
 // Nearester returns the closest index to a given latitude/longitude.
 type Nearester interface {
-	Nearest(latitude, longitude float32) (geo lookup.GeoResponse, err error)
+	Nearest(latitude, longitude float32) (index lookup.GeoResponse, err error)
 }
 
 type cachedMaps struct {

@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"io"
 
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/geo/lookup"
+	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/index/lookup"
 	"gitlab.met.no/forti/f2/upload/pkg/collector"
 )
 
