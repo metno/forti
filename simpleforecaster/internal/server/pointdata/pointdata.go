@@ -5,12 +5,12 @@ package pointdata
 import (
 	"time"
 
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/simpledatagroup"
+	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/values"
 )
 
 type PointData struct {
 	Meta *Meta
-	Data []simpledatagroup.PointDataCollection
+	Data []values.PointDataCollection
 }
 
 // GetData extracts all values for the given parameter

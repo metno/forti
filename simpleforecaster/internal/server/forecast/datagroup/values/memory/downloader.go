@@ -5,11 +5,11 @@ import (
 	"encoding/binary"
 	"log"
 
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/simpledatagroup"
+	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/values"
 	"gitlab.met.no/forti/f2/upload/pkg/collector"
 )
 
-func Download(ctx context.Context, source *collector.Client, datasetMeta *collector.DatasetMeta, hash string) (simpledatagroup.Reader, error) {
+func Download(ctx context.Context, source *collector.Client, datasetMeta *collector.DatasetMeta, hash string) (values.Reader, error) {
 	return newDownloader(source).Get(ctx, datasetMeta, hash)
 }
 
@@ -23,7 +23,7 @@ func newDownloader(source *collector.Client) *downloader {
 	}
 }
 
-func (d *downloader) Get(ctx context.Context, datasetMeta *collector.DatasetMeta, hash string) (simpledatagroup.Reader, error) {
+func (d *downloader) Get(ctx context.Context, datasetMeta *collector.DatasetMeta, hash string) (values.Reader, error) {
 
 	metaCollection, err := d.store.GetHashMeta(ctx, datasetMeta, hash)
 	if err != nil {

@@ -12,7 +12,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"gitlab.met.no/forti/f2/simpleforecaster/internal/server"
 	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup"
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/simpledatagroup/file"
+	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/values/file"
 )
 
 func main() {

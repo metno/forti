@@ -1,4 +1,4 @@
-// Package file provides an implementation of simpledatagroup.Reader. It is
+// Package file provides an implementation of values.Reader. It is
 // not meant for running in production, but for testing simpleforecaster in
 // environments with little memory.
 package file
@@ -12,7 +12,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/simpledatagroup"
+	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/values"
 	"gitlab.met.no/forti/f2/upload/pkg/collector"
 )
 
@@ -21,7 +21,7 @@ type reader struct {
 	file *os.File
 }
 
-func Download(ctx context.Context, source *collector.Client, datasetMeta *collector.DatasetMeta, hash string) (simpledatagroup.Reader, error) {
+func Download(ctx context.Context, source *collector.Client, datasetMeta *collector.DatasetMeta, hash string) (values.Reader, error) {
 	meta, err := source.GetHashMeta(ctx, datasetMeta, hash)
 	if err != nil {
 		return nil, err
@@ -55,8 +55,8 @@ func (r *reader) Close() error {
 	return os.Remove(r.file.Name())
 }
 
-func (r *reader) Read(idx int) (*simpledatagroup.PointDataCollection, error) {
-	ret := simpledatagroup.PointDataCollection{
+func (r *reader) Read(idx int) (*values.PointDataCollection, error) {
+	ret := values.PointDataCollection{
 		ParameterMeta: r.meta.Parameters,
 		Data:          make([]float32, r.meta.PointCount),
 	}

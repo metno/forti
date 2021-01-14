@@ -8,8 +8,8 @@ import (
 
 	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/geo"
 	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/geo/area"
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/simpledatagroup"
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/simpledatagroup/memory"
+	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/values"
+	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/values/memory"
 	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/pointdata"
 	"gitlab.met.no/forti/f2/upload/pkg/collector"
 )
@@ -19,14 +19,14 @@ type Dataset struct {
 	Meta pointdata.Meta
 
 	Area    *area.Area
-	readers []simpledatagroup.Reader
+	readers []values.Reader
 	lookups []geo.Nearester
 }
 
 var downloadFunc = memory.Download
 
 // SetDownloadFunction overrides the function to download data. It is meant for creating local tests.
-func SetDownloadFunction(f func(ctx context.Context, source *collector.Client, datasetMeta *collector.DatasetMeta, hash string) (simpledatagroup.Reader, error)) {
+func SetDownloadFunction(f func(ctx context.Context, source *collector.Client, datasetMeta *collector.DatasetMeta, hash string) (values.Reader, error)) {
 	downloadFunc = f
 }
 
@@ -37,7 +37,7 @@ func Download(ctx context.Context, source *collector.Client, datasetMeta *collec
 		return nil, err
 	}
 
-	var readers []simpledatagroup.Reader
+	var readers []values.Reader
 	var lookups []geo.Nearester
 
 	for _, hash := range hashes {

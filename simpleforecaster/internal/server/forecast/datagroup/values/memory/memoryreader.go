@@ -3,7 +3,7 @@ package memory
 import (
 	"errors"
 
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/simpledatagroup"
+	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/values"
 	"gitlab.met.no/forti/f2/upload/pkg/collector"
 )
 
@@ -19,7 +19,7 @@ func (r *MemoryReader) Close() error {
 }
 
 // Read gets the forecast for the given index.
-func (r *MemoryReader) Read(idx int) (*simpledatagroup.PointDataCollection, error) {
+func (r *MemoryReader) Read(idx int) (*values.PointDataCollection, error) {
 	sliceFrom := idx * r.PointCount
 	sliceTo := sliceFrom + r.PointCount
 
@@ -32,7 +32,7 @@ func (r *MemoryReader) Read(idx int) (*simpledatagroup.PointDataCollection, erro
 		data[i] = float32(val) / 10
 	}
 
-	return &simpledatagroup.PointDataCollection{
+	return &values.PointDataCollection{
 		ParameterMeta: r.Parameters,
 		Data:          data,
 	}, nil

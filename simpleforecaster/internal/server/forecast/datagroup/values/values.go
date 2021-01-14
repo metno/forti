@@ -1,5 +1,5 @@
-// Package simpledatagroup handles forecasts with a single group, version and spatial resolution.
-package simpledatagroup
+// Package values handles forecasts with a single group, version and spatial resolution.
+package values
 
 import (
 	"io"
