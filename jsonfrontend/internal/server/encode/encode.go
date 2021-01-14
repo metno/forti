@@ -40,12 +40,10 @@ func getSerializationForecast(forecast *internalprotocol.Forecast) (*jsonformat.
 }
 
 func getAltitude(forecast *internalprotocol.Forecast) float32 {
-	for _, data := range forecast.Data {
-		for _, p := range data.ParameterMeta {
-			if len(p.Times) == 1 && p.Times[0].AsTime().Equal(time.Time{}) {
-				if p.Parameter == "altitude" {
-					return data.Data[p.SliceFrom]
-				}
+	for _, p := range forecast.ParameterMeta {
+		if len(p.Times) == 1 && p.Times[0].AsTime().Equal(time.Time{}) {
+			if p.Parameter == "altitude" {
+				return forecast.Data[p.SliceFrom]
 			}
 		}
 	}
@@ -63,17 +61,15 @@ func getMeta(forecast *internalprotocol.Forecast) jsonformat.Metadata {
 	}
 
 	units := make(map[string]string)
-	for _, data := range forecast.Data {
-		for _, meta := range data.ParameterMeta {
-			external, ok := myParameters[meta.Parameter]
-			if ok {
-				units[external] = meta.Units
-			}
+	for _, meta := range forecast.ParameterMeta {
+		external, ok := myParameters[meta.Parameter]
+		if ok {
+			units[external] = meta.Units
 		}
 	}
 
 	return jsonformat.Metadata{
-		UpdatedAt:     time.Unix(forecast.Meta.UpdatedAt.Seconds, 0).UTC(),
+		UpdatedAt:     time.Unix(forecast.ForecastMeta.UpdatedAt.Seconds, 0).UTC(),
 		Units:         units,
 		RadarCoverage: getRadarCoverage(forecast),
 	}
@@ -83,12 +79,10 @@ func getRadarCoverage(forecast *internalprotocol.Forecast) string {
 	if config.Configuration.Meta.RadarCoverage == "" {
 		return ""
 	}
-	for _, data := range forecast.Data {
-		for _, meta := range data.ParameterMeta {
-			if meta.Parameter == config.Configuration.Meta.RadarCoverage {
-				c := radar.Coverage(data.Data[meta.SliceFrom])
-				return c.String()
-			}
+	for _, meta := range forecast.ParameterMeta {
+		if meta.Parameter == config.Configuration.Meta.RadarCoverage {
+			c := radar.Coverage(forecast.Data[meta.SliceFrom])
+			return c.String()
 		}
 	}
 	return radar.UnknownCoverage.String()
@@ -209,17 +203,15 @@ func GetForecast(forecast *internalprotocol.Forecast) *Forecast {
 		Data: make(map[time.Time]map[string]float32),
 	}
 
-	for _, data := range forecast.Data {
-		for _, meta := range data.ParameterMeta {
-			for i, t := range meta.Times {
-				time := t.AsTime().UTC()
-				timestep, ok := ret.Data[time]
-				if !ok {
-					timestep = make(map[string]float32)
-					ret.Data[time] = timestep
-				}
-				timestep[meta.Parameter] = data.Data[int(meta.SliceFrom)+i]
+	for _, meta := range forecast.ParameterMeta {
+		for i, t := range meta.Times {
+			time := t.AsTime().UTC()
+			timestep, ok := ret.Data[time]
+			if !ok {
+				timestep = make(map[string]float32)
+				ret.Data[time] = timestep
 			}
+			timestep[meta.Parameter] = forecast.Data[int(meta.SliceFrom)+i]
 		}
 	}
 

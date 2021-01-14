@@ -7,7 +7,7 @@
         }
     ],
     "meta": {
-        "radar_coverage": "precipitation_status"
+        "#radar_coverage": "precipitation_status"
     },
     "parameters": {
         "instant": {

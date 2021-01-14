@@ -156,13 +156,11 @@ func getAltitude(interpreted map[string]internalprotocol.InterpretedData) (*floa
 func (s *Server) correctWithRadarStatus(request *internalprotocol.Location, interpreted map[string]internalprotocol.InterpretedData, forecast *internalprotocol.Forecast) error {
 	if status, ok := interpreted["precipitation_status"]; ok {
 		if radar.Coverage(status.Values[0]) != radar.OK {
-			for _, d := range forecast.Data {
-				for _, m := range d.ParameterMeta {
-					if m.Parameter == "lwe_precipitation_rate" {
-						// This should cause all lookups to be of size 0
-						m.Times = nil
-						return nil
-					}
+			for _, m := range forecast.ParameterMeta {
+				if m.Parameter == "lwe_precipitation_rate" {
+					// This should cause all lookups to be of size 0
+					m.Times = nil
+					return nil
 				}
 			}
 		}

@@ -24,8 +24,8 @@ func Encode(location *internalprotocol.Location, forecast *internalprotocol.Fore
 		Created: time.Now().UTC().Round(time.Second),
 	}
 
-	runEnded := forecast.Meta.UpdatedAt.AsTime().UTC().Round(time.Second)
-	nextRun := forecast.Meta.NextUpdate.AsTime().UTC().Round(time.Second)
+	runEnded := forecast.ForecastMeta.UpdatedAt.AsTime().UTC().Round(time.Second)
+	nextRun := forecast.ForecastMeta.NextUpdate.AsTime().UTC().Round(time.Second)
 
 	sorted := sortByTime(forecast)
 
@@ -67,17 +67,15 @@ type parsedForecast struct {
 func sortByTime(forecast *internalprotocol.Forecast) []parsedForecast {
 	sorted := make(map[time.Time]map[string]float32)
 
-	for _, data := range forecast.Data {
-		for _, meta := range data.ParameterMeta {
-			for i, t := range meta.Times {
-				t := t.AsTime().UTC()
-				values, ok := sorted[t]
-				if !ok {
-					values = make(map[string]float32)
-					sorted[t] = values
-				}
-				values[meta.Parameter] = data.Data[int(meta.SliceFrom)+i]
+	for _, meta := range forecast.ParameterMeta {
+		for i, t := range meta.Times {
+			t := t.AsTime().UTC()
+			values, ok := sorted[t]
+			if !ok {
+				values = make(map[string]float32)
+				sorted[t] = values
 			}
+			values[meta.Parameter] = forecast.Data[int(meta.SliceFrom)+i]
 		}
 	}
 

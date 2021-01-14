@@ -65,11 +65,15 @@ func (s *grpcServer) GetForecast(ctx context.Context, in *internalprotocol.Locat
 		return nil, err
 	}
 
-	var data []*internalprotocol.PointDataCollection
-	for _, pd := range pointData.Data {
+	var size int
+	for _, data := range pointData.Data {
+		size += len(data.Data)
+	}
+	values := make([]float32, 0, size)
+	parameterMeta := make([]*internalprotocol.ParameterMeta, 0, size)
 
-		var parameterMeta []*internalprotocol.ParameterMeta
-		for parameter, meta := range pd.ParameterMeta {
+	for _, data := range pointData.Data {
+		for parameter, meta := range data.ParameterMeta {
 			times := make([]*timestamppb.Timestamp, len(meta.Times))
 			for i, t := range meta.Times {
 				times[i] = timestamppb.New(t)
@@ -77,25 +81,23 @@ func (s *grpcServer) GetForecast(ctx context.Context, in *internalprotocol.Locat
 			pm := &internalprotocol.ParameterMeta{
 				Parameter: parameter,
 				Units:     meta.Units,
-				SliceFrom: int32(meta.SliceFrom),
+				SliceFrom: int32(meta.SliceFrom + len(values)),
 				Times:     times,
 			}
 			parameterMeta = append(parameterMeta, pm)
 		}
 
-		collection := &internalprotocol.PointDataCollection{
-			ParameterMeta: parameterMeta,
-			Data:          pd.Data,
-		}
-		data = append(data, collection)
+		values = append(values, data.Data...)
 	}
 
 	forecast := internalprotocol.Forecast{
-		Meta: &internalprotocol.Meta{
+		ForecastStatus: internalprotocol.ForecastStatus_OK,
+		ForecastMeta: &internalprotocol.ForecastMeta{
 			UpdatedAt:  timestamppb.New(pointData.Meta.UpdatedAt),
 			NextUpdate: timestamppb.New(pointData.Meta.NextUpdate),
 		},
-		Data: data,
+		ParameterMeta: parameterMeta,
+		Data:          values,
 	}
 
 	return &forecast, nil

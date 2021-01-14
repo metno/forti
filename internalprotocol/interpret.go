@@ -10,20 +10,18 @@ type InterpretedData struct {
 func InterpretValues(forecast *Forecast) map[string]InterpretedData {
 	ret := make(map[string]InterpretedData)
 
-	for _, data := range forecast.Data {
-		for _, meta := range data.ParameterMeta {
-			times := make([]time.Time, len(meta.Times))
-			for i, t := range meta.Times {
-				times[i] = t.AsTime().UTC()
-			}
-			d := InterpretedData{
-				Times:  times,
-				Values: data.Data[meta.SliceFrom : int(meta.SliceFrom)+len(times)],
-			}
-			ret[meta.Parameter] = d
-			if len(d.Times) != len(d.Values) {
-				panic("size mismatch")
-			}
+	for _, meta := range forecast.ParameterMeta {
+		times := make([]time.Time, len(meta.Times))
+		for i, t := range meta.Times {
+			times[i] = t.AsTime().UTC()
+		}
+		d := InterpretedData{
+			Times:  times,
+			Values: forecast.Data[meta.SliceFrom : int(meta.SliceFrom)+len(times)],
+		}
+		ret[meta.Parameter] = d
+		if len(d.Times) != len(d.Values) {
+			panic("size mismatch")
 		}
 	}
 	return ret

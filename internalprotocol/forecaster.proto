@@ -4,7 +4,7 @@ import "google/protobuf/timestamp.proto";
 
 package internalprotocol;
 
-option go_package = "gitlab.met.no/forti/simpleforecaster/pkg/internalprotocol";
+option go_package = "gitlab.met.no/forti/f2/internalprotocol";
 
 
 service Forecaster {
@@ -28,24 +28,22 @@ enum ForecastStatus {
 }
 
 message Forecast {
-    ForecastStatus forecastStatus = 3;
-    Meta meta = 1;
-    repeated PointDataCollection data = 2;
+    ForecastStatus forecastStatus = 1;
+    
+    ForecastMeta forecastMeta = 2;
+
+    repeated ParameterMeta parameterMeta = 3;
+    repeated float data = 4;
 }
 
-message Meta {
+message ForecastMeta {
     google.protobuf.Timestamp updatedAt = 1;
     google.protobuf.Timestamp nextUpdate = 2;
-}
-
-message PointDataCollection {
-    repeated ParameterMeta parameterMeta = 1;
-    repeated float data = 2;
 }
 
 message ParameterMeta {
     string parameter = 1;
 	string units = 2;
     int32 sliceFrom = 3;
-	repeated google.protobuf.Timestamp times = 5;
+	repeated google.protobuf.Timestamp times = 4;
 }

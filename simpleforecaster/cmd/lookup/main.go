@@ -33,7 +33,7 @@ func main() {
 		Longitude: float32(*longitude),
 	}
 
-	r, err := c.GetForecast(ctx, &request)
+	forecast, err := c.GetForecast(ctx, &request)
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
 	}
@@ -44,15 +44,13 @@ func main() {
 	// }
 	// fmt.Println(string(b))
 
-	fmt.Printf("updated at: %v\n", r.Meta.UpdatedAt.AsTime())
-	fmt.Printf("next update: %v\n", r.Meta.NextUpdate.AsTime())
-	for _, data := range r.Data {
-		for _, meta := range data.ParameterMeta {
-			fmt.Printf("%s (%s):\n", meta.Parameter, meta.Units)
-			for i, t := range meta.Times {
-				value := data.Data[i+int(meta.SliceFrom)]
-				fmt.Printf("  %v: %0.1f\n", t.AsTime(), value)
-			}
+	fmt.Printf("updated at: %v\n", forecast.ForecastMeta.UpdatedAt.AsTime())
+	fmt.Printf("next update: %v\n", forecast.ForecastMeta.NextUpdate.AsTime())
+	for _, meta := range forecast.ParameterMeta {
+		fmt.Printf("%s (%s):\n", meta.Parameter, meta.Units)
+		for i, t := range meta.Times {
+			value := forecast.Data[i+int(meta.SliceFrom)]
+			fmt.Printf("  %v: %0.1f\n", t.AsTime(), value)
 		}
 	}
 }
