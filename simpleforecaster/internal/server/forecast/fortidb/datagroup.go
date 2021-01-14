@@ -1,15 +1,15 @@
-// Package datagroup handles forecasts for a single group (nordic, arctic, etc)
-package datagroup
+// Package fortidb handles forecasts for a single group (nordic, arctic, etc)
+package fortidb
 
 import (
 	"context"
 	"math"
 	"time"
 
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/index"
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/index/area"
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/values"
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/values/memory"
+	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/fortidb/index"
+	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/fortidb/index/area"
+	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/fortidb/values"
+	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/fortidb/values/memory"
 	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/pointdata"
 	"gitlab.met.no/forti/f2/upload/pkg/collector"
 )

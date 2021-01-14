@@ -3,7 +3,7 @@ package memory
 import (
 	"errors"
 
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/values"
+	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/fortidb/values"
 	"gitlab.met.no/forti/f2/upload/pkg/collector"
 )
 

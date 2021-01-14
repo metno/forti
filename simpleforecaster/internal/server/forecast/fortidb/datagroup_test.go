@@ -1,4 +1,4 @@
-package datagroup
+package fortidb
 
 import (
 	"context"

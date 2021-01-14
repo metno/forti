@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup"
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/datagroup/index/area"
+	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/fortidb"
+	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/fortidb/index/area"
 	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/pointdata"
 	"gitlab.met.no/forti/f2/upload/pkg/collector"
 )
@@ -21,7 +21,7 @@ type Forecast struct {
 	store  *collector.Client
 	groups []string
 
-	datasets map[string]*datagroup.Dataset
+	datasets map[string]*fortidb.Dataset
 	m        sync.RWMutex
 }
 
@@ -43,7 +43,7 @@ func newFromCollector(store *collector.Client, groups []string) *Forecast {
 	f := &Forecast{
 		store:    store,
 		groups:   groups,
-		datasets: make(map[string]*datagroup.Dataset),
+		datasets: make(map[string]*fortidb.Dataset),
 	}
 
 	f.update()
@@ -76,9 +76,9 @@ func (f *Forecast) Get(latitude, longitude float32) (*pointdata.PointData, error
 	return best.Read(latitude, longitude)
 }
 
-func (f *Forecast) bestGroup(latitude, longitude float32) (*datagroup.Dataset, error) {
+func (f *Forecast) bestGroup(latitude, longitude float32) (*fortidb.Dataset, error) {
 	selectedDistance := uint(math.MaxUint32)
-	var selected *datagroup.Dataset
+	var selected *fortidb.Dataset
 	for _, datagroup := range f.datasets {
 		distance, err := datagroup.DistanceTo(latitude, longitude)
 		if err != nil {
@@ -152,7 +152,7 @@ func (f *Forecast) load(ctx context.Context, group string, version int) {
 		log.Fatalln(err)
 	}
 
-	datagroup, err := datagroup.Download(ctx, f.store, meta)
+	datagroup, err := fortidb.Download(ctx, f.store, meta)
 	if err != nil {
 		log.Fatalln(err)
 	}
