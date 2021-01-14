@@ -10,9 +10,9 @@ import (
 	_ "gocloud.dev/blob/fileblob"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server"
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/fortidb"
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/fortidb/values/file"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/fortidb"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/fortidb/values/file"
 )
 
 func main() {

@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"log"
 
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/fortidb/values"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/fortidb/values"
 	"gitlab.met.no/forti/f2/upload/pkg/collector"
 )
 

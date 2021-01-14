@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/fortidb"
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/fortidb/index/area"
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/pointdata"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/fortidb"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/fortidb/index/area"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/pointdata"
 	"gitlab.met.no/forti/f2/upload/pkg/collector"
 )
 

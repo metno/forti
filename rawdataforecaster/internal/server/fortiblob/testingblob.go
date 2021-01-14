@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/pointdata"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/pointdata"
 	"gocloud.dev/blob"
 	_ "gocloud.dev/blob/memblob"
 )

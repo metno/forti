@@ -10,8 +10,8 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"gitlab.met.no/forti/f2/internalprotocol"
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/health"
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/health"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast"
 )
 
 type Configuration struct {

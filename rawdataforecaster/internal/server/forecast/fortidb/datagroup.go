@@ -6,11 +6,11 @@ import (
 	"math"
 	"time"
 
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/fortidb/index"
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/fortidb/index/area"
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/fortidb/values"
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/forecast/fortidb/values/memory"
-	"gitlab.met.no/forti/f2/simpleforecaster/internal/server/pointdata"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/fortidb/index"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/fortidb/index/area"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/fortidb/values"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/fortidb/values/memory"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/pointdata"
 	"gitlab.met.no/forti/f2/upload/pkg/collector"
 )
 
