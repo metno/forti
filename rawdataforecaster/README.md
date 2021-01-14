@@ -7,9 +7,9 @@ Serves unmodified data from a forecast. The term 'simple' refers to the data not
 ```mermaid
 graph LR;
 server --> forecast;
-forecast --> datagroup;
-datagroup --> geo;
-datagroup --> simpledatagroup;
+forecast --> fortidb;
+fortidb --> index;
+fortidb --> values;
 ```
 
 Four components are mainly involved in serving data: 
@@ -22,17 +22,17 @@ Handles incoming grpc requests, including protobuf serialization.
 
 Determines what is the correct group (and version) to serve data from. Forwards requests to the relevant `datagroup`.
 
-### datagroup
+### fortidb
 
-Each object of type `datagroup.Dataset` serves data for a single group/verision. They maintain a list of grids (aka "hashes") for its group.
+Each object of type `fortidb.Dataset` serves data for a single group/verision. They maintain a list of grids (aka "hashes") for its group.
 
-Handles requests for a given latitute/longitude pair. For each hash, lookup the correct index from `geo`, and find relevant data from `simpledatagroup`.
+Handles requests for a given latitute/longitude pair. For each hash, lookup the correct index from `index`, and find relevant data from `values`.
 
-### geo
+### index
 
 Handles lookup from latitude/longitude to a grid index.
 
-### simpledatagroup
+### values
 
 A collection of all data having the same group. 
 
