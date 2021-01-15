@@ -48,10 +48,6 @@ Provides a `Reader` interface, for looking up data with a given index. The index
 
 Provides grpc healthcheck, meant for kubernetes readiness probe.
 
-### fortiblob
-
-Used for testing only. Should probably be moved somewhere else.
-
 ### pointdata
 
 Defines internal data format. Its placement reflects that several modules in various places in the hierarchy needs access to this.
