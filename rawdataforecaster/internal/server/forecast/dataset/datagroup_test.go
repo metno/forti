@@ -1,4 +1,4 @@
-package fortidb
+package dataset
 
 import (
 	"context"

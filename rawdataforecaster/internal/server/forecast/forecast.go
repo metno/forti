@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/fortidb"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/fortidb/index/area"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index/area"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/pointdata"
 	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
@@ -21,7 +21,7 @@ type Forecast struct {
 	store *fortiblob.Client
 	areas []string
 
-	datasets map[string]*fortidb.Dataset
+	datasets map[string]*dataset.Dataset
 	m        sync.RWMutex
 }
 
@@ -43,7 +43,7 @@ func newFromCollector(store *fortiblob.Client, areas []string) *Forecast {
 	f := &Forecast{
 		store:    store,
 		areas:    areas,
-		datasets: make(map[string]*fortidb.Dataset),
+		datasets: make(map[string]*dataset.Dataset),
 	}
 
 	f.update()
@@ -76,9 +76,9 @@ func (f *Forecast) Get(latitude, longitude float32) (*pointdata.PointData, error
 	return best.Read(latitude, longitude)
 }
 
-func (f *Forecast) bestArea(latitude, longitude float32) (*fortidb.Dataset, error) {
+func (f *Forecast) bestArea(latitude, longitude float32) (*dataset.Dataset, error) {
 	selectedDistance := uint(math.MaxUint32)
-	var selected *fortidb.Dataset
+	var selected *dataset.Dataset
 	for _, area := range f.datasets {
 		distance, err := area.DistanceTo(latitude, longitude)
 		if err != nil {
@@ -152,7 +152,7 @@ func (f *Forecast) load(ctx context.Context, area string, version int) {
 		log.Fatalln(err)
 	}
 
-	datagroup, err := fortidb.Download(ctx, f.store, meta)
+	datagroup, err := dataset.Download(ctx, f.store, meta)
 	if err != nil {
 		log.Fatalln(err)
 	}

@@ -12,7 +12,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/fortidb/values"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/values"
 	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
 

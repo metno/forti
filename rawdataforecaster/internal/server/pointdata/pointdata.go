@@ -5,7 +5,7 @@ package pointdata
 import (
 	"time"
 
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/fortidb/values"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/values"
 )
 
 type PointData struct {

@@ -1,15 +1,15 @@
-// Package fortidb handles forecasts for a single area (nordic, arctic, etc)
-package fortidb
+// Package dataset handles forecasts for a single area (nordic, arctic, etc)
+package dataset
 
 import (
 	"context"
 	"math"
 	"time"
 
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/fortidb/index"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/fortidb/index/area"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/fortidb/values"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/fortidb/values/memory"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index/area"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/values"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/values/memory"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/pointdata"
 	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )

@@ -11,8 +11,8 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/fortidb"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/fortidb/values/file"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/values/file"
 )
 
 func main() {
@@ -24,7 +24,7 @@ func main() {
 
 	if *useFiles {
 		log.Println("storing data in file system instead of memory")
-		fortidb.SetDownloadFunction(file.Download)
+		dataset.SetDownloadFunction(file.Download)
 	}
 
 	conf := server.Configuration{

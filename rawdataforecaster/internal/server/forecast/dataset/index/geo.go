@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"sync"
 
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/fortidb/index/georeader"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/fortidb/index/lookup"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index/georeader"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index/lookup"
 	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
 
