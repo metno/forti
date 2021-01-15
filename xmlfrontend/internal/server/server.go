@@ -12,8 +12,10 @@ import (
 	"time"
 
 	"gitlab.met.no/forti/f2/internalprotocol"
+	"gitlab.met.no/forti/f2/parameters/radar"
 	"gitlab.met.no/forti/f2/xmlfrontend/internal/server/config"
 	"gitlab.met.no/forti/f2/xmlfrontend/internal/server/encode"
+	"gitlab.met.no/forti/f2/xmlfrontend/pkg/xmlformat"
 	"google.golang.org/grpc"
 )
 
@@ -67,7 +69,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	output := encode.Encode(location, data)
 	if len(output.Product.Time) == 0 {
-		http.NotFound(w, r)
+		handleEmptyForecast(w, output, data)
 		return
 	}
 
@@ -77,6 +79,24 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err := enc.Encode(output); err != nil {
 		log.Println(err)
 	}
+}
+
+func handleEmptyForecast(w http.ResponseWriter, doc *xmlformat.ForecastDocument, data *internalprotocol.Forecast) {
+	// Special handling for nowcast's radar temporarily unavailable
+	for _, d := range data.ParameterMeta {
+		if d.Parameter == "precipitation_status" {
+			status := radar.Coverage(data.Data[int(d.SliceFrom)])
+			if status == radar.TemporarilyUnavailable {
+				if err := xml.NewEncoder(w).Encode(doc); err != nil {
+					log.Println(err)
+				}
+				return
+			}
+			break
+		}
+	}
+
+	http.Error(w, "404 page not found", http.StatusNotFound)
 }
 
 func getLocation(r *http.Request) (*internalprotocol.Location, error) {
