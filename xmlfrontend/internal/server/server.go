@@ -87,6 +87,7 @@ func handleEmptyForecast(w http.ResponseWriter, doc *xmlformat.ForecastDocument,
 		if d.Parameter == "precipitation_status" {
 			status := radar.Coverage(data.Data[int(d.SliceFrom)])
 			if status == radar.TemporarilyUnavailable {
+				doc.Product = nil
 				if err := xml.NewEncoder(w).Encode(doc); err != nil {
 					log.Println(err)
 				}
