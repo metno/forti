@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	group := flag.String("group", "", "group to collect")
+	area := flag.String("area", "", "group to collect")
 	version := flag.Int("version", 0, "version to collect")
 	in := flag.String("in", "file:///home/vegardb/local/forti/", "Read forecasts from the given bucket")
 	out := flag.String("out", "file:///home/vegardb/local/forti/collected", "Write forecasts to the given bucket")
@@ -24,7 +24,7 @@ func main() {
 		defer cancel()
 	}
 
-	if err := collector.Get(ctx, *in, *out, *group, *version); err != nil {
+	if err := collector.Get(ctx, *in, *out, *area, *version); err != nil {
 		log.Fatalln(err)
 	}
 
