@@ -56,7 +56,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y \
     libgflags2.2 libgoogle-glog0v5 libssl1.1 \
-    libgeos-3.8.0 libproj15 \
+    libgeos-c1v5 libproj15 \
     curl
 
 RUN curl -L -o /bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v0.3.6/grpc_health_probe-linux-amd64 && \
