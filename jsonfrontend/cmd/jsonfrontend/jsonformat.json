@@ -6,6 +6,7 @@
             "value": "application/json; charset=utf-8"
         }
     ],
+    "data_expiry_offset": 1800,
     "meta": {
         "#radar_coverage": "precipitation_status"
     },

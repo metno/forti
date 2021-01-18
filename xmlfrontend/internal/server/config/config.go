@@ -28,6 +28,7 @@ type Elements struct {
 	CutForecast         bool          `json:"cut_forecast,omitempty"`
 	KeepCurrentTimeStep bool          `json:"keep_current_timestep"`
 	HTTPHeaders         []HTTPHeader  `json:"http_headers"`
+	DataExpiryOffset    int           `json:"data_expiry_offset"`
 	Elements            []DataElement `json:"elements"`
 }
 

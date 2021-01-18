@@ -73,6 +73,13 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	now := time.Now()
+	w.Header().Add("Last-Modified", now.Format(http.TimeFormat))
+	if config.Configuration.DataExpiryOffset != 0 {
+		expiry := now.Add(time.Duration(config.Configuration.DataExpiryOffset) * time.Second)
+		w.Header().Add("Expires", expiry.Format(http.TimeFormat))
+	}
+
 	enc := xml.NewEncoder(w)
 	enc.Indent("", "  ")
 
