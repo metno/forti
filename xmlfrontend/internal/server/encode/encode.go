@@ -102,14 +102,35 @@ func getProductElement(location *internalprotocol.Location, forecast []parsedFor
 }
 
 func getTimeElements(location *internalprotocol.Location, forecast []parsedForecast) []xmlformat.TimeElement {
-	ret := make([]xmlformat.TimeElement, 0, len(forecast))
 
+	if config.Configuration.CutForecast {
+		forecast = cutForecast(forecast, config.Configuration.KeepCurrentTimeStep)
+	}
+
+	ret := make([]xmlformat.TimeElement, 0, len(forecast))
 	for _, f := range forecast {
 		timeElement := getElementsForTimestep(location, &f)
 		ret = append(ret, timeElement...)
 	}
 
 	return ret
+}
+
+func cutForecast(forecast []parsedForecast, keepCurrentTimeStep bool) []parsedForecast {
+	now := time.Now()
+	for i, f := range forecast {
+		if f.Time.After(now) {
+			if keepCurrentTimeStep {
+				if i > 0 {
+					return forecast[i-1:]
+				}
+			} else {
+				return forecast[i:]
+			}
+			return forecast
+		}
+	}
+	return nil
 }
 
 func getElementsForTimestep(location *internalprotocol.Location, forecast *parsedForecast) []xmlformat.TimeElement {
