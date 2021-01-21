@@ -11,15 +11,11 @@ import (
 
 	"gitlab.met.no/forti/f2/internalprotocol"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/health"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/config"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast"
 )
 
-type Configuration struct {
-	Bucket string
-	Areas  []string
-}
-
-func Run(conf *Configuration) error {
+func Run(conf *config.Configuration) error {
 
 	server, err := newGrpcServer(conf)
 	if err != nil {
@@ -42,8 +38,8 @@ type grpcServer struct {
 	forecast *forecast.Forecast
 }
 
-func newGrpcServer(conf *Configuration) (*grpcServer, error) {
-	forecast, err := forecast.New(conf.Bucket, conf.Areas)
+func newGrpcServer(conf *config.Configuration) (*grpcServer, error) {
+	forecast, err := forecast.New(conf)
 	if err != nil {
 		return nil, err
 	}

@@ -54,5 +54,21 @@ func (u *Uploader) SetDatasetMeta(ctx context.Context, meta *fortiblob.DatasetMe
 	if err := json.NewEncoder(w).Encode(meta); err != nil {
 		return err
 	}
+
+	if err := u.setLatest(ctx, meta); err != nil {
+		return err
+	}
+
+	return w.Close()
+}
+
+func (u *Uploader) setLatest(ctx context.Context, meta *fortiblob.DatasetMeta) error {
+	key := fmt.Sprintf("latest/%s", meta.Area)
+	w, err := u.bucket.NewWriter(ctx, key, nil)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "%d\n", meta.Version)
+
 	return w.Close()
 }

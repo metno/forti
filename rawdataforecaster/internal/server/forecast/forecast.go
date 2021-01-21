@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/config"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index/area"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/pointdata"
@@ -21,28 +22,31 @@ type Forecast struct {
 	store *fortiblob.Client
 	areas []string
 
+	download config.DownloadFunction
+
 	datasets map[string]*dataset.Dataset
 	m        sync.RWMutex
 }
 
 // New initializes an object that can be queries for forecasts. It is self-updating.
-func New(blobURL string, areas []string) (*Forecast, error) {
-	store, err := fortiblob.NewClient(blobURL)
+func New(cfg *config.Configuration) (*Forecast, error) {
+	store, err := fortiblob.NewClient(cfg.Bucket)
 	if err != nil {
 		return nil, err
 	}
 
-	f := newFromCollector(store, areas)
+	f := newFromCollector(store, cfg.Areas, cfg.ValueDownloadFunction)
 
 	go f.run()
 
 	return f, nil
 }
 
-func newFromCollector(store *fortiblob.Client, areas []string) *Forecast {
+func newFromCollector(store *fortiblob.Client, areas []string, download config.DownloadFunction) *Forecast {
 	f := &Forecast{
 		store:    store,
 		areas:    areas,
+		download: download,
 		datasets: make(map[string]*dataset.Dataset),
 	}
 
@@ -100,7 +104,7 @@ func (f *Forecast) bestArea(latitude, longitude float32) (*dataset.Dataset, erro
 
 func (f *Forecast) run() {
 	for {
-		time.Sleep(30 * time.Second)
+		time.Sleep(3 * time.Second)
 		f.update()
 	}
 }
@@ -152,7 +156,7 @@ func (f *Forecast) load(ctx context.Context, area string, version int) {
 		log.Fatalln(err)
 	}
 
-	datagroup, err := dataset.Download(ctx, f.store, meta)
+	datagroup, err := dataset.Download(ctx, f.store, meta, f.download)
 	if err != nil {
 		log.Fatalln(err)
 	}

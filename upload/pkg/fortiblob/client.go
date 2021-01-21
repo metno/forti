@@ -6,8 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
-	"strconv"
 	"strings"
 	"time"
 
@@ -39,31 +37,35 @@ func (c *Client) Close() error {
 }
 
 func (c *Client) Latest(ctx context.Context) (map[string]int, error) {
+	prefix := "latest/"
+
 	ret := make(map[string]int)
-	it := c.bucket.List(nil)
+	it := c.bucket.List(&blob.ListOptions{
+		Prefix: prefix,
+	})
 	for {
 		lo, err := it.Next(ctx)
 		if err != nil {
 			if errors.Is(err, io.EOF) {
-				return ret, nil
+				break
 			}
 			return nil, err
 		}
-		if strings.HasSuffix(lo.Key, "/complete.json") {
-			elements := strings.Split(lo.Key, "/")
-			if len(elements) == 3 {
-				area := elements[0]
-				version, err := strconv.Atoi(elements[1])
-				if err != nil {
-					log.Printf("enountered unexpected key in store: %s", lo.Key)
-					continue
-				}
-				if version > ret[area] {
-					ret[area] = version
-				}
-			}
+		area := strings.TrimPrefix(lo.Key, prefix)
+
+		r, err := c.bucket.NewReader(ctx, lo.Key, nil)
+		if err != nil {
+			return nil, err
 		}
+		defer r.Close()
+
+		var version int
+		if _, err := fmt.Fscanf(r, "%d", &version); err != nil {
+			return nil, err
+		}
+		ret[area] = version
 	}
+	return ret, nil
 }
 
 func (c *Client) GetMeta(ctx context.Context, area string, version int) (*DatasetMeta, error) {
@@ -136,6 +138,16 @@ type DataReader interface {
 
 func (c *Client) GetData(ctx context.Context, d *DatasetMeta, hash string) (DataReader, error) {
 	return c.getStream(ctx, fmt.Sprintf("%s/%d/%s/data", d.Area, d.Version, hash))
+}
+
+func (c *Client) GetDataRange(ctx context.Context, d *DatasetMeta, hash string, from, length int) (io.ReadCloser, error) {
+	path := fmt.Sprintf("%s/%d/%s/data", d.Area, d.Version, hash)
+	r, err := c.bucket.NewRangeReader(ctx, path, int64(from), int64(length), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return r, nil
 }
 
 func (c *Client) GetLatitude(ctx context.Context, d *DatasetMeta, hash string) (DataReader, error) {

@@ -6,10 +6,10 @@ import (
 	"math"
 	"time"
 
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/config"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index/area"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/values"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/values/memory"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/pointdata"
 	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
@@ -23,15 +23,8 @@ type Dataset struct {
 	lookups []index.Nearester
 }
 
-var downloadFunc = memory.Download
-
-// SetDownloadFunction overrides the function to download data. It is meant for creating local tests.
-func SetDownloadFunction(f func(ctx context.Context, source *fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, hash string) (values.Reader, error)) {
-	downloadFunc = f
-}
-
 // Download creates and returns a Dataset from the given specification.
-func Download(ctx context.Context, source *fortiblob.Client, datasetMeta *fortiblob.DatasetMeta) (*Dataset, error) {
+func Download(ctx context.Context, source *fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, download config.DownloadFunction) (*Dataset, error) {
 	hashes, err := source.GetHashes(ctx, datasetMeta)
 	if err != nil {
 		return nil, err
@@ -47,7 +40,7 @@ func Download(ctx context.Context, source *fortiblob.Client, datasetMeta *fortib
 		}
 		lookups = append(lookups, lookup)
 
-		reader, err := downloadFunc(ctx, source, datasetMeta, hash)
+		reader, err := download(ctx, source, datasetMeta, hash)
 		if err != nil {
 			for _, r := range readers {
 				r.Close()
