@@ -179,5 +179,21 @@ func setComplete(workdir, group string, version int) error {
 		return err
 	}
 
+	if err := f.Close(); err != nil {
+		return err
+	}
+
+	return setLatest(workdir, group, version)
+}
+
+func setLatest(workdir, group string, version int) error {
+	path := fmt.Sprintf("%s/latest/%s", workdir, group)
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	if _, err := fmt.Fprintf(f, "%d\n", version); err != nil {
+		return err
+	}
 	return f.Close()
 }

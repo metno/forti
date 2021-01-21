@@ -11,26 +11,34 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/config"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/values/blob"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/values/file"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/values/memory"
 )
 
 func main() {
 	bucket := flag.String("blob", "file:///home/vegardb/local/forti/collected", "Read forecasts from the given bucket")
 	areas := flag.String("areas", "nordic", "Serve the given areas")
-	useFiles := flag.Bool("use-files", false, "Store data in local file system instead of in memory. This is meant for testing.")
+	storage := flag.String("storage", "memory", "Use the given data storage strategy. Available: memory, file and blob.")
 	stats := flag.Bool("serve-stats", false, "serve prometheus stats")
 	flag.Parse()
 
-	if *useFiles {
-		log.Println("storing data in file system instead of memory")
-		dataset.SetDownloadFunction(file.Download)
-	}
-
-	conf := server.Configuration{
+	conf := config.Configuration{
 		Bucket: *bucket,
 		Areas:  strings.Split(*areas, ","),
 	}
+	switch *storage {
+	case "memory":
+		conf.ValueDownloadFunction = memory.Download
+	case "file":
+		conf.ValueDownloadFunction = file.Download
+	case "blob":
+		conf.ValueDownloadFunction = blob.Download
+	default:
+		log.Fatalf("invalid strategy: %s", *storage)
+	}
+	log.Printf("use %s storage strategy", *storage)
 
 	if *stats {
 		go serveStats()

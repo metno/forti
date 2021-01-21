@@ -36,8 +36,8 @@ func main() {
 					log.Fatalln(err)
 				}
 				loaded[dataset.Group] = dataset.Version
+				log.Println("done")
 			}
-			log.Println("done")
 		}
 
 		time.Sleep(time.Minute)
