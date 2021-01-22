@@ -35,14 +35,17 @@ func New(cfg *config.Configuration) (*Forecast, error) {
 		return nil, err
 	}
 
-	f := newFromCollector(store, cfg.Areas, cfg.ValueDownloadFunction)
+	f, err := newFromCollector(store, cfg.Areas, cfg.ValueDownloadFunction)
+	if err != nil {
+		return nil, err
+	}
 
 	go f.run()
 
 	return f, nil
 }
 
-func newFromCollector(store *fortiblob.Client, areas []string, download config.DownloadFunction) *Forecast {
+func newFromCollector(store *fortiblob.Client, areas []string, download config.DownloadFunction) (*Forecast, error) {
 	f := &Forecast{
 		store:    store,
 		areas:    areas,
@@ -50,9 +53,11 @@ func newFromCollector(store *fortiblob.Client, areas []string, download config.D
 		datasets: make(map[string]*dataset.Dataset),
 	}
 
-	f.update()
+	if err := f.update(); err != nil {
+		return nil, err
+	}
 
-	return f
+	return f, nil
 }
 
 // ErrOutsideAllGrids is returned by Forecast.Get if no grids can be found for the given latitude and longitude.
@@ -105,7 +110,10 @@ func (f *Forecast) bestArea(latitude, longitude float32) (*dataset.Dataset, erro
 func (f *Forecast) run() {
 	for {
 		time.Sleep(3 * time.Second)
-		f.update()
+		if err := f.update(); err != nil {
+			// log errors, and retry on next round
+			log.Println(err)
+		}
 	}
 }
 
