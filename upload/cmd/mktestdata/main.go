@@ -19,13 +19,13 @@ func main() {
 	workdir := flag.String("workdir", "/tmp", "where to place files")
 	area := flag.String("area", "group_a", "group to write")
 	version := flag.Int("version", 1, "version to write")
-	hash := flag.String("hash", "hash_a", "hash to write")
+	grid := flag.String("grid", "grid_a", "grid to write")
 	latitudes := flag.String("lat", "59,59,60,60", "longitudes")
 	longitudes := flag.String("lon", "10,11,10,11", "latitudes")
 	parameters := flag.String("parameters", "p1=2,p2=0", "parameters to set, use lik this: p1=<count>,p2=<count>")
 	flag.Parse()
 
-	path := fmt.Sprintf("%s/%s/%d/%s/", *workdir, *area, *version, *hash)
+	path := fmt.Sprintf("%s/%s/%d/%s/", *workdir, *area, *version, *grid)
 
 	if err := os.MkdirAll(path, os.ModeDir|0770); err != nil {
 		log.Fatalln(err)

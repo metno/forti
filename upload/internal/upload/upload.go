@@ -18,23 +18,23 @@ func New(bucket *blob.Bucket) *Uploader {
 	return &Uploader{bucket}
 }
 
-func (u *Uploader) GetDataStream(ctx context.Context, area string, version int, hash string) (io.WriteCloser, error) {
-	key := fmt.Sprintf("%s/%d/%s/data", area, version, hash)
+func (u *Uploader) GetDataStream(ctx context.Context, area string, version int, gridid string) (io.WriteCloser, error) {
+	key := fmt.Sprintf("%s/%d/%s/data", area, version, gridid)
 	return u.bucket.NewWriter(ctx, key, nil)
 }
 
-func (u *Uploader) GetLatitudeStream(ctx context.Context, area string, version int, hash string) (io.WriteCloser, error) {
-	key := fmt.Sprintf("%s/%d/%s/latitude", area, version, hash)
+func (u *Uploader) GetLatitudeStream(ctx context.Context, area string, version int, gridid string) (io.WriteCloser, error) {
+	key := fmt.Sprintf("%s/%d/%s/latitude", area, version, gridid)
 	return u.bucket.NewWriter(ctx, key, nil)
 }
 
-func (u *Uploader) GetLongitudeStream(ctx context.Context, area string, version int, hash string) (io.WriteCloser, error) {
-	key := fmt.Sprintf("%s/%d/%s/longitude", area, version, hash)
+func (u *Uploader) GetLongitudeStream(ctx context.Context, area string, version int, gridid string) (io.WriteCloser, error) {
+	key := fmt.Sprintf("%s/%d/%s/longitude", area, version, gridid)
 	return u.bucket.NewWriter(ctx, key, nil)
 }
 
-func (u *Uploader) SetHashMeta(ctx context.Context, meta *fortiblob.MetaCollection, area string, version int, hash string) error {
-	key := fmt.Sprintf("%s/%d/%s/meta.json", area, version, hash)
+func (u *Uploader) SetGridMeta(ctx context.Context, meta *fortiblob.MetaCollection, area string, version int, gridid string) error {
+	key := fmt.Sprintf("%s/%d/%s/meta.json", area, version, gridid)
 	w, err := u.bucket.NewWriter(ctx, key, nil)
 	if err != nil {
 		return err

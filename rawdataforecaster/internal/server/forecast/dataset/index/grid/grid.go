@@ -1,4 +1,4 @@
-package area
+package grid
 
 // #define GEOS_USE_ONLY_R_API
 // #include <geos_c.h>
@@ -13,14 +13,14 @@ import (
 )
 
 // Area allows performing calculations on a geographic areas.
-type Area struct {
+type Grid struct {
 	projection      *projector
 	polygon         *C.GEOSPreparedGeometry
 	originalPolygon *C.GEOSGeometry
 }
 
 // New creates a new Area struct, with the given Well-Known Text and Coordinate Reference System.
-func New(area fortiblob.GeographicArea) (*Area, error) {
+func New(area fortiblob.GeographicArea) (*Grid, error) {
 	projection, err := newProjector(area.SRS)
 	if err != nil {
 		return nil, err
@@ -42,7 +42,7 @@ func New(area fortiblob.GeographicArea) (*Area, error) {
 		return nil, errors.New("unable to prepare geometry")
 	}
 
-	return &Area{
+	return &Grid{
 		projection:      projection,
 		polygon:         prepared,
 		originalPolygon: polygon,
@@ -50,7 +50,7 @@ func New(area fortiblob.GeographicArea) (*Area, error) {
 }
 
 // Free releases the resources associated with the Area.
-func (a *Area) Free() {
+func (a *Grid) Free() {
 	ctx := C.GEOS_init_r()
 	defer C.GEOS_finish_r(ctx)
 	C.GEOSPreparedGeom_destroy_r(ctx, a.polygon)
@@ -59,7 +59,7 @@ func (a *Area) Free() {
 }
 
 // Contains tells if the given lat/lon is within our polygon. It panics on error.
-func (a *Area) Contains(coord LatLon) bool {
+func (a *Grid) Contains(coord LatLon) bool {
 	xy := a.projection.Convert(coord)
 
 	ctx := C.GEOS_init_r()

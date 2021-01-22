@@ -11,7 +11,7 @@ mkdir -p "$WORKDIR"
 $RUN 	-workdir $WORKDIR \
 	-area group_a \
 	-version 1 \
-	-hash hash_a \
+	-grid grid_a \
 	-parameters "p1=2,p2=0" \
         -lat 5,5,6,6 \
         -lon 1,2,1,2
@@ -19,12 +19,12 @@ $RUN 	-workdir $WORKDIR \
 $RUN 	-workdir $WORKDIR \
         -area group_b \
         -version 2 \
-        -hash hash_a \
+        -grid grid_a \
 	 -parameters "foo=2,bar=1"
 
 $RUN 	-workdir $WORKDIR \
         -area group_b \
         -version 2 \
-        -hash hash_b \
+        -grid grid_b \
         -parameters "bik=4,bok=0"
 

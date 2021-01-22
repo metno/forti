@@ -31,7 +31,7 @@ func makeTestingClient() *fortiblob.Client {
 		panic(err)
 	}
 
-	hash := "hash1"
+	gridid := "gridid1"
 	paMeta := fortiblob.MetaCollection{
 		Parameters: map[string]fortiblob.ParameterMeta{
 			"foo": {
@@ -51,11 +51,11 @@ func makeTestingClient() *fortiblob.Client {
 		},
 		PointCount: 4,
 	}
-	if err := u.SetHashMeta(ctx, &paMeta, area, version, hash); err != nil {
+	if err := u.SetGridMeta(ctx, &paMeta, area, version, gridid); err != nil {
 		panic(err)
 	}
 
-	data, err := u.GetDataStream(ctx, area, version, hash)
+	data, err := u.GetDataStream(ctx, area, version, gridid)
 	if err != nil {
 		panic(err)
 	}
@@ -69,7 +69,7 @@ func makeTestingClient() *fortiblob.Client {
 		panic(err)
 	}
 
-	lat, err := u.GetLatitudeStream(ctx, area, version, hash)
+	lat, err := u.GetLatitudeStream(ctx, area, version, gridid)
 	if err != nil {
 		panic(err)
 	}
@@ -80,7 +80,7 @@ func makeTestingClient() *fortiblob.Client {
 		panic(err)
 	}
 
-	lon, err := u.GetLatitudeStream(ctx, area, version, hash)
+	lon, err := u.GetLatitudeStream(ctx, area, version, gridid)
 	if err != nil {
 		panic(err)
 	}
@@ -112,7 +112,7 @@ func Test(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err = client.GetHashes(ctx, datasetMeta)
+	_, err = client.GetGridIds(ctx, datasetMeta)
 	if err != nil {
 		t.Fatal(err)
 	}

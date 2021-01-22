@@ -85,8 +85,8 @@ func (c *Client) GetMeta(ctx context.Context, area string, version int) (*Datase
 	return &ret, nil
 }
 
-func (c *Client) GetHashes(ctx context.Context, d *DatasetMeta) ([]string, error) {
-	var hashes []string
+func (c *Client) GetGridIds(ctx context.Context, d *DatasetMeta) ([]string, error) {
+	var gridids []string
 	it := c.bucket.List(
 		&blob.ListOptions{
 			Prefix:    fmt.Sprintf("%s/%d/", d.Area, d.Version),
@@ -107,15 +107,15 @@ func (c *Client) GetHashes(ctx context.Context, d *DatasetMeta) ([]string, error
 				continue
 			}
 
-			hashes = append(hashes, elements[2])
+			gridids = append(gridids, elements[2])
 		}
 	}
 
-	return hashes, nil
+	return gridids, nil
 }
 
-func (c *Client) GetHashMeta(ctx context.Context, d *DatasetMeta, hash string) (*MetaCollection, error) {
-	path := fmt.Sprintf("%s/%d/%s/meta.json", d.Area, d.Version, hash)
+func (c *Client) GetGridMeta(ctx context.Context, d *DatasetMeta, gridid string) (*MetaCollection, error) {
+	path := fmt.Sprintf("%s/%d/%s/meta.json", d.Area, d.Version, gridid)
 
 	r, err := c.bucket.NewReader(ctx, path, nil)
 	if err != nil {
@@ -136,8 +136,8 @@ type DataReader interface {
 	Size() int64
 }
 
-func (c *Client) GetData(ctx context.Context, d *DatasetMeta, hash string) (DataReader, error) {
-	return c.getStream(ctx, fmt.Sprintf("%s/%d/%s/data", d.Area, d.Version, hash))
+func (c *Client) GetData(ctx context.Context, d *DatasetMeta, gridid string) (DataReader, error) {
+	return c.getStream(ctx, fmt.Sprintf("%s/%d/%s/data", d.Area, d.Version, gridid))
 }
 
 func (c *Client) GetDataRange(ctx context.Context, d *DatasetMeta, hash string, from, length int) (io.ReadCloser, error) {
@@ -150,12 +150,12 @@ func (c *Client) GetDataRange(ctx context.Context, d *DatasetMeta, hash string, 
 	return r, nil
 }
 
-func (c *Client) GetLatitude(ctx context.Context, d *DatasetMeta, hash string) (DataReader, error) {
-	return c.getStream(ctx, fmt.Sprintf("%s/%d/%s/latitude", d.Area, d.Version, hash))
+func (c *Client) GetLatitude(ctx context.Context, d *DatasetMeta, gridid string) (DataReader, error) {
+	return c.getStream(ctx, fmt.Sprintf("%s/%d/%s/latitude", d.Area, d.Version, gridid))
 }
 
-func (c *Client) GetLongitude(ctx context.Context, d *DatasetMeta, hash string) (DataReader, error) {
-	return c.getStream(ctx, fmt.Sprintf("%s/%d/%s/longitude", d.Area, d.Version, hash))
+func (c *Client) GetLongitude(ctx context.Context, d *DatasetMeta, gridid string) (DataReader, error) {
+	return c.getStream(ctx, fmt.Sprintf("%s/%d/%s/longitude", d.Area, d.Version, gridid))
 }
 
 func (c *Client) getStream(ctx context.Context, path string) (DataReader, error) {

@@ -20,7 +20,7 @@ type Reader struct {
 }
 
 func Download(ctx context.Context, source *fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, hash string) (values.Reader, error) {
-	meta, err := source.GetHashMeta(ctx, datasetMeta, hash)
+	meta, err := source.GetGridMeta(ctx, datasetMeta, hash)
 	if err != nil {
 		return nil, err
 	}

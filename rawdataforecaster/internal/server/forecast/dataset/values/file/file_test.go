@@ -30,7 +30,7 @@ func Test(t *testing.T) {
 			Area:    "group_a",
 			Version: 1,
 		},
-		"hash_a",
+		"grid_a",
 	)
 	if err != nil {
 		t.Fatal(err)

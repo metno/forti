@@ -1,4 +1,4 @@
-package area
+package grid
 
 import (
 	"testing"

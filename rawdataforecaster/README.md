@@ -20,13 +20,13 @@ Handles incoming grpc requests, including protobuf serialization.
 
 ### forecast
 
-Determines what is the correct group (and version) to serve data from. Forwards requests to the relevant `datagroup`.
+Determines what is the correct group (and version) to serve data from. Forwards requests to the relevant `dataset` handler.
 
 ### dataset
 
-Each object of type `dataset.Dataset` serves data for a single group/verision. They maintain a list of grids (aka "hashes") for its group.
+Each object of type `dataset.Dataset` serves data for a single area/version. They maintain a list of grids for its area. A grid is a unique collection of latitude/longitude pairs within a single area. They exist because different parameters may have different grid resolutions.
 
-Handles requests for a given latitute/longitude pair. For each hash, lookup the correct index from `index`, and find relevant data from `values`.
+Handles requests for a given latitute/longitude pair. For each grid, lookup the correct index from `index`, and find relevant data from `values`.
 
 ### index
 
@@ -34,13 +34,13 @@ Handles lookup from latitude/longitude to a grid index.
 
 ### values
 
-A collection of all data having the same group. 
+A collection of all data having the same area and grid id. 
 
 Provides a `Reader` interface, for looking up data with a given index. The index is provided by the `geo` component. There are several implementations of this interface.
 
 ## Loading data
 
-`forecast` component contains a function, `Forecast.update`, that is called periodically in a goroutine. It checks a blob store for updates, and loads data if needed, by calling `datagroup.Download`.
+`forecast` component contains a function, `Forecast.update`, that is called periodically in a goroutine. It checks a blob store for updates, and loads data if needed, by calling `dataset.Download`.
 
 ## Other modules
 

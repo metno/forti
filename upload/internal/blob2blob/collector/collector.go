@@ -8,7 +8,7 @@ import (
 	"io"
 	"log"
 
-	"gitlab.met.no/forti/f2/upload/internal/blob2blob/collector/hash"
+	"gitlab.met.no/forti/f2/upload/internal/blob2blob/collector/grid"
 	"gitlab.met.no/forti/f2/upload/internal/blob2blob/modelprovider"
 	"gitlab.met.no/forti/f2/upload/internal/upload"
 	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
@@ -34,14 +34,14 @@ func Get(ctx context.Context, blobIn, blobOut, group string, version int) error 
 		return err
 	}
 
-	hashes, err := getHashes(ctx, in, &dataset)
+	grids, err := getGrids(ctx, in, &dataset)
 	if err != nil {
 		return err
 	}
-	hashCollector := hash.New(ctx, in, out, group, version)
+	gridCollector := grid.New(ctx, in, out, group, version)
 
-	for hash, parameters := range hashes {
-		log.Println(hash)
+	for grid, parameters := range grids {
+		log.Println(grid)
 
 		var rg []modelprovider.Meta
 		for _, parameter := range parameters {
@@ -57,7 +57,7 @@ func Get(ctx context.Context, blobIn, blobOut, group string, version int) error 
 			rg = append(rg, meta)
 		}
 
-		if err := hashCollector.Collect(ctx, hash, rg); err != nil {
+		if err := gridCollector.Collect(ctx, grid, rg); err != nil {
 			return err
 		}
 	}
@@ -70,7 +70,7 @@ func Get(ctx context.Context, blobIn, blobOut, group string, version int) error 
 	return out.SetDatasetMeta(ctx, &meta)
 }
 
-func getHashes(ctx context.Context, in *modelprovider.Client, dataset *modelprovider.DataSet) (map[string][]string, error) {
+func getGrids(ctx context.Context, in *modelprovider.Client, dataset *modelprovider.DataSet) (map[string][]string, error) {
 	geos := make(map[string][]string)
 
 	for _, parameter := range dataset.Parameters {

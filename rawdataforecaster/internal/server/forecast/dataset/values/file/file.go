@@ -21,13 +21,13 @@ type reader struct {
 	file *os.File
 }
 
-func Download(ctx context.Context, source *fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, hash string) (values.Reader, error) {
-	meta, err := source.GetHashMeta(ctx, datasetMeta, hash)
+func Download(ctx context.Context, source *fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, gridid string) (values.Reader, error) {
+	meta, err := source.GetGridMeta(ctx, datasetMeta, gridid)
 	if err != nil {
 		return nil, err
 	}
 
-	src, err := source.GetData(ctx, datasetMeta, hash)
+	src, err := source.GetData(ctx, datasetMeta, gridid)
 	if err != nil {
 		return nil, err
 	}
