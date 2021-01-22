@@ -1,0 +1,18 @@
+{
+  "parameters": {
+    "p1": {
+      "units": "u_p1",
+      "times": [
+        "2020-12-24T00:00:00Z",
+        "2020-12-24T01:00:00Z"
+      ],
+      "slice_from": 0
+    },
+    "p2": {
+      "units": "u_p2",
+      "times": null,
+      "slice_from": 2
+    }
+  },
+  "number_of_points": 3
+}

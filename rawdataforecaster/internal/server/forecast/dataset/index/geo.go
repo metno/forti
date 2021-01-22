@@ -23,38 +23,38 @@ type cachedMaps struct {
 	useCount uint
 }
 
-type avh struct {
+type avg struct {
 	Area    string
 	Version int
-	Hash    string
+	GridID  string
 }
 
-var idCache map[avh]string
+var idCache map[avg]string
 var checkSumCache map[string]*cachedMaps
 var cacheMutex sync.Mutex
 
 func init() {
-	idCache = make(map[avh]string)
+	idCache = make(map[avg]string)
 	checkSumCache = make(map[string]*cachedMaps)
 }
 
 // Add creates or returns a cached lookup object from the given reader and id.
-func Add(ctx context.Context, source *fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, hash string) (Nearester, error) {
+func Add(ctx context.Context, source *fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, gridid string) (Nearester, error) {
 
 	gridReader := georeader.New(source)
 
-	checksum, err := gridReader.Checksum(ctx, datasetMeta, hash)
+	checksum, err := gridReader.Checksum(ctx, datasetMeta, gridid)
 	if err != nil {
-		return nil, fmt.Errorf("unable to get checksum for %s/%d/%s: %w", datasetMeta.Area, datasetMeta.Version, hash, err)
+		return nil, fmt.Errorf("unable to get checksum for %s/%d/%s: %w", datasetMeta.Area, datasetMeta.Version, gridid, err)
 	}
 
 	cacheMutex.Lock()
 	defer cacheMutex.Unlock()
 
-	id := avh{
+	id := avg{
 		Area:    datasetMeta.Area,
 		Version: datasetMeta.Version,
-		Hash:    hash,
+		GridID:  gridid,
 	}
 
 	if _, ok := idCache[id]; ok {
@@ -63,7 +63,7 @@ func Add(ctx context.Context, source *fortiblob.Client, datasetMeta *fortiblob.D
 
 	cacheEntry, ok := checkSumCache[checksum]
 	if !ok {
-		return getData(ctx, gridReader, datasetMeta, hash, checksum)
+		return getData(ctx, gridReader, datasetMeta, gridid, checksum)
 	}
 
 	idCache[id] = checksum
@@ -72,16 +72,16 @@ func Add(ctx context.Context, source *fortiblob.Client, datasetMeta *fortiblob.D
 }
 
 // getData fetches data directly from a model provider, and adds it to the cache
-func getData(ctx context.Context, gridReader *georeader.Reader, datasetMeta *fortiblob.DatasetMeta, hash, checksum string) (Nearester, error) {
-	geoMap, err := gridReader.Get(ctx, datasetMeta, hash)
+func getData(ctx context.Context, gridReader *georeader.Reader, datasetMeta *fortiblob.DatasetMeta, gridid, checksum string) (Nearester, error) {
+	geoMap, err := gridReader.Get(ctx, datasetMeta, gridid)
 	if err != nil {
 		return nil, err
 	}
 
-	id := avh{
+	id := avg{
 		Area:    datasetMeta.Area,
 		Version: datasetMeta.Version,
-		Hash:    hash,
+		GridID:  gridid,
 	}
 
 	idCache[id] = checksum
@@ -100,7 +100,7 @@ func getData(ctx context.Context, gridReader *georeader.Reader, datasetMeta *for
 // 	free(id)
 // }
 
-func free(id avh) {
+func free(id avg) {
 	checksum, ok := idCache[id]
 	if !ok {
 		return

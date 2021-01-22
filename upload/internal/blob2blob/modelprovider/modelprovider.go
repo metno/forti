@@ -158,8 +158,8 @@ func (c *Client) Meta(ctx context.Context, id ID) (Meta, error) {
 	return meta, nil
 }
 
-func (c *Client) CollectedMeta(ctx context.Context, group string, version int, hash string) (*CollectedMeta, error) {
-	name := fmt.Sprintf("%s/%d/%s/meta.json", group, version, hash)
+func (c *Client) CollectedMeta(ctx context.Context, group string, version int, gridid string) (*CollectedMeta, error) {
+	name := fmt.Sprintf("%s/%d/%s/meta.json", group, version, gridid)
 	r, err := c.bucket.NewReader(ctx, name, nil)
 	if err != nil {
 		return nil, err
@@ -180,8 +180,8 @@ func (c *Client) Data(ctx context.Context, id ID) (io.ReadCloser, error) {
 	return c.bucket.NewReader(ctx, name, nil)
 }
 
-func (c *Client) CollectedData(ctx context.Context, group string, version int, hash string) (io.ReadCloser, error) {
-	name := fmt.Sprintf("%s/%d/%s/data", group, version, hash)
+func (c *Client) CollectedData(ctx context.Context, group string, version int, gridid string) (io.ReadCloser, error) {
+	name := fmt.Sprintf("%s/%d/%s/data", group, version, gridid)
 	return c.bucket.NewReader(ctx, name, nil)
 }
 

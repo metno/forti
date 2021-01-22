@@ -12,7 +12,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/config"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index/area"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index/grid"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/pointdata"
 	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
@@ -68,7 +68,7 @@ func (f *Forecast) Get(latitude, longitude float32) (*pointdata.PointData, error
 		return nil, err
 	}
 
-	if best.Area != nil && !best.Area.Contains(area.LatLon{
+	if best.Grid != nil && !best.Grid.Contains(grid.LatLon{
 		Latitude:  float64(latitude),
 		Longitude: float64(longitude),
 	}) {
@@ -156,7 +156,7 @@ func (f *Forecast) load(ctx context.Context, area string, version int) {
 		log.Fatalln(err)
 	}
 
-	datagroup, err := dataset.Download(ctx, f.store, meta, f.download)
+	ds, err := dataset.Download(ctx, f.store, meta, f.download)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -165,7 +165,7 @@ func (f *Forecast) load(ctx context.Context, area string, version int) {
 	if old, ok := f.datasets[area]; ok {
 		old.Close()
 	}
-	f.datasets[area] = datagroup
+	f.datasets[area] = ds
 	f.m.Unlock()
 
 	fortiActiveLatest.With(prometheusLabel).Set(float64(version))

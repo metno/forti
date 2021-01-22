@@ -25,8 +25,8 @@ func New(source *fortiblob.Client) *Reader {
 }
 
 // Get creates a new GeoMap object from the given id
-func (r *Reader) Get(ctx context.Context, datasetMeta *fortiblob.DatasetMeta, hash string) (*lookup.GeoMap, error) {
-	latitude, err := r.source.GetLatitude(ctx, datasetMeta, hash)
+func (r *Reader) Get(ctx context.Context, datasetMeta *fortiblob.DatasetMeta, gridid string) (*lookup.GeoMap, error) {
+	latitude, err := r.source.GetLatitude(ctx, datasetMeta, gridid)
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +36,7 @@ func (r *Reader) Get(ctx context.Context, datasetMeta *fortiblob.DatasetMeta, ha
 		return nil, fmt.Errorf("error when getting latitude data from model provider: %s", err)
 	}
 
-	longitude, err := r.source.GetLongitude(ctx, datasetMeta, hash)
+	longitude, err := r.source.GetLongitude(ctx, datasetMeta, gridid)
 	if err != nil {
 		return nil, err
 	}
@@ -50,10 +50,10 @@ func (r *Reader) Get(ctx context.Context, datasetMeta *fortiblob.DatasetMeta, ha
 }
 
 // Checksum returns a short string that uniquely idenitfies the given set of lat/lon for the given id
-func (r *Reader) Checksum(ctx context.Context, datasetMeta *fortiblob.DatasetMeta, hash string) (string, error) {
+func (r *Reader) Checksum(ctx context.Context, datasetMeta *fortiblob.DatasetMeta, gridid string) (string, error) {
 	checksumStream := md5.New()
 
-	latitude, err := r.source.GetLatitude(ctx, datasetMeta, hash)
+	latitude, err := r.source.GetLatitude(ctx, datasetMeta, gridid)
 	if err != nil {
 		return "", err
 	}
@@ -62,7 +62,7 @@ func (r *Reader) Checksum(ctx context.Context, datasetMeta *fortiblob.DatasetMet
 		return "", err
 	}
 
-	longitude, err := r.source.GetLongitude(ctx, datasetMeta, hash)
+	longitude, err := r.source.GetLongitude(ctx, datasetMeta, gridid)
 	if err != nil {
 		return "", err
 	}

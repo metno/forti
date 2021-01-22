@@ -8,7 +8,7 @@ import (
 
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/config"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index/area"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index/grid"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/values"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/pointdata"
 	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
@@ -18,14 +18,14 @@ import (
 type Dataset struct {
 	Meta pointdata.Meta
 
-	Area    *area.Area
+	Grid    *grid.Grid
 	readers []values.Reader
 	lookups []index.Nearester
 }
 
 // Download creates and returns a Dataset from the given specification.
 func Download(ctx context.Context, source *fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, download config.DownloadFunction) (*Dataset, error) {
-	hashes, err := source.GetHashes(ctx, datasetMeta)
+	gridIds, err := source.GetGridIds(ctx, datasetMeta)
 	if err != nil {
 		return nil, err
 	}
@@ -33,14 +33,14 @@ func Download(ctx context.Context, source *fortiblob.Client, datasetMeta *fortib
 	var readers []values.Reader
 	var lookups []index.Nearester
 
-	for _, hash := range hashes {
-		lookup, err := index.Add(ctx, source, datasetMeta, hash)
+	for _, gridid := range gridIds {
+		lookup, err := index.Add(ctx, source, datasetMeta, gridid)
 		if err != nil {
 			return nil, err
 		}
 		lookups = append(lookups, lookup)
 
-		reader, err := download(ctx, source, datasetMeta, hash)
+		reader, err := download(ctx, source, datasetMeta, gridid)
 		if err != nil {
 			for _, r := range readers {
 				r.Close()
@@ -50,9 +50,9 @@ func Download(ctx context.Context, source *fortiblob.Client, datasetMeta *fortib
 		readers = append(readers, reader)
 	}
 
-	var geographicArea *area.Area
+	var geographicArea *grid.Grid
 	if datasetMeta.GeographicExtent != nil {
-		geographicArea, err = area.New(*datasetMeta.GeographicExtent)
+		geographicArea, err = grid.New(*datasetMeta.GeographicExtent)
 		if err != nil {
 			return nil, err
 		}
@@ -66,7 +66,7 @@ func Download(ctx context.Context, source *fortiblob.Client, datasetMeta *fortib
 			UpdatedAt:  readyTime,
 			NextUpdate: readyTime.Add(datasetMeta.TimeUntilNext),
 		},
-		Area:    geographicArea,
+		Grid:    geographicArea,
 		readers: readers,
 		lookups: lookups,
 	}, nil

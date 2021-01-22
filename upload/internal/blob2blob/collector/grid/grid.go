@@ -1,4 +1,4 @@
-package hash
+package grid
 
 import (
 	"context"
@@ -26,12 +26,12 @@ func New(ctx context.Context, source *modelprovider.Client, sink *upload.Uploade
 	}
 }
 
-func (c *Collector) Collect(ctx context.Context, gridHash string, rg []modelprovider.Meta) error {
-	meta, err := c.collectData(ctx, c.group, c.version, gridHash, rg)
+func (c *Collector) Collect(ctx context.Context, gridid string, rg []modelprovider.Meta) error {
+	meta, err := c.collectData(ctx, c.group, c.version, gridid, rg)
 	if err != nil {
 		return err
 	}
-	if err := c.sink.SetHashMeta(ctx, meta, c.group, c.version, gridHash); err != nil {
+	if err := c.sink.SetGridMeta(ctx, meta, c.group, c.version, gridid); err != nil {
 		return err
 	}
 
@@ -46,7 +46,7 @@ func (c *Collector) Collect(ctx context.Context, gridHash string, rg []modelprov
 		return err
 	}
 	defer latIn.Close()
-	latOut, err := c.sink.GetLatitudeStream(ctx, c.group, c.version, gridHash)
+	latOut, err := c.sink.GetLatitudeStream(ctx, c.group, c.version, gridid)
 	if err != nil {
 		return err
 	}
@@ -62,7 +62,7 @@ func (c *Collector) Collect(ctx context.Context, gridHash string, rg []modelprov
 		return err
 	}
 	defer lonIn.Close()
-	lonOut, err := c.sink.GetLongitudeStream(ctx, c.group, c.version, gridHash)
+	lonOut, err := c.sink.GetLongitudeStream(ctx, c.group, c.version, gridid)
 	if err != nil {
 		return err
 	}
@@ -75,8 +75,8 @@ func (c *Collector) Collect(ctx context.Context, gridHash string, rg []modelprov
 	return nil
 }
 
-func (c *Collector) collectData(ctx context.Context, group string, version int, hash string, rg []modelprovider.Meta) (*fortiblob.MetaCollection, error) {
-	out, err := c.sink.GetDataStream(ctx, group, version, hash)
+func (c *Collector) collectData(ctx context.Context, group string, version int, gridid string, rg []modelprovider.Meta) (*fortiblob.MetaCollection, error) {
+	out, err := c.sink.GetDataStream(ctx, group, version, gridid)
 	if err != nil {
 		log.Fatalln(err)
 	}

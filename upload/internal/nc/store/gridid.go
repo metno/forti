@@ -8,8 +8,8 @@ import (
 	"gitlab.met.no/forti/f2/upload/internal/nc/store/netcdf"
 )
 
-func getHashes(area string, version int, files []string) (map[string][]string, error) {
-	hashes := make(map[string][]string)
+func getGridIds(area string, version int, files []string) (map[string][]string, error) {
+	grids := make(map[string][]string)
 	for _, filename := range files {
 		f, err := netcdf.Open(filename)
 		if err != nil {
@@ -26,15 +26,15 @@ func getHashes(area string, version int, files []string) (map[string][]string, e
 			return nil, err
 		}
 
-		hash := getHash(lat, lon)
+		grid := getGridId(lat, lon)
 
-		hashes[hash] = append(hashes[hash], filename)
+		grids[grid] = append(grids[grid], filename)
 	}
 
-	return hashes, nil
+	return grids, nil
 }
 
-func getHash(latitudes, longitudes []netcdf.Float) string {
+func getGridId(latitudes, longitudes []netcdf.Float) string {
 	h := sha256.New()
 	if err := binary.Write(h, binary.LittleEndian, latitudes); err != nil {
 		panic(err)

@@ -1,4 +1,4 @@
-package area
+package grid
 
 // #include "proj_wrapper.h"
 // #include <stdlib.h>
