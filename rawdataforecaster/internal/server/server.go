@@ -3,6 +3,7 @@ package server
 import (
 	context "context"
 	"errors"
+	"log"
 	"net"
 
 	"google.golang.org/grpc"
@@ -22,7 +23,8 @@ func Run(conf *config.Configuration) error {
 		return err
 	}
 
-	lis, err := net.Listen("tcp", ":50051")
+	listenAddress := ":50051"
+	lis, err := net.Listen("tcp", listenAddress)
 	if err != nil {
 		return err
 	}
@@ -30,6 +32,9 @@ func Run(conf *config.Configuration) error {
 	s := grpc.NewServer()
 	internalprotocol.RegisterForecasterServer(s, server)
 	grpc_health_v1.RegisterHealthServer(s, health.NewServer())
+
+	log.Printf("listening on %s", listenAddress)
+
 	return s.Serve(lis)
 }
 

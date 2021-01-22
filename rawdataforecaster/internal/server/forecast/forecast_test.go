@@ -26,7 +26,10 @@ func Test(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	forecast := newFromCollector(fortiblob.NewClientFromBucket(bucket), []string{"group_a", "group_b"}, memory.Download)
+	forecast, err := newFromCollector(fortiblob.NewClientFromBucket(bucket), []string{"group_a", "group_b"}, memory.Download)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	pointdata, err := forecast.Get(59, 11)
 	if err != nil {
