@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"strings"
 	"time"
 
@@ -107,7 +106,6 @@ func (c *Client) GetGridInfo(ctx context.Context, d *DatasetMeta) ([]GridInfo, e
 			}
 			return nil, err
 		}
-		log.Println(obj.Key)
 		if obj.IsDir {
 			elements := strings.Split(obj.Key, "/")
 			if len(elements) != 4 {

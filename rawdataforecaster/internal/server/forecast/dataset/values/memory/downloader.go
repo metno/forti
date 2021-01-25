@@ -53,7 +53,7 @@ func (d *downloader) getData(ctx context.Context, meta *fortiblob.DatasetMeta, g
 
 	valueCount := src.Size() / 2
 
-	log.Printf("Download %0.2f GiB", float64(src.Size())/(1024*1024*1024))
+	log.Printf("Download %0.2f GiB from %s/%d/%s", float64(src.Size())/(1024*1024*1024), meta.Area, meta.Version, gridid)
 
 	// We return an array with an extra entry.
 	// First reserve the extra cap, and when returning we increase len with 1.
