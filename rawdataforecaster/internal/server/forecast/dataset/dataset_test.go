@@ -10,7 +10,7 @@ import (
 
 	_ "gocloud.dev/blob/fileblob"
 
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/values/memory"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/config"
 	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 	"gocloud.dev/blob"
 )
@@ -33,7 +33,11 @@ func Test(t *testing.T) {
 			Area:    "group_b",
 			Version: 2,
 		},
-		memory.Download,
+		&config.Configuration{
+			Loader: config.Loader{
+				Type: "memory",
+			},
+		},
 	)
 	if err != nil {
 		t.Fatal(err)

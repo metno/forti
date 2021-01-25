@@ -20,9 +20,8 @@ import (
 // Forecast gives the latest weather forecast for a location.
 type Forecast struct {
 	store *fortiblob.Client
-	areas []string
 
-	download config.DownloadFunction
+	cfg *config.Configuration
 
 	datasets map[string]*dataset.Dataset
 	m        sync.RWMutex
@@ -30,12 +29,12 @@ type Forecast struct {
 
 // New initializes an object that can be queries for forecasts. It is self-updating.
 func New(cfg *config.Configuration) (*Forecast, error) {
-	store, err := fortiblob.NewClient(cfg.Bucket)
+	store, err := fortiblob.NewClient(cfg.Source.Bucket)
 	if err != nil {
 		return nil, err
 	}
 
-	f, err := newFromCollector(store, cfg.Areas, cfg.ValueDownloadFunction)
+	f, err := newFromClient(store, cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -45,11 +44,10 @@ func New(cfg *config.Configuration) (*Forecast, error) {
 	return f, nil
 }
 
-func newFromCollector(store *fortiblob.Client, areas []string, download config.DownloadFunction) (*Forecast, error) {
+func newFromClient(store *fortiblob.Client, cfg *config.Configuration) (*Forecast, error) {
 	f := &Forecast{
 		store:    store,
-		areas:    areas,
-		download: download,
+		cfg:      cfg,
 		datasets: make(map[string]*dataset.Dataset),
 	}
 
@@ -128,7 +126,7 @@ func (f *Forecast) update() error {
 
 	f.m.RLock()
 	toAdd := make(map[string]int)
-	for _, area := range f.areas {
+	for _, area := range f.cfg.Areas {
 		latestVersion := latest[area]
 		current, ok := f.datasets[area]
 		if !ok || current.Meta.Version < latestVersion {
@@ -164,7 +162,7 @@ func (f *Forecast) load(ctx context.Context, area string, version int) {
 		log.Fatalln(err)
 	}
 
-	ds, err := dataset.Download(ctx, f.store, meta, f.download)
+	ds, err := dataset.Download(ctx, f.store, meta, f.cfg)
 	if err != nil {
 		log.Fatalln(err)
 	}

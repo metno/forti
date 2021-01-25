@@ -59,6 +59,7 @@ func makeTestingClient() *fortiblob.Client {
 	if err != nil {
 		panic(err)
 	}
+	defer data.Close()
 	dataValues := []int16{
 		01, 02, 03, 04,
 		11, 12, 13, 14,
@@ -73,6 +74,7 @@ func makeTestingClient() *fortiblob.Client {
 	if err != nil {
 		panic(err)
 	}
+	defer lat.Close()
 	latValues := []float32{
 		10, 10, 11, 11,
 	}
@@ -84,6 +86,7 @@ func makeTestingClient() *fortiblob.Client {
 	if err != nil {
 		panic(err)
 	}
+	defer lon.Close()
 	lonValues := []float32{
 		59, 60, 59, 60,
 	}
@@ -112,7 +115,7 @@ func Test(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err = client.GetGridIds(ctx, datasetMeta)
+	_, err = client.GetGridInfo(ctx, datasetMeta)
 	if err != nil {
 		t.Fatal(err)
 	}

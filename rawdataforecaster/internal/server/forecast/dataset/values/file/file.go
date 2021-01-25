@@ -21,7 +21,7 @@ type reader struct {
 	file *os.File
 }
 
-func Download(ctx context.Context, source *fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, gridid string) (values.Reader, error) {
+func Download(ctx context.Context, source *fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, gridid string, config map[string]interface{}) (values.Reader, error) {
 	meta, err := source.GetGridMeta(ctx, datasetMeta, gridid)
 	if err != nil {
 		return nil, err

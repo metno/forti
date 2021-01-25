@@ -9,8 +9,11 @@ import (
 	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
 
-func Download(ctx context.Context, source *fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, gridid string) (values.Reader, error) {
-	return newDownloader(source).Get(ctx, datasetMeta, gridid)
+func Download(ctx context.Context, source *fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, gridid string, config map[string]interface{}) (values.Reader, error) {
+	d := downloader{
+		store: source,
+	}
+	return d.Get(ctx, datasetMeta, gridid)
 }
 
 type downloader struct {
@@ -50,7 +53,7 @@ func (d *downloader) getData(ctx context.Context, meta *fortiblob.DatasetMeta, g
 
 	valueCount := src.Size() / 2
 
-	log.Printf("Download %0.1f MiB", float32(src.Size())/1024/1024)
+	log.Printf("Download %0.2f GiB", float64(src.Size())/(1024*1024*1024))
 
 	// We return an array with an extra entry.
 	// First reserve the extra cap, and when returning we increase len with 1.

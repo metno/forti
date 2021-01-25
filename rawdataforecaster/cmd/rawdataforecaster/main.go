@@ -1,10 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
-	"strings"
+	"os"
 
 	_ "gocloud.dev/blob/azureblob"
 	_ "gocloud.dev/blob/fileblob"
@@ -12,41 +14,42 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/config"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/values/blob"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/values/file"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/values/memory"
 )
 
 func main() {
-	bucket := flag.String("blob", "file:///home/vegardb/local/forti/collected", "Read forecasts from the given bucket")
-	areas := flag.String("areas", "nordic", "Serve the given areas")
-	storage := flag.String("storage", "memory", "Use the given data storage strategy. Available: memory, file and blob.")
+	confFile := flag.String("config", "config.json", "Read configuration from the given file")
 	stats := flag.Bool("serve-stats", false, "serve prometheus stats")
 	port := flag.Int("port", 5052, "Listen port for incoming grpc requests.")
 
 	flag.Parse()
 
-	conf := config.Configuration{
-		Bucket: *bucket,
-		Areas:  strings.Split(*areas, ","),
+	conf, err := getConfig(*confFile)
+	if err != nil {
+		log.Fatalln(err)
 	}
-	switch *storage {
-	case "memory":
-		conf.ValueDownloadFunction = memory.Download
-	case "file":
-		conf.ValueDownloadFunction = file.Download
-	case "blob":
-		conf.ValueDownloadFunction = blob.Download
-	default:
-		log.Fatalf("invalid strategy: %s", *storage)
-	}
-	log.Printf("use %s storage strategy", *storage)
+
+	log.Printf("use %s storage strategy", conf.Loader.Type)
 
 	if *stats {
 		go serveStats()
 	}
 
-	log.Fatalln(server.Run(&conf, *port))
+	log.Fatalln(server.Run(conf, *port))
+}
+
+func getConfig(file string) (*config.Configuration, error) {
+	f, err := os.Open(file)
+	if err != nil {
+		return nil, fmt.Errorf("unable to open config file: %w", err)
+	}
+	defer f.Close()
+
+	var out config.Configuration
+	if err := json.NewDecoder(f).Decode(&out); err != nil {
+		return nil, fmt.Errorf("unable to parse config file: %w", err)
+	}
+
+	return &out, nil
 }
 
 func serveStats() {

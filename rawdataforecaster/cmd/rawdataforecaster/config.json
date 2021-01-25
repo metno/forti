@@ -1,0 +1,21 @@
+{
+    "source": {
+        "bucket": "azblob://collected"
+    },
+    "areas": [
+        "arctic",
+        "nordic",
+        "world"
+    ],
+    "loader": {
+        "type": "memory",
+        "configuration": {
+            "max_size_gib": {
+                "nowcast": 0.13,
+                "arctic": 0.637,
+                "nordic": 6.110,
+                "world": 11.660
+            }
+        }
+    }
+}
