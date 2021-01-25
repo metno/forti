@@ -11,7 +11,7 @@ import (
 	"gocloud.dev/blob"
 	_ "gocloud.dev/blob/fileblob"
 
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/values/memory"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/config"
 	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
 
@@ -26,7 +26,15 @@ func Test(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	forecast, err := newFromCollector(fortiblob.NewClientFromBucket(bucket), []string{"group_a", "group_b"}, memory.Download)
+	forecast, err := newFromClient(
+		fortiblob.NewClientFromBucket(bucket),
+		&config.Configuration{
+			Areas: []string{"group_a", "group_b"},
+			Loader: config.Loader{
+				Type: "memory",
+			},
+		},
+	)
 	if err != nil {
 		t.Fatal(err)
 	}

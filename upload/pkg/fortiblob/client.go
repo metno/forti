@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"strings"
 	"time"
 
@@ -85,8 +86,13 @@ func (c *Client) GetMeta(ctx context.Context, area string, version int) (*Datase
 	return &ret, nil
 }
 
-func (c *Client) GetGridIds(ctx context.Context, d *DatasetMeta) ([]string, error) {
-	var gridids []string
+type GridInfo struct {
+	ID          string
+	RawDataSize int64
+}
+
+func (c *Client) GetGridInfo(ctx context.Context, d *DatasetMeta) ([]GridInfo, error) {
+	var gridids []GridInfo
 	it := c.bucket.List(
 		&blob.ListOptions{
 			Prefix:    fmt.Sprintf("%s/%d/", d.Area, d.Version),
@@ -101,13 +107,24 @@ func (c *Client) GetGridIds(ctx context.Context, d *DatasetMeta) ([]string, erro
 			}
 			return nil, err
 		}
+		log.Println(obj.Key)
 		if obj.IsDir {
 			elements := strings.Split(obj.Key, "/")
 			if len(elements) != 4 {
 				continue
 			}
 
-			gridids = append(gridids, elements[2])
+			attr, err := c.bucket.Attributes(ctx, obj.Key+"data")
+			if err != nil {
+				return nil, err
+			}
+
+			gridids = append(gridids,
+				GridInfo{
+					ID:          elements[2],
+					RawDataSize: attr.Size,
+				},
+			)
 		}
 	}
 

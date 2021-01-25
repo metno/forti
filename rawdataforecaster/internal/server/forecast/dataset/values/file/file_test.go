@@ -31,6 +31,7 @@ func Test(t *testing.T) {
 			Version: 1,
 		},
 		"grid_a",
+		nil,
 	)
 	if err != nil {
 		t.Fatal(err)

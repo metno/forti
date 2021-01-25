@@ -3,6 +3,7 @@ package dataset
 
 import (
 	"context"
+	"fmt"
 	"math"
 	"time"
 
@@ -24,23 +25,24 @@ type Dataset struct {
 }
 
 // Download creates and returns a Dataset from the given specification.
-func Download(ctx context.Context, source *fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, download config.DownloadFunction) (*Dataset, error) {
-	gridIds, err := source.GetGridIds(ctx, datasetMeta)
+func Download(ctx context.Context, source *fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, cfg *config.Configuration) (*Dataset, error) {
+	grids, err := source.GetGridInfo(ctx, datasetMeta)
 	if err != nil {
 		return nil, err
+	}
+
+	maxSizes, ok := cfg.Loader.Configuration["max_size_gib"]
+	if ok {
+		if err := verifySize(maxSizes.(map[string]interface{}), grids, datasetMeta); err != nil {
+			return nil, err
+		}
 	}
 
 	var readers []values.Reader
 	var lookups []index.Nearester
 
-	for _, gridid := range gridIds {
-		lookup, err := index.Add(ctx, source, datasetMeta, gridid)
-		if err != nil {
-			return nil, err
-		}
-		lookups = append(lookups, lookup)
-
-		reader, err := download(ctx, source, datasetMeta, gridid)
+	for _, grid := range grids {
+		reader, err := cfg.DownloadFunction()(ctx, source, datasetMeta, grid.ID, cfg.Loader.Configuration)
 		if err != nil {
 			for _, r := range readers {
 				r.Close()
@@ -48,6 +50,12 @@ func Download(ctx context.Context, source *fortiblob.Client, datasetMeta *fortib
 			return nil, err
 		}
 		readers = append(readers, reader)
+
+		lookup, err := index.Add(ctx, source, datasetMeta, grid.ID)
+		if err != nil {
+			return nil, err
+		}
+		lookups = append(lookups, lookup)
 	}
 
 	var geographicArea *grid.Grid
@@ -70,6 +78,28 @@ func Download(ctx context.Context, source *fortiblob.Client, datasetMeta *fortib
 		readers: readers,
 		lookups: lookups,
 	}, nil
+}
+
+func verifySize(maxSizes map[string]interface{}, grids []fortiblob.GridInfo, datasetMeta *fortiblob.DatasetMeta) error {
+	maxGiB, ok := maxSizes[datasetMeta.Area]
+	if ok {
+		var actualSize int64
+		for _, grid := range grids {
+			actualSize += grid.RawDataSize
+		}
+
+		const gib float64 = 1024 * 1024 * 1024
+		maxSize := int64(maxGiB.(float64) * gib)
+
+		if actualSize > maxSize {
+			return fmt.Errorf(
+				"download size (%.2f GiB) is larger than allowed maximum (%.2f GiB)",
+				float64(actualSize)/gib,
+				float64(maxSize)/gib,
+			)
+		}
+	}
+	return nil
 }
 
 // Close removes all resources associated with the downloaded Dataset.
