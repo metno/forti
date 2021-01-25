@@ -18,13 +18,13 @@ import (
 	"gitlab.met.no/forti/f2/parameters/radar"
 )
 
-func Run(upstream string, topographyFiles []string) error {
+func Run(upstream string, port int, topographyFiles []string) error {
 	server, err := New(upstream, topographyFiles)
 	if err != nil {
 		return err
 	}
 
-	lis, err := net.Listen("tcp", ":50052")
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
 		return err
 	}

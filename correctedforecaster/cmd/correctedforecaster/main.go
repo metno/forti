@@ -14,9 +14,11 @@ import (
 )
 
 func main() {
-	upstream := flag.String("upstream", "localhost:50051", "get data from the given grpc server")
+	upstream := flag.String("upstream", "localhost:5052", "get data from the given grpc server")
 	bucket := flag.String("download-from", "", "download data from the given bucket")
 	workdir := flag.String("workdir", "/data/", "use files in the given directory")
+	port := flag.Int("port", 5051, "Listen port for incoming grpc requests.")
+
 	flag.Parse()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
@@ -27,5 +29,5 @@ func main() {
 	}
 
 	log.Println("ready")
-	log.Fatalln(server.Run(*upstream, topographyFiles))
+	log.Fatalln(server.Run(*upstream, *port, topographyFiles))
 }

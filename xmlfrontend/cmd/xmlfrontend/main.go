@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	upstream := flag.String("upstream", "localhost:50051", "get data from the given grpc server")
+	upstream := flag.String("upstream", "localhost:5051", "get data from the given grpc server")
 	configFile := flag.String("config", "xmlformat.json", "read json formatting instructions from the given file")
 	flag.Parse()
 
