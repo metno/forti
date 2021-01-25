@@ -3,6 +3,7 @@ package server
 import (
 	context "context"
 	"errors"
+	"fmt"
 	"log"
 	"net"
 
@@ -16,14 +17,14 @@ import (
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast"
 )
 
-func Run(conf *config.Configuration) error {
+func Run(conf *config.Configuration, port int) error {
 
 	server, err := newGrpcServer(conf)
 	if err != nil {
 		return err
 	}
 
-	listenAddress := ":50051"
+	listenAddress := fmt.Sprintf(":%d", port)
 	lis, err := net.Listen("tcp", listenAddress)
 	if err != nil {
 		return err

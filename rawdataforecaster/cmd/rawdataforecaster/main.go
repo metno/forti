@@ -22,6 +22,8 @@ func main() {
 	areas := flag.String("areas", "nordic", "Serve the given areas")
 	storage := flag.String("storage", "memory", "Use the given data storage strategy. Available: memory, file and blob.")
 	stats := flag.Bool("serve-stats", false, "serve prometheus stats")
+	port := flag.Int("port", 5052, "Listen port for incoming grpc requests.")
+
 	flag.Parse()
 
 	conf := config.Configuration{
@@ -44,7 +46,7 @@ func main() {
 		go serveStats()
 	}
 
-	log.Fatalln(server.Run(&conf))
+	log.Fatalln(server.Run(&conf, *port))
 }
 
 func serveStats() {
