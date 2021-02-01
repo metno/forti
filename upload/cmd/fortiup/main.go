@@ -11,6 +11,7 @@ import (
 	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 
 	"gocloud.dev/blob"
+	_ "gocloud.dev/blob/azureblob"
 	_ "gocloud.dev/blob/fileblob"
 )
 
