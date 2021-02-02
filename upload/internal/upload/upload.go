@@ -55,11 +55,11 @@ func (u *Uploader) SetDatasetMeta(ctx context.Context, meta *fortiblob.DatasetMe
 		return err
 	}
 
-	if err := u.setLatest(ctx, meta); err != nil {
+	if err := w.Close(); err != nil {
 		return err
 	}
 
-	return w.Close()
+	return u.setLatest(ctx, meta)
 }
 
 func (u *Uploader) setLatest(ctx context.Context, meta *fortiblob.DatasetMeta) error {
