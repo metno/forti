@@ -23,18 +23,18 @@ type cachedMaps struct {
 	useCount uint
 }
 
-type avg struct {
+type indexID struct {
 	Area    string
 	Version int
 	GridID  string
 }
 
-var idCache map[avg]string
+var idCache map[indexID]string
 var checkSumCache map[string]*cachedMaps
 var cacheMutex sync.Mutex
 
 func init() {
-	idCache = make(map[avg]string)
+	idCache = make(map[indexID]string)
 	checkSumCache = make(map[string]*cachedMaps)
 }
 
@@ -51,13 +51,14 @@ func Add(ctx context.Context, source *fortiblob.Client, datasetMeta *fortiblob.D
 	cacheMutex.Lock()
 	defer cacheMutex.Unlock()
 
-	id := avg{
+	id := indexID{
 		Area:    datasetMeta.Area,
 		Version: datasetMeta.Version,
 		GridID:  gridid,
 	}
 
 	if _, ok := idCache[id]; ok {
+		// if the exact same entry existed from before, we delete the old one
 		free(id)
 	}
 
@@ -78,7 +79,7 @@ func getData(ctx context.Context, gridReader *georeader.Reader, datasetMeta *for
 		return nil, err
 	}
 
-	id := avg{
+	id := indexID{
 		Area:    datasetMeta.Area,
 		Version: datasetMeta.Version,
 		GridID:  gridid,
@@ -94,13 +95,18 @@ func getData(ctx context.Context, gridReader *georeader.Reader, datasetMeta *for
 
 // Free notifies the cache that the given id is no longer in use, and remove
 // it from the cache.
-// func Free(id gvh) {
-// 	cacheMutex.Lock()
-// 	defer cacheMutex.Unlock()
-// 	free(id)
-// }
+func Free(area string, version int, gridid string) {
+	id := indexID{
+		Area:    area,
+		Version: version,
+		GridID:  gridid,
+	}
+	cacheMutex.Lock()
+	defer cacheMutex.Unlock()
+	free(id)
+}
 
-func free(id avg) {
+func free(id indexID) {
 	checksum, ok := idCache[id]
 	if !ok {
 		return

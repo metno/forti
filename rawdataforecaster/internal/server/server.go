@@ -19,7 +19,7 @@ import (
 
 func Run(conf *config.Configuration, port int) error {
 
-	server, err := newGrpcServer(conf)
+	server, err := newForecastServer(conf)
 	if err != nil {
 		return err
 	}
@@ -39,23 +39,23 @@ func Run(conf *config.Configuration, port int) error {
 	return s.Serve(lis)
 }
 
-type grpcServer struct {
+type forecastServer struct {
 	internalprotocol.UnimplementedForecasterServer
 	forecast *forecast.Forecast
 }
 
-func newGrpcServer(conf *config.Configuration) (*grpcServer, error) {
+func newForecastServer(conf *config.Configuration) (*forecastServer, error) {
 	forecast, err := forecast.New(conf)
 	if err != nil {
 		return nil, err
 	}
 
-	return &grpcServer{
+	return &forecastServer{
 		forecast: forecast,
 	}, nil
 }
 
-func (s *grpcServer) GetForecast(ctx context.Context, in *internalprotocol.Location) (*internalprotocol.Forecast, error) {
+func (s *forecastServer) GetForecast(ctx context.Context, in *internalprotocol.Location) (*internalprotocol.Forecast, error) {
 
 	pointData, err := s.forecast.Get(in.Latitude, in.Longitude)
 	if err != nil {
@@ -67,12 +67,14 @@ func (s *grpcServer) GetForecast(ctx context.Context, in *internalprotocol.Locat
 		return nil, err
 	}
 
-	var size int
+	var dataSize int
+	var parameterCount int
 	for _, data := range pointData.Data {
-		size += len(data.Data)
+		dataSize += len(data.Data)
+		parameterCount += len(data.ParameterMeta)
 	}
-	values := make([]float32, 0, size)
-	parameterMeta := make([]*internalprotocol.ParameterMeta, 0, size)
+	values := make([]float32, 0, dataSize)
+	parameterMeta := make([]*internalprotocol.ParameterMeta, 0, parameterCount)
 
 	for _, data := range pointData.Data {
 		for parameter, meta := range data.ParameterMeta {

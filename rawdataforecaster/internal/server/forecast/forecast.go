@@ -12,7 +12,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/config"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index/grid"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/pointdata"
 	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
@@ -71,10 +70,7 @@ func (f *Forecast) Get(latitude, longitude float32) (*pointdata.PointData, error
 		return nil, err
 	}
 
-	if best.Grid != nil && !best.Grid.Contains(grid.LatLon{
-		Latitude:  float64(latitude),
-		Longitude: float64(longitude),
-	}) {
+	if !best.WithinPolygon(latitude, longitude) {
 		return nil, ErrOutsideAllGrids
 	}
 

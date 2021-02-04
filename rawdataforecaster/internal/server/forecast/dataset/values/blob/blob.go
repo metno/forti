@@ -15,24 +15,24 @@ type Reader struct {
 	prefix string
 
 	datasetMeta fortiblob.DatasetMeta
-	hashMeta    fortiblob.MetaCollection
-	hash        string
+	gridMeta    fortiblob.MetaCollection
+	grid        string
 }
 
-func Download(ctx context.Context, source *fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, hash string, config map[string]interface{}) (values.Reader, error) {
-	meta, err := source.GetGridMeta(ctx, datasetMeta, hash)
+func Download(ctx context.Context, source *fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, grid string, config map[string]interface{}) (values.Reader, error) {
+	meta, err := source.GetGridMeta(ctx, datasetMeta, grid)
 	if err != nil {
 		return nil, err
 	}
 
-	prefix := fmt.Sprintf("%s/%d/%s/", datasetMeta.Area, datasetMeta.Version, hash)
+	prefix := fmt.Sprintf("%s/%d/%s/", datasetMeta.Area, datasetMeta.Version, grid)
 
 	return &Reader{
 		source:      source,
 		prefix:      prefix,
 		datasetMeta: *datasetMeta,
-		hashMeta:    *meta,
-		hash:        hash,
+		gridMeta:    *meta,
+		grid:        grid,
 	}, nil
 }
 
@@ -44,20 +44,20 @@ func (r *Reader) Read(idx int) (*values.PointDataCollection, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
-	reader, err := r.source.GetDataRange(ctx, &r.datasetMeta, r.hash, r.hashMeta.PointCount*idx*2, r.hashMeta.PointCount*2)
+	reader, err := r.source.GetDataRange(ctx, &r.datasetMeta, r.grid, r.gridMeta.PointCount*idx*2, r.gridMeta.PointCount*2)
 	if err != nil {
 		return nil, err
 	}
 	defer reader.Close()
 
-	buffer := make([]int16, r.hashMeta.PointCount)
+	buffer := make([]int16, r.gridMeta.PointCount)
 	if err := binary.Read(reader, binary.LittleEndian, &buffer); err != nil {
 		return nil, err
 	}
 
 	ret := values.PointDataCollection{
-		ParameterMeta: r.hashMeta.Parameters,
-		Data:          make([]float32, r.hashMeta.PointCount),
+		ParameterMeta: r.gridMeta.Parameters,
+		Data:          make([]float32, r.gridMeta.PointCount),
 	}
 
 	for i, bufData := range buffer {

@@ -121,12 +121,12 @@ func (d *Dataset) Read(latitude, longitude float32) (*pointdata.PointData, error
 
 	for i, r := range d.readers {
 		n := d.lookups[i]
-		response, err := n.Nearest(latitude, longitude)
+		gridLocation, err := n.Nearest(latitude, longitude)
 		if err != nil {
 			return nil, err
 		}
 
-		data, err := r.Read(int(response.Idx))
+		data, err := r.Read(int(gridLocation.Idx))
 		if err != nil {
 			return nil, err
 		}
@@ -149,4 +149,19 @@ func (d *Dataset) DistanceTo(latitude, longitude float32) (uint, error) {
 		}
 	}
 	return uint(min), nil
+}
+
+func (d *Dataset) HasPolygon() bool {
+	return d.Grid != nil
+}
+
+func (d *Dataset) WithinPolygon(latitude, longitude float32) bool {
+	if d.HasPolygon() {
+		location := grid.LatLon{
+			Latitude:  float64(latitude),
+			Longitude: float64(longitude),
+		}
+		return d.Grid.Contains(location)
+	}
+	return true
 }
