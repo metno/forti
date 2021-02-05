@@ -106,11 +106,12 @@ func (f *Forecast) run() {
 		time.Sleep(3 * time.Second)
 		if err := f.update(); err != nil {
 			// log errors, and retry on next round
-			log.Println(err)
+			log.Printf("%s - will retry later", err)
 		}
 	}
 }
 
+// update looks up new data from blob store, and loads it.
 func (f *Forecast) update() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -131,21 +132,29 @@ func (f *Forecast) update() error {
 	}
 	f.m.RUnlock()
 
-	var wait sync.WaitGroup
+	errs := make(chan error)
 	for area, version := range toAdd {
-		wait.Add(1)
-		ctx := context.TODO()
 		go func(area string, version int) {
-			f.load(ctx, area, version)
-			wait.Done()
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+			defer cancel()
+			errs <- f.load(ctx, area, version)
 		}(area, version)
 	}
-	wait.Wait()
+	hasLoadErrors := false
+	for area, version := range toAdd {
+		if err := <-errs; err != nil {
+			log.Printf("unable to load %s/%d: %s", area, version, err)
+			hasLoadErrors = true
+		}
+	}
 
+	if hasLoadErrors {
+		return errors.New("unable to load some areas")
+	}
 	return nil
 }
 
-func (f *Forecast) load(ctx context.Context, area string, version int) {
+func (f *Forecast) load(ctx context.Context, area string, version int) error {
 	log.Printf("available: %s/%d", area, version)
 
 	prometheusLabel := prometheus.Labels{"area": area}
@@ -155,12 +164,12 @@ func (f *Forecast) load(ctx context.Context, area string, version int) {
 
 	meta, err := f.store.GetMeta(ctx, area, version)
 	if err != nil {
-		log.Fatalln(err)
+		return err
 	}
 
 	ds, err := dataset.Download(ctx, f.store, meta, f.cfg)
 	if err != nil {
-		log.Fatalln(err)
+		return err
 	}
 
 	f.m.Lock()
@@ -174,4 +183,6 @@ func (f *Forecast) load(ctx context.Context, area string, version int) {
 	fortiActiveUpdated.With(prometheusLabel).Set(float64(time.Now().Unix()))
 
 	log.Printf("active: %s/%d", area, version)
+
+	return nil
 }
