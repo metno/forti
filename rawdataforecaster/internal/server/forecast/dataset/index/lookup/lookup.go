@@ -20,6 +20,13 @@ type GeoMap struct {
 type GeoResponse struct {
 	Idx      uint32
 	Distance uint32
+	Point    Point
+}
+
+// Point is a grid point in latitude, longitude from the index lookup.
+type Point struct {
+	Lat  float32
+	Long float32
 }
 
 func (gr GeoResponse) String() string {
