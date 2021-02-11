@@ -51,9 +51,12 @@ GridIndex Nearest(void * lookup, float latitude, float longitude)
         return GridIndex{0, std::numeric_limits<unsigned>::max()};
 
 	unsigned distance = S2Earth::RadiansToMeters(result.distance().radians());
-	S2LatLng point = S2LatLng(result.point());
 
-	return GridIndex{result.data(), distance, point};
+	S2LatLng pt(result.point());
+	float realLatitude = pt.lat().degrees();
+	float realLongitude = pt.lng().degrees();
+
+	return GridIndex{result.data(), distance, realLatitude, realLongitude};
 
 }
 }

@@ -14,9 +14,36 @@ func TestLookup(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	expected := GeoResponse{3, 0}
-	if expected != gr {
-		t.Errorf("expected %v, got %v", expected, gr)
+
+	if gr.Idx != 3 {
+		t.Errorf("unexpected idx: %d", gr.Idx)
+	}
+	if gr.Distance != 0 {
+		t.Errorf("unexpected distance: %d", gr.Distance)
+	}
+	expectedPoint := Point{Lat: 61, Long: 11}
+	if gr.Point != expectedPoint {
+		t.Errorf("unexpected point: %v", gr.Point)
+	}
+}
+
+func TestCorrectLatLon(t *testing.T) {
+	geo, err := New([]float32{60, 60, 61, 61}, []float32{10, 11, 10, 11})
+	if err != nil {
+		t.Fatalf("Error when creating lookup")
+	}
+	defer geo.Free()
+	gr, err := geo.Nearest(61, 11.1)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if gr.Idx != 3 {
+		t.Errorf("unexpected idx: %d", gr.Idx)
+	}
+	expectedPoint := Point{Lat: 61, Long: 11}
+	if gr.Point != expectedPoint {
+		t.Errorf("unexpected point: %v", gr.Point)
 	}
 }
 

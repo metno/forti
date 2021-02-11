@@ -78,5 +78,7 @@ func (l *GeoMap) Nearest(latitude, longitude float32) (geo GeoResponse, err erro
 	gi := C.Nearest(l.data, C.float(latitude), C.float(longitude))
 	geo.Idx = uint32(gi.Idx)
 	geo.Distance = uint32(gi.Distance)
+	geo.Point.Lat = float32(gi.Latitude)
+	geo.Point.Long = float32(gi.Longitude)
 	return
 }
