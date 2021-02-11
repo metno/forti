@@ -1,6 +1,7 @@
 package store
 
 import (
+	"bufio"
 	"context"
 	"encoding/binary"
 	"fmt"
@@ -97,8 +98,14 @@ func storeData(ctx context.Context, u *upload.Uploader, area string, version int
 		return nil, err
 	}
 
-	meta, err := collect.Collect(ctx, vars, out)
+	buf := bufio.NewWriter(out)
+
+	meta, err := collect.Collect(ctx, vars, buf)
 	if err != nil {
+		return nil, err
+	}
+
+	if err := buf.Flush(); err != nil {
 		return nil, err
 	}
 
