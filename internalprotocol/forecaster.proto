@@ -39,6 +39,13 @@ message Forecast {
 message ForecastMeta {
     google.protobuf.Timestamp updatedAt = 1;
     google.protobuf.Timestamp nextUpdate = 2;
+    
+    Point GridPoint = 3;
+}
+
+message Point {
+    float Lat  = 1;
+    float Long = 2;
 }
 
 message ParameterMeta {

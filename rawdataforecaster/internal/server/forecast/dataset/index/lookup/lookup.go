@@ -9,6 +9,8 @@ import (
 	"errors"
 	"fmt"
 	"unsafe"
+
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/pointdata"
 )
 
 // GeoMap allows looking up nearest index from a list of lat/lon pairs.
@@ -20,13 +22,7 @@ type GeoMap struct {
 type GeoResponse struct {
 	Idx      uint32
 	Distance uint32
-	Point    Point
-}
-
-// Point is a grid point in latitude, longitude from the index lookup.
-type Point struct {
-	Lat  float32
-	Long float32
+	Point    pointdata.Point
 }
 
 func (gr GeoResponse) String() string {

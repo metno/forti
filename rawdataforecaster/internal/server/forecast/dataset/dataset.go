@@ -4,12 +4,12 @@ package dataset
 import (
 	"context"
 	"fmt"
-	"math"
 	"time"
 
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/config"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index/grid"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index/lookup"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/values"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/pointdata"
 	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
@@ -137,18 +137,18 @@ func (d *Dataset) Read(latitude, longitude float32) (*pointdata.PointData, error
 
 // DistanceTo returns the distance in meters from the given latitude/longitude
 // to the closest point that we have data for.
-func (d *Dataset) DistanceTo(latitude, longitude float32) (uint, error) {
-	min := uint32(math.MaxUint32)
+func (d *Dataset) ClosestPoint(latitude, longitude float32) (*lookup.GeoResponse, error) {
+	var min *lookup.GeoResponse
 	for _, n := range d.lookups {
 		nearest, err := n.Nearest(latitude, longitude)
 		if err != nil {
-			return 0, err
+			return nil, err
 		}
-		if nearest.Distance < min {
-			min = nearest.Distance
+		if min == nil || nearest.Distance < min.Distance {
+			min = &nearest
 		}
 	}
-	return uint(min), nil
+	return min, nil
 }
 
 func (d *Dataset) HasPolygon() bool {

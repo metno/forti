@@ -74,6 +74,8 @@ func (s *forecastServer) GetForecast(ctx context.Context, in *internalprotocol.L
 		parameterCount += len(data.ParameterMeta)
 	}
 	values := make([]float32, 0, dataSize)
+	gridPoint := internalprotocol.Point{Lat: pointData.Meta.GridPoint.Lat, Long: pointData.Meta.GridPoint.Long}
+
 	parameterMeta := make([]*internalprotocol.ParameterMeta, 0, parameterCount)
 
 	for _, data := range pointData.Data {
@@ -99,6 +101,7 @@ func (s *forecastServer) GetForecast(ctx context.Context, in *internalprotocol.L
 		ForecastMeta: &internalprotocol.ForecastMeta{
 			UpdatedAt:  timestamppb.New(pointData.Meta.UpdatedAt),
 			NextUpdate: timestamppb.New(pointData.Meta.NextUpdate),
+			GridPoint:  &gridPoint,
 		},
 		ParameterMeta: parameterMeta,
 		Data:          values,

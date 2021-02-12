@@ -5,13 +5,13 @@ import (
 	"context"
 	"errors"
 	"log"
-	"math"
 	"sync"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/config"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index/lookup"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/pointdata"
 	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
@@ -70,35 +70,46 @@ func (f *Forecast) Get(latitude, longitude float32) (*pointdata.PointData, error
 		return nil, err
 	}
 
-	if !best.WithinPolygon(latitude, longitude) {
+	if !best.d.WithinPolygon(latitude, longitude) {
 		return nil, ErrOutsideAllGrids
 	}
 
-	areaCounter.With(prometheus.Labels{"area": best.Meta.Area}).Inc()
+	areaCounter.With(prometheus.Labels{"area": best.d.Meta.Area}).Inc()
 
-	return best.Read(latitude, longitude)
+	pointData, err := best.d.Read(latitude, longitude)
+	if err != nil {
+		return nil, err
+	}
+	pointData.Meta.GridPoint = best.point
+
+	return pointData, nil
 }
 
-func (f *Forecast) bestArea(latitude, longitude float32) (*dataset.Dataset, error) {
-	selectedDistance := uint(math.MaxUint32)
+type bestDataset struct {
+	d     *dataset.Dataset
+	point pointdata.Point
+}
+
+func (f *Forecast) bestArea(latitude, longitude float32) (*bestDataset, error) {
 	var selected *dataset.Dataset
+	var selectedPoint *lookup.GeoResponse
 	for _, area := range f.datasets {
-		distance, err := area.DistanceTo(latitude, longitude)
+		closestPoint, err := area.ClosestPoint(latitude, longitude)
 		if err != nil {
 			return nil, err
 		}
-		if distance < selectedDistance {
-			selectedDistance = distance
+		if selectedPoint == nil || closestPoint.Distance < selectedPoint.Distance {
 			selected = area
+			selectedPoint = closestPoint
 		}
 	}
 	if selected == nil {
 		return nil, errors.New("no datasets available")
 	}
 
-	distanceHistogram.With(prometheus.Labels{"area": selected.Meta.Area}).Observe(float64(selectedDistance))
+	distanceHistogram.With(prometheus.Labels{"area": selected.Meta.Area}).Observe(float64(selectedPoint.Distance))
 
-	return selected, nil
+	return &bestDataset{selected, selectedPoint.Point}, nil
 }
 
 func (f *Forecast) run() {

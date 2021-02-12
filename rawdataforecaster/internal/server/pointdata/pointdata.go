@@ -34,6 +34,12 @@ type Meta struct {
 	Version    int
 	UpdatedAt  time.Time
 	NextUpdate time.Time
+	GridPoint  Point
+}
+
+type Point struct {
+	Lat  float32
+	Long float32
 }
 
 // PointDataCollection contains forecast information for a single point
