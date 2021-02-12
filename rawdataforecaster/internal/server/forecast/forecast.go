@@ -12,7 +12,6 @@ import (
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/config"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index/lookup"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/pointdata"
 	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
 
@@ -61,7 +60,7 @@ func newFromClient(store *fortiblob.Client, cfg *config.Configuration) (*Forecas
 var ErrOutsideAllGrids = errors.New("outside all grids")
 
 // Get returns a forecast for the given latitude and longitude. Returns ErrOutsideAllGrids if outside all grids.
-func (f *Forecast) Get(latitude, longitude float32) (*pointdata.PointData, error) {
+func (f *Forecast) Get(latitude, longitude float32) (*dataset.PointData, error) {
 	f.m.RLock()
 	defer f.m.RUnlock()
 
@@ -80,14 +79,14 @@ func (f *Forecast) Get(latitude, longitude float32) (*pointdata.PointData, error
 	if err != nil {
 		return nil, err
 	}
-	pointData.Meta.GridPoint = best.point
+	pointData.GridPoint = best.gridPoint
 
 	return pointData, nil
 }
 
 type bestDataset struct {
-	d     *dataset.Dataset
-	point pointdata.Point
+	d         *dataset.Dataset
+	gridPoint dataset.Point
 }
 
 func (f *Forecast) bestArea(latitude, longitude float32) (*bestDataset, error) {
@@ -109,7 +108,8 @@ func (f *Forecast) bestArea(latitude, longitude float32) (*bestDataset, error) {
 
 	distanceHistogram.With(prometheus.Labels{"area": selected.Meta.Area}).Observe(float64(selectedPoint.Distance))
 
-	return &bestDataset{selected, selectedPoint.Point}, nil
+	return &bestDataset{selected,
+		dataset.Point{Lat: selectedPoint.Lat, Long: selectedPoint.Long}}, nil
 }
 
 func (f *Forecast) run() {

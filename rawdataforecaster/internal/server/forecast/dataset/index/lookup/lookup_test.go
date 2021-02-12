@@ -2,8 +2,6 @@ package lookup
 
 import (
 	"testing"
-
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/pointdata"
 )
 
 func TestLookup(t *testing.T) {
@@ -23,9 +21,11 @@ func TestLookup(t *testing.T) {
 	if gr.Distance != 0 {
 		t.Errorf("unexpected distance: %d", gr.Distance)
 	}
-	expectedPoint := pointdata.Point{Lat: 61, Long: 11}
-	if gr.Point != expectedPoint {
-		t.Errorf("unexpected point: %v", gr.Point)
+	Lat := float32(61.0)
+	Long := float32(11.0)
+
+	if gr.Lat != Lat || gr.Long != Long {
+		t.Errorf("unexpected point: Lat: %v, Long: %v", gr.Lat, gr.Long)
 	}
 }
 
@@ -43,9 +43,12 @@ func TestCorrectLatLon(t *testing.T) {
 	if gr.Idx != 3 {
 		t.Errorf("unexpected idx: %d", gr.Idx)
 	}
-	expectedPoint := pointdata.Point{Lat: 61, Long: 11}
-	if gr.Point != expectedPoint {
-		t.Errorf("unexpected point: %v", gr.Point)
+
+	Lat := float32(61.0)
+	Long := float32(11.0)
+
+	if gr.Lat != Lat || gr.Long != Long {
+		t.Errorf("unexpected point: Lat: %v, Long: %v", gr.Lat, gr.Long)
 	}
 }
 

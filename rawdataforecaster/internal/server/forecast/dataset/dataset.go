@@ -11,17 +11,23 @@ import (
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index/grid"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index/lookup"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/values"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/pointdata"
 	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
 
 // Dataset contains a forecast for a single area.
 type Dataset struct {
-	Meta pointdata.Meta
+	Meta Meta
 
 	Grid    *grid.Grid
 	readers []values.Reader
 	lookups []index.Nearester
+}
+
+type Meta struct {
+	Area       string
+	Version    int
+	UpdatedAt  time.Time
+	NextUpdate time.Time
 }
 
 // Download creates and returns a Dataset from the given specification.
@@ -68,7 +74,7 @@ func Download(ctx context.Context, source *fortiblob.Client, datasetMeta *fortib
 
 	readyTime := time.Now().UTC()
 	return &Dataset{
-		Meta: pointdata.Meta{
+		Meta: Meta{
 			Area:       datasetMeta.Area,
 			Version:    datasetMeta.Version,
 			UpdatedAt:  readyTime,
@@ -114,8 +120,8 @@ func (d *Dataset) Close() error {
 }
 
 // Read returns the best forecast for the given latitude and longitude.
-func (d *Dataset) Read(latitude, longitude float32) (*pointdata.PointData, error) {
-	pointData := pointdata.PointData{
+func (d *Dataset) Read(latitude, longitude float32) (*PointData, error) {
+	pointData := PointData{
 		Meta: &d.Meta,
 	}
 
