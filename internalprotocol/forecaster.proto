@@ -39,6 +39,8 @@ message Forecast {
 message ForecastMeta {
     google.protobuf.Timestamp updatedAt = 1;
     google.protobuf.Timestamp nextUpdate = 2;
+    
+    Location GridLocation = 3;
 }
 
 message ParameterMeta {

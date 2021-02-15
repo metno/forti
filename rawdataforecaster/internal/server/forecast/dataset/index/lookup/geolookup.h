@@ -10,6 +10,8 @@ struct GridIndex
 {
     unsigned Idx;       //< Index into the grid
     unsigned Distance;  //< Result's distance from requested lat/lon, in meters
+    float Latitude;     //< Latitude of the returned grid point
+    float Longitude;    //< Loongitude of the returned grid point
 };
 
 void * MakePointIndex(float * lat, float * lon, unsigned size);

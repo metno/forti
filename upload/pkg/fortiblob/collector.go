@@ -18,8 +18,8 @@ type GeographicArea struct {
 }
 
 type MetaCollection struct {
-	Parameters map[string]ParameterMeta `json:"parameters"`
-	PointCount int                      `json:"number_of_points"`
+	Parameters    map[string]ParameterMeta `json:"parameters"`
+	LocationCount int                      `json:"number_of_points"`
 }
 
 // ParameterMeta contains metadata about a forecast for a single parameter

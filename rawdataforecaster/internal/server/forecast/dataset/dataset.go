@@ -4,24 +4,30 @@ package dataset
 import (
 	"context"
 	"fmt"
-	"math"
 	"time"
 
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/config"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index/grid"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index/lookup"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/values"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/pointdata"
 	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
 
 // Dataset contains a forecast for a single area.
 type Dataset struct {
-	Meta pointdata.Meta
+	Meta Meta
 
 	Grid    *grid.Grid
 	readers []values.Reader
 	lookups []index.Nearester
+}
+
+type Meta struct {
+	Area       string
+	Version    int
+	UpdatedAt  time.Time
+	NextUpdate time.Time
 }
 
 // Download creates and returns a Dataset from the given specification.
@@ -68,7 +74,7 @@ func Download(ctx context.Context, source *fortiblob.Client, datasetMeta *fortib
 
 	readyTime := time.Now().UTC()
 	return &Dataset{
-		Meta: pointdata.Meta{
+		Meta: Meta{
 			Area:       datasetMeta.Area,
 			Version:    datasetMeta.Version,
 			UpdatedAt:  readyTime,
@@ -114,8 +120,8 @@ func (d *Dataset) Close() error {
 }
 
 // Read returns the best forecast for the given latitude and longitude.
-func (d *Dataset) Read(latitude, longitude float32) (*pointdata.PointData, error) {
-	pointData := pointdata.PointData{
+func (d *Dataset) Read(latitude, longitude float32) (*LocationData, error) {
+	locationData := LocationData{
 		Meta: &d.Meta,
 	}
 
@@ -130,25 +136,25 @@ func (d *Dataset) Read(latitude, longitude float32) (*pointdata.PointData, error
 		if err != nil {
 			return nil, err
 		}
-		pointData.Data = append(pointData.Data, *data)
+		locationData.Data = append(locationData.Data, *data)
 	}
-	return &pointData, nil
+	return &locationData, nil
 }
 
-// DistanceTo returns the distance in meters from the given latitude/longitude
-// to the closest point that we have data for.
-func (d *Dataset) DistanceTo(latitude, longitude float32) (uint, error) {
-	min := uint32(math.MaxUint32)
+// ClosestGridLocation returns the index GeoResponse struct for the grid location closest
+// to the user requested locations.
+func (d *Dataset) ClosestGridLocation(latitude, longitude float32) (*lookup.GeoResponse, error) {
+	var min *lookup.GeoResponse
 	for _, n := range d.lookups {
 		nearest, err := n.Nearest(latitude, longitude)
 		if err != nil {
-			return 0, err
+			return nil, err
 		}
-		if nearest.Distance < min {
-			min = nearest.Distance
+		if min == nil || nearest.Distance < min.Distance {
+			min = &nearest
 		}
 	}
-	return uint(min), nil
+	return min, nil
 }
 
 func (d *Dataset) HasPolygon() bool {

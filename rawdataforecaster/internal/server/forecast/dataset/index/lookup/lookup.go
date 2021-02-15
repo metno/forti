@@ -20,6 +20,8 @@ type GeoMap struct {
 type GeoResponse struct {
 	Idx      uint32
 	Distance uint32
+	Lat      float32
+	Long     float32
 }
 
 func (gr GeoResponse) String() string {
@@ -71,5 +73,7 @@ func (l *GeoMap) Nearest(latitude, longitude float32) (geo GeoResponse, err erro
 	gi := C.Nearest(l.data, C.float(latitude), C.float(longitude))
 	geo.Idx = uint32(gi.Idx)
 	geo.Distance = uint32(gi.Distance)
+	geo.Lat = float32(gi.Latitude)
+	geo.Long = float32(gi.Longitude)
 	return
 }

@@ -40,24 +40,24 @@ func (r *Reader) Close() error {
 	return nil
 }
 
-func (r *Reader) Read(idx int) (*values.PointDataCollection, error) {
+func (r *Reader) Read(idx int) (*values.LocationDataCollection, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
-	reader, err := r.source.GetDataRange(ctx, &r.datasetMeta, r.grid, r.gridMeta.PointCount*idx*2, r.gridMeta.PointCount*2)
+	reader, err := r.source.GetDataRange(ctx, &r.datasetMeta, r.grid, r.gridMeta.LocationCount*idx*2, r.gridMeta.LocationCount*2)
 	if err != nil {
 		return nil, err
 	}
 	defer reader.Close()
 
-	buffer := make([]int16, r.gridMeta.PointCount)
+	buffer := make([]int16, r.gridMeta.LocationCount)
 	if err := binary.Read(reader, binary.LittleEndian, &buffer); err != nil {
 		return nil, err
 	}
 
-	ret := values.PointDataCollection{
+	ret := values.LocationDataCollection{
 		ParameterMeta: r.gridMeta.Parameters,
-		Data:          make([]float32, r.gridMeta.PointCount),
+		Data:          make([]float32, r.gridMeta.LocationCount),
 	}
 
 	for i, bufData := range buffer {

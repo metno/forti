@@ -49,7 +49,7 @@ func makeTestingClient() *fortiblob.Client {
 				SliceFrom: 3,
 			},
 		},
-		PointCount: 4,
+		LocationCount: 4,
 	}
 	if err := u.SetGridMeta(ctx, &paMeta, area, version, gridid); err != nil {
 		panic(err)

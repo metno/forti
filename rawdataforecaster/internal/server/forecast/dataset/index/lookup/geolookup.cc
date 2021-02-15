@@ -52,7 +52,11 @@ GridIndex Nearest(void * lookup, float latitude, float longitude)
 
 	unsigned distance = S2Earth::RadiansToMeters(result.distance().radians());
 
-	return GridIndex{result.data(), distance};
+	S2LatLng pt(result.point());
+	float realLatitude = pt.lat().degrees();
+	float realLongitude = pt.lng().degrees();
+
+	return GridIndex{result.data(), distance, realLatitude, realLongitude};
 
 }
 }

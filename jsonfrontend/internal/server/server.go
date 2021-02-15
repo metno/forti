@@ -64,6 +64,10 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add(header.Key, header.Value)
 	}
 
+	if config.Configuration.LocationFromGrid {
+		location = data.ForecastMeta.GridLocation
+	}
+
 	// output := encode.GetForecast(data)
 	output, err := encode.Encode(location, data)
 	if err != nil {

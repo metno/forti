@@ -26,6 +26,7 @@ func Initialize(filename string) error {
 
 type Elements struct {
 	CutForecast      bool                 `json:"cut_forecast,omitempty"`
+	LocationFromGrid bool                 `json:"location_from_grid,omitempty"`
 	HTTPHeaders      []HTTPHeader         `json:"http_headers"`
 	DataExpiryOffset int                  `json:"data_expiry_offset"`
 	Meta             Meta                 `json:"meta,omitempty"`

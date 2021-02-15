@@ -1,5 +1,6 @@
 {
     "cut_forecast": true,
+    "location_from_grid": false,
     "http_headers": [
         {
             "key": "Content-Type",
