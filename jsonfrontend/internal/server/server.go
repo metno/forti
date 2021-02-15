@@ -65,9 +65,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if config.Configuration.LocationFromGrid {
-		location = &internalprotocol.Location{
-			Latitude:  data.ForecastMeta.GridPoint.Lat,
-			Longitude: data.ForecastMeta.GridPoint.Long}
+		location = data.ForecastMeta.GridLocation
 	}
 
 	// output := encode.GetForecast(data)

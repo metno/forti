@@ -19,20 +19,20 @@ func (r *MemoryReader) Close() error {
 }
 
 // Read gets the forecast for the given index.
-func (r *MemoryReader) Read(idx int) (*values.PointDataCollection, error) {
-	sliceFrom := idx * r.PointCount
-	sliceTo := sliceFrom + r.PointCount
+func (r *MemoryReader) Read(idx int) (*values.LocationDataCollection, error) {
+	sliceFrom := idx * r.LocationCount
+	sliceTo := sliceFrom + r.LocationCount
 
 	if sliceTo >= len(r.data) {
 		return nil, errors.New("out of bounds")
 	}
 
-	data := make([]float32, r.PointCount)
+	data := make([]float32, r.LocationCount)
 	for i, val := range r.data[sliceFrom:sliceTo] {
 		data[i] = float32(val) / 10
 	}
 
-	return &values.PointDataCollection{
+	return &values.LocationDataCollection{
 		ParameterMeta: r.Parameters,
 		Data:          data,
 	}, nil

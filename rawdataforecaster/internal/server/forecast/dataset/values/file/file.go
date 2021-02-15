@@ -55,13 +55,13 @@ func (r *reader) Close() error {
 	return os.Remove(r.file.Name())
 }
 
-func (r *reader) Read(idx int) (*values.PointDataCollection, error) {
-	ret := values.PointDataCollection{
+func (r *reader) Read(idx int) (*values.LocationDataCollection, error) {
+	ret := values.LocationDataCollection{
 		ParameterMeta: r.meta.Parameters,
-		Data:          make([]float32, r.meta.PointCount),
+		Data:          make([]float32, r.meta.LocationCount),
 	}
 
-	readFrom := idx * r.meta.PointCount * 2
+	readFrom := idx * r.meta.LocationCount * 2
 	buffer := make([]byte, len(ret.Data)*2)
 	if _, err := r.file.ReadAt(buffer, int64(readFrom)); err != nil {
 		return nil, fmt.Errorf("b: %w", err)

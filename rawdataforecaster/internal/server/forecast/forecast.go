@@ -60,7 +60,7 @@ func newFromClient(store *fortiblob.Client, cfg *config.Configuration) (*Forecas
 var ErrOutsideAllGrids = errors.New("outside all grids")
 
 // Get returns a forecast for the given latitude and longitude. Returns ErrOutsideAllGrids if outside all grids.
-func (f *Forecast) Get(latitude, longitude float32) (*dataset.PointData, error) {
+func (f *Forecast) Get(latitude, longitude float32) (*dataset.LocationData, error) {
 	f.m.RLock()
 	defer f.m.RUnlock()
 
@@ -69,47 +69,47 @@ func (f *Forecast) Get(latitude, longitude float32) (*dataset.PointData, error) 
 		return nil, err
 	}
 
-	if !best.d.WithinPolygon(latitude, longitude) {
+	if !best.D.WithinPolygon(latitude, longitude) {
 		return nil, ErrOutsideAllGrids
 	}
 
-	areaCounter.With(prometheus.Labels{"area": best.d.Meta.Area}).Inc()
+	areaCounter.With(prometheus.Labels{"area": best.D.Meta.Area}).Inc()
 
-	pointData, err := best.d.Read(latitude, longitude)
+	locationData, err := best.D.Read(latitude, longitude)
 	if err != nil {
 		return nil, err
 	}
-	pointData.GridPoint = best.gridPoint
+	locationData.GridLocation = best.GridLocation
 
-	return pointData, nil
+	return locationData, nil
 }
 
 type bestDataset struct {
-	d         *dataset.Dataset
-	gridPoint dataset.Point
+	D            *dataset.Dataset
+	GridLocation dataset.Location
 }
 
 func (f *Forecast) bestArea(latitude, longitude float32) (*bestDataset, error) {
 	var selected *dataset.Dataset
-	var selectedPoint *lookup.GeoResponse
+	var selectedLocation *lookup.GeoResponse
 	for _, area := range f.datasets {
-		closestPoint, err := area.ClosestPoint(latitude, longitude)
+		closestLocation, err := area.ClosestGridLocation(latitude, longitude)
 		if err != nil {
 			return nil, err
 		}
-		if selectedPoint == nil || closestPoint.Distance < selectedPoint.Distance {
+		if selectedLocation == nil || closestLocation.Distance < selectedLocation.Distance {
 			selected = area
-			selectedPoint = closestPoint
+			selectedLocation = closestLocation
 		}
 	}
 	if selected == nil {
 		return nil, errors.New("no datasets available")
 	}
 
-	distanceHistogram.With(prometheus.Labels{"area": selected.Meta.Area}).Observe(float64(selectedPoint.Distance))
+	distanceHistogram.With(prometheus.Labels{"area": selected.Meta.Area}).Observe(float64(selectedLocation.Distance))
 
 	return &bestDataset{selected,
-		dataset.Point{Lat: selectedPoint.Lat, Long: selectedPoint.Long}}, nil
+		dataset.Location{Lat: selectedLocation.Lat, Long: selectedLocation.Long}}, nil
 }
 
 func (f *Forecast) run() {

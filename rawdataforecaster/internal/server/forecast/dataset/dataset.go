@@ -120,8 +120,8 @@ func (d *Dataset) Close() error {
 }
 
 // Read returns the best forecast for the given latitude and longitude.
-func (d *Dataset) Read(latitude, longitude float32) (*PointData, error) {
-	pointData := PointData{
+func (d *Dataset) Read(latitude, longitude float32) (*LocationData, error) {
+	locationData := LocationData{
 		Meta: &d.Meta,
 	}
 
@@ -136,14 +136,14 @@ func (d *Dataset) Read(latitude, longitude float32) (*PointData, error) {
 		if err != nil {
 			return nil, err
 		}
-		pointData.Data = append(pointData.Data, *data)
+		locationData.Data = append(locationData.Data, *data)
 	}
-	return &pointData, nil
+	return &locationData, nil
 }
 
-// DistanceTo returns the distance in meters from the given latitude/longitude
-// to the closest point that we have data for.
-func (d *Dataset) ClosestPoint(latitude, longitude float32) (*lookup.GeoResponse, error) {
+// ClosestGridLocation returns the index GeoResponse struct for the grid location closest
+// to the user requested locations.
+func (d *Dataset) ClosestGridLocation(latitude, longitude float32) (*lookup.GeoResponse, error) {
 	var min *lookup.GeoResponse
 	for _, n := range d.lookups {
 		nearest, err := n.Nearest(latitude, longitude)

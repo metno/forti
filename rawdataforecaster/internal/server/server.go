@@ -57,7 +57,7 @@ func newForecastServer(conf *config.Configuration) (*forecastServer, error) {
 
 func (s *forecastServer) GetForecast(ctx context.Context, in *internalprotocol.Location) (*internalprotocol.Forecast, error) {
 
-	pointData, err := s.forecast.Get(in.Latitude, in.Longitude)
+	locationData, err := s.forecast.Get(in.Latitude, in.Longitude)
 	if err != nil {
 		if errors.Is(err, forecast.ErrOutsideAllGrids) {
 			return &internalprotocol.Forecast{
@@ -69,16 +69,16 @@ func (s *forecastServer) GetForecast(ctx context.Context, in *internalprotocol.L
 
 	var dataSize int
 	var parameterCount int
-	for _, data := range pointData.Data {
+	for _, data := range locationData.Data {
 		dataSize += len(data.Data)
 		parameterCount += len(data.ParameterMeta)
 	}
 	values := make([]float32, 0, dataSize)
-	gridPoint := internalprotocol.Point{Lat: pointData.GridPoint.Lat, Long: pointData.GridPoint.Long}
+	gridLocation := internalprotocol.Location{Latitude: locationData.GridLocation.Lat, Longitude: locationData.GridLocation.Long}
 
 	parameterMeta := make([]*internalprotocol.ParameterMeta, 0, parameterCount)
 
-	for _, data := range pointData.Data {
+	for _, data := range locationData.Data {
 		for parameter, meta := range data.ParameterMeta {
 			times := make([]*timestamppb.Timestamp, len(meta.Times))
 			for i, t := range meta.Times {
@@ -99,9 +99,9 @@ func (s *forecastServer) GetForecast(ctx context.Context, in *internalprotocol.L
 	forecast := internalprotocol.Forecast{
 		ForecastStatus: internalprotocol.ForecastStatus_OK,
 		ForecastMeta: &internalprotocol.ForecastMeta{
-			UpdatedAt:  timestamppb.New(pointData.Meta.UpdatedAt),
-			NextUpdate: timestamppb.New(pointData.Meta.NextUpdate),
-			GridPoint:  &gridPoint,
+			UpdatedAt:    timestamppb.New(locationData.Meta.UpdatedAt),
+			NextUpdate:   timestamppb.New(locationData.Meta.NextUpdate),
+			GridLocation: &gridLocation,
 		},
 		ParameterMeta: parameterMeta,
 		Data:          values,

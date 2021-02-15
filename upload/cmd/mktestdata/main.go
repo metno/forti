@@ -101,11 +101,11 @@ func writeMeta(path, parameters string) (*fortiblob.MetaCollection, error) {
 		pm := fortiblob.ParameterMeta{
 			Units:     "u_" + match[1],
 			Times:     times,
-			SliceFrom: meta.PointCount,
+			SliceFrom: meta.LocationCount,
 		}
-		meta.PointCount += len(times)
+		meta.LocationCount += len(times)
 		if len(times) == 0 {
-			meta.PointCount++
+			meta.LocationCount++
 		}
 		meta.Parameters[match[1]] = pm
 	}
@@ -124,7 +124,7 @@ func writeMeta(path, parameters string) (*fortiblob.MetaCollection, error) {
 }
 
 func writeData(path string, meta *fortiblob.MetaCollection, lat, lon []float32) error {
-	totalSize := len(lat) * meta.PointCount
+	totalSize := len(lat) * meta.LocationCount
 
 	data := make([]int16, totalSize)
 
@@ -132,12 +132,12 @@ func writeData(path string, meta *fortiblob.MetaCollection, lat, lon []float32) 
 		for _, pMeta := range meta.Parameters {
 			if len(pMeta.Times) == 0 {
 				value := (i * 100) + pMeta.SliceFrom
-				idx := (i * meta.PointCount) + pMeta.SliceFrom
+				idx := (i * meta.LocationCount) + pMeta.SliceFrom
 				data[idx] = int16(value) * 10
 			}
 			for t := range pMeta.Times {
 				value := (i * 100) + (t * 10) + pMeta.SliceFrom
-				idx := (i * meta.PointCount) + pMeta.SliceFrom + t
+				idx := (i * meta.LocationCount) + pMeta.SliceFrom + t
 				data[idx] = int16(value) * 10
 			}
 		}

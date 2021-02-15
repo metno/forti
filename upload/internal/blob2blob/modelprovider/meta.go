@@ -13,8 +13,8 @@ type Meta struct {
 }
 
 type CollectedMeta struct {
-	Parameters     map[string]ParameterMeta `json:"parameters"`
-	NumberOfPoints int                      `json:"number_of_points"`
+	Parameters        map[string]ParameterMeta `json:"parameters"`
+	NumberOfLocations int                      `json:"number_of_points"`
 }
 
 // ParameterMeta contains metadata about a single parameter
