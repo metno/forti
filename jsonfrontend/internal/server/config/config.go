@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -8,6 +9,20 @@ import (
 
 var Configuration *Elements
 
+// InitializeFromString populates global Configuration with values from string.
+func InitializeFromString(config string) error {
+	br := bytes.NewReader([]byte(config))
+
+	var conf Elements
+	if err := json.NewDecoder(br).Decode(&conf); err != nil {
+		return fmt.Errorf("unable to read json configuration: %w", err)
+	}
+	Configuration = &conf
+
+	return nil
+}
+
+// Initialize populates global Configuration with values from specified file path.
 func Initialize(filename string) error {
 	f, err := os.Open(filename)
 	if err != nil {

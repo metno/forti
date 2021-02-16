@@ -1,9 +1,9 @@
 package jsonformat
 
 type GeoJSON struct {
-	Type       string      `json:"type"`
-	Geometry   Geometry    `json:"geometry"`
-	Properties interface{} `json:"properties,omitempty"`
+	Type       string    `json:"type"`
+	Geometry   Geometry  `json:"geometry"`
+	Properties *Forecast `json:"properties,omitempty"`
 }
 
 type Geometry struct {
