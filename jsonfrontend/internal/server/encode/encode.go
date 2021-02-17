@@ -12,7 +12,6 @@ import (
 )
 
 func Encode(location *internalprotocol.Location, forecast *internalprotocol.Forecast) (*jsonformat.GeoJSON, error) {
-
 	properties, err := getSerializationForecast(forecast)
 	if err != nil {
 		return nil, err
@@ -22,10 +21,10 @@ func Encode(location *internalprotocol.Location, forecast *internalprotocol.Fore
 		Type: "Feature",
 		Geometry: jsonformat.Geometry{
 			Type: "Point",
-			Coordinates: []float32{
-				location.Longitude,
-				location.Latitude,
-				getAltitude(forecast),
+			Coordinates: []jsonformat.GeoJSONCoordinate{
+				jsonformat.GeoJSONCoordinate(location.Longitude),
+				jsonformat.GeoJSONCoordinate(location.Latitude),
+				jsonformat.GeoJSONCoordinate(getAltitude(forecast)),
 			},
 		},
 		Properties: properties,

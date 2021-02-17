@@ -71,8 +71,12 @@ func (h *handler) getAltitude(r *http.Request) (*jsonformat.GeoJSON, error) {
 	obj := jsonformat.GeoJSON{
 		Type: "Feature",
 		Geometry: jsonformat.Geometry{
-			Type:        "Point",
-			Coordinates: []float32{latitude, longitude, altitude},
+			Type: "Point",
+			Coordinates: []jsonformat.GeoJSONCoordinate{
+				jsonformat.GeoJSONCoordinate(latitude),
+				jsonformat.GeoJSONCoordinate(longitude),
+				jsonformat.GeoJSONCoordinate(altitude),
+			},
 		},
 	}
 
