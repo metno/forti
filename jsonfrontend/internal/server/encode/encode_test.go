@@ -7,6 +7,7 @@ import (
 
 	"gitlab.met.no/forti/f2/internalprotocol"
 	"gitlab.met.no/forti/f2/jsonfrontend/internal/server/config"
+	"gitlab.met.no/forti/f2/jsonfrontend/pkg/jsonformat"
 
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -36,6 +37,32 @@ const configString = `
 }
 `
 
+const expectedJSONResponse = `{
+	"type": "Feature",
+	"geometry": {
+		"type": "Point",
+		"coordinates": [10.1121, 59.1243, 0]
+	},
+	"properties": {
+		"meta": {
+			"updated_at": "1970-01-01T00:00:00Z",
+			"units": {
+				"air_temperature": "celsius"
+			}
+		},
+		"timeseries": [{
+			"time": "0001-01-01T00:00:00Z",
+			"data": {
+				"instant": {
+					"details": {
+						"air_temperature": 12.1
+					}
+				}
+			}
+		}]
+	}
+}`
+
 func TestEncode(t *testing.T) {
 	err := config.InitializeFromString(configString)
 	if err != nil {
@@ -45,7 +72,7 @@ func TestEncode(t *testing.T) {
 
 	location := internalprotocol.Location{
 		Latitude:  59.124263,
-		Longitude: 10.1121323,
+		Longitude: 10.00,
 	}
 
 	forecast := internalprotocol.Forecast{
@@ -57,19 +84,21 @@ func TestEncode(t *testing.T) {
 				Parameter: "air_temperature_2m",
 				Units:     "celsius",
 				SliceFrom: 0,
-				Times:     []*timestamppb.Timestamp{timestamppb.New(time.Now())},
+				Times:     []*timestamppb.Timestamp{timestamppb.New(time.Time{})},
+			},
+			{
+				Parameter: "altitude",
+				Units:     "meter",
+				SliceFrom: 1,
+				Times:     []*timestamppb.Timestamp{timestamppb.New(time.Time{})},
 			},
 		},
-		Data: []float32{12.1},
+		Data: []float32{12.1, 0},
 	}
 
 	geojson, err := Encode(&location, &forecast)
 	if err != nil {
 		t.Errorf("Expected correct GeoJSON; Got error: %v", err)
-	}
-
-	if geojson.Geometry.Coordinates[0] != location.Longitude {
-		t.Errorf("Expected latitude coord: %f; Got %f", location.Longitude, geojson.Geometry.Coordinates[0])
 	}
 
 	if len(geojson.Properties.Timeseries) == 0 {
@@ -81,9 +110,26 @@ func TestEncode(t *testing.T) {
 		t.Errorf("Expected air_temperature 12.1; Got %f", airTemp)
 	}
 
-	// Test serialize geojson
-	_, err = json.Marshal(geojson)
+	payload, err := json.Marshal(geojson)
 	if err != nil {
-		t.Errorf("Expected error free json encoding of geojson; Got error: %v.", err)
+		t.Errorf("Expected error free json encoding of geojson; Got error: %v., payload: %s", err, payload)
+	}
+
+	// Decode back and test that coordinates have been trunkated and rounded correctly.
+	decoded := jsonformat.GeoJSON{}
+	err = json.Unmarshal(payload, &decoded)
+	if err != nil {
+		t.Errorf("Expected successful decoding of geosjon; Got error: %v", err)
+		return
+	}
+
+	responseLongitude := jsonformat.GeoJSONCoordinate(10)
+	responseLatitude := jsonformat.GeoJSONCoordinate(59.1243)
+	if decoded.Geometry.Coordinates[0] != responseLongitude {
+		t.Errorf("Expected longitude in decoded response to be %f; Got %f.", responseLongitude, decoded.Geometry.Coordinates[0])
+	}
+
+	if decoded.Geometry.Coordinates[1] != responseLatitude {
+		t.Errorf("Expected longitude in decoded response to be %f; Got %f.", responseLatitude, decoded.Geometry.Coordinates[1])
 	}
 }
