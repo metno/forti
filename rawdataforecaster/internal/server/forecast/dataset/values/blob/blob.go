@@ -60,8 +60,8 @@ func (r *Reader) Read(idx int) (*values.LocationDataCollection, error) {
 		Data:          make([]float32, r.gridMeta.LocationCount),
 	}
 
-	for i, bufData := range buffer {
-		ret.Data[i] = float32(bufData) / 10
+	for _, meta := range r.gridMeta.Parameters {
+		values.Read(&meta, ret.Data[meta.SliceFrom:], buffer[meta.SliceFrom:])
 	}
 
 	return &ret, nil

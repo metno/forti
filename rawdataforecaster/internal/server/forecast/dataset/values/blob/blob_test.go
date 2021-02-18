@@ -1,4 +1,4 @@
-package file
+package blob
 
 import (
 	"context"

@@ -5,7 +5,6 @@ import (
 
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/values"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/values/blob"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/values/file"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/values/memory"
 	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
@@ -22,8 +21,6 @@ func (c *Configuration) DownloadFunction() DownloadFunction {
 	switch c.Loader.Type {
 	case "memory":
 		return memory.Download
-	case "file":
-		return file.Download
 	case "blob":
 		return blob.Download
 	}

@@ -23,17 +23,19 @@ func (r *MemoryReader) Read(idx int) (*values.LocationDataCollection, error) {
 	sliceFrom := idx * r.LocationCount
 	sliceTo := sliceFrom + r.LocationCount
 
-	if sliceTo >= len(r.data) {
+	if sliceTo > len(r.data) {
 		return nil, errors.New("out of bounds")
 	}
 
-	data := make([]float32, r.LocationCount)
-	for i, val := range r.data[sliceFrom:sliceTo] {
-		data[i] = float32(val) / 10
+	in := r.data[sliceFrom:sliceTo]
+	out := make([]float32, len(in))
+
+	for _, meta := range r.Parameters {
+		values.Read(&meta, out[meta.SliceFrom:], in[meta.SliceFrom:])
 	}
 
 	return &values.LocationDataCollection{
 		ParameterMeta: r.Parameters,
-		Data:          data,
+		Data:          out,
 	}, nil
 }
