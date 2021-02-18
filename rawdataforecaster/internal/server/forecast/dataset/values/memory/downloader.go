@@ -55,11 +55,7 @@ func (d *downloader) getData(ctx context.Context, meta *fortiblob.DatasetMeta, g
 
 	log.Printf("Download %0.2f GiB from %s/%d/%s", float64(src.Size())/(1024*1024*1024), meta.Area, meta.Version, gridid)
 
-	// We return an array with an extra entry.
-	// First reserve the extra cap, and when returning we increase len with 1.
-	// This is because we want to be able to slice like this for the last element:
-	// ret[idx:len(ret)], which would otherwise fail.
-	ret := make([]int16, valueCount, valueCount+1)
+	ret := make([]int16, valueCount)
 
 	chunkSize := 1024 * 1024
 	for i := 0; i < int(valueCount); i += chunkSize {
@@ -74,5 +70,5 @@ func (d *downloader) getData(ctx context.Context, meta *fortiblob.DatasetMeta, g
 		}
 	}
 
-	return append(ret, 0), nil
+	return ret, nil
 }

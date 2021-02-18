@@ -27,4 +27,6 @@ type ParameterMeta struct {
 	Units     string      `json:"units"`
 	Times     []time.Time `json:"times"`
 	SliceFrom int         `json:"slice_from"`
+
+	ScaleFactor float32 `json:"scale_factor,omitempty"`
 }

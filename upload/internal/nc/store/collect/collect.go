@@ -56,11 +56,14 @@ func getMetaCollection(ctx context.Context, variables []*netcdf.Variable) (*fort
 			times = append(times, time.Time{})
 		}
 
-		ret.Parameters[v.Name] = fortiblob.ParameterMeta{
-			Units:     units,
-			Times:     times,
-			SliceFrom: ret.LocationCount,
+		meta := fortiblob.ParameterMeta{
+			Units:       units,
+			Times:       times,
+			SliceFrom:   ret.LocationCount,
+			ScaleFactor: getScaleFactor(v),
 		}
+
+		ret.Parameters[v.Name] = meta
 		ret.LocationCount += len(times)
 	}
 
@@ -92,13 +95,29 @@ func collectRawData(ctx context.Context, out io.Writer, variables []*netcdf.Vari
 			return fmt.Errorf("error when reading %s, idx %d: %w", variable.Name, idx, err)
 		}
 
+		scaleFactor := getScaleFactor(variable)
 		data := make([]int16, len(floats))
 		for i, val := range floats {
-			data[i] = int16(math.Round(float64(val) * 10))
+			value := math.Round(float64(val) / float64(scaleFactor))
+			if value > 32767 || value < -32768 {
+				return fmt.Errorf("value for %s is out of range: %f", variable.Name, value)
+			}
+
+			data[i] = int16(value)
 		}
 		if err := binary.Write(out, binary.LittleEndian, data); err != nil {
 			return err
 		}
 	}
+
 	return ctx.Err()
+}
+
+func getScaleFactor(v *netcdf.Variable) float32 {
+	switch v.Name {
+	case "altitude":
+		return 1
+	default:
+		return 0.1
+	}
 }
