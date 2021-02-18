@@ -17,5 +17,8 @@
                 "world": 11.660
             }
         }
+    },
+    "maximum_gridpoint_distance": {
+        "oceanforecast_nordic": 10000
     }
 }
