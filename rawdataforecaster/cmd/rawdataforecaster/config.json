@@ -18,7 +18,5 @@
             }
         }
     },
-    "maximum_gridpoint_distance": {
-        "oceanforecast_nordic": 10000
-    }
+    "maximum_gridpoint_distance": 10000
 }
