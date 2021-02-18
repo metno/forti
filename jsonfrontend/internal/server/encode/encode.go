@@ -17,18 +17,22 @@ func Encode(location *internalprotocol.Location, forecast *internalprotocol.Fore
 		return nil, err
 	}
 
-	return &jsonformat.GeoJSON{
+	ret := jsonformat.GeoJSON{
 		Type: "Feature",
 		Geometry: jsonformat.Geometry{
 			Type: "Point",
 			Coordinates: []jsonformat.GeoJSONCoordinate{
 				jsonformat.GeoJSONCoordinate(location.Longitude),
 				jsonformat.GeoJSONCoordinate(location.Latitude),
-				jsonformat.GeoJSONCoordinate(getAltitude(forecast)),
 			},
 		},
 		Properties: properties,
-	}, nil
+	}
+	if !config.Configuration.SkipAltitude {
+		ret.Geometry.Coordinates = append(ret.Geometry.Coordinates, jsonformat.GeoJSONCoordinate(getAltitude(forecast)))
+	}
+
+	return &ret, nil
 }
 
 func getSerializationForecast(forecast *internalprotocol.Forecast) (*jsonformat.Forecast, error) {

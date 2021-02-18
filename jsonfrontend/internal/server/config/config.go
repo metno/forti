@@ -43,6 +43,7 @@ type Elements struct {
 	CutForecast      bool                 `json:"cut_forecast,omitempty"`
 	LocationFromGrid bool                 `json:"location_from_grid,omitempty"`
 	HTTPHeaders      []HTTPHeader         `json:"http_headers"`
+	SkipAltitude     bool                 `json:"skip_altitude,omitempty"`
 	DataExpiryOffset int                  `json:"data_expiry_offset"`
 	Meta             Meta                 `json:"meta,omitempty"`
 	Parameters       map[string]TimeGroup `json:"parameters"`
