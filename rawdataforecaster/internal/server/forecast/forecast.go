@@ -69,10 +69,6 @@ func (f *Forecast) Get(latitude, longitude float32) (*dataset.LocationData, erro
 		return nil, err
 	}
 
-	if !best.D.WithinPolygon(latitude, longitude) {
-		return nil, ErrOutsideAllGrids
-	}
-
 	areaCounter.With(prometheus.Labels{"area": best.D.Meta.Area}).Inc()
 
 	locationData, err := best.D.Read(latitude, longitude)
@@ -102,6 +98,10 @@ func (f *Forecast) bestArea(latitude, longitude float32) (*bestDataset, error) {
 			selectedLocation = closestLocation
 		}
 	}
+	if !selected.WithinGeographicLimit(selectedLocation, latitude, longitude) {
+		return nil, ErrOutsideAllGrids
+	}
+
 	if selected == nil {
 		return nil, errors.New("no datasets available")
 	}

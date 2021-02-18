@@ -18,9 +18,16 @@ import (
 type Dataset struct {
 	Meta Meta
 
-	Grid    *grid.Grid
-	readers []values.Reader
-	lookups []index.Nearester
+	GridLimit GridLimit
+	readers   []values.Reader
+	lookups   []index.Nearester
+}
+
+// GridLimit should set geographic limit for this dataset.
+// Either Polygon or Distance or none is set, depending upon the type of dataset.
+type GridLimit struct {
+	Polygon                  *grid.Grid
+	MaximumGridPointDistance int
 }
 
 type Meta struct {
@@ -80,7 +87,10 @@ func Download(ctx context.Context, source *fortiblob.Client, datasetMeta *fortib
 			UpdatedAt:  readyTime,
 			NextUpdate: readyTime.Add(datasetMeta.TimeUntilNext),
 		},
-		Grid:    geographicArea,
+		GridLimit: GridLimit{
+			Polygon:                  geographicArea,
+			MaximumGridPointDistance: cfg.MaximumGridPointDistance,
+		},
 		readers: readers,
 		lookups: lookups,
 	}, nil
@@ -157,17 +167,24 @@ func (d *Dataset) ClosestGridLocation(latitude, longitude float32) (*lookup.GeoR
 	return min, nil
 }
 
-func (d *Dataset) HasPolygon() bool {
-	return d.Grid != nil
-}
-
-func (d *Dataset) WithinPolygon(latitude, longitude float32) bool {
+// WithinGeographicLimit checks if forecast request is outside allowed geographic bounds.
+// Limits are checked first for distance and then for a polygon mask.
+func (d *Dataset) WithinGeographicLimit(georesponse *lookup.GeoResponse, reqLat, reqLong float32) bool {
+	if d.GridLimit.MaximumGridPointDistance > 0 {
+		if int(georesponse.Distance) > d.GridLimit.MaximumGridPointDistance {
+			return false
+		}
+	}
 	if d.HasPolygon() {
 		location := grid.LatLon{
-			Latitude:  float64(latitude),
-			Longitude: float64(longitude),
+			Latitude:  float64(reqLat),
+			Longitude: float64(reqLong),
 		}
-		return d.Grid.Contains(location)
+		return d.GridLimit.Polygon.Contains(location)
 	}
 	return true
+}
+
+func (d *Dataset) HasPolygon() bool {
+	return d.GridLimit.Polygon != nil
 }

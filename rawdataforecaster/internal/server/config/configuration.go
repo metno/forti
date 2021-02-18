@@ -12,9 +12,10 @@ import (
 type DownloadFunction func(ctx context.Context, source *fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, gridid string, config map[string]interface{}) (values.Reader, error)
 
 type Configuration struct {
-	Source DataSource `json:"source"`
-	Areas  []string   `json:"areas"`
-	Loader Loader     `json:"loader"`
+	Source                   DataSource `json:"source"`
+	Areas                    []string   `json:"areas"`
+	Loader                   Loader     `json:"loader"`
+	MaximumGridPointDistance int        `json:"maximum_gridpoint_distance"` // in meters
 }
 
 func (c *Configuration) DownloadFunction() DownloadFunction {

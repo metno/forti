@@ -11,34 +11,13 @@ import (
 	_ "gocloud.dev/blob/fileblob"
 
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/config"
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index/lookup"
 	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 	"gocloud.dev/blob"
 )
 
-func Test(t *testing.T) {
-	ctx := context.Background()
-	_, filename, _, _ := runtime.Caller(0)
-	log.Println(filename)
-	testPath := filepath.Clean(filepath.Dir(filename) + "/../../../../test/data")
-
-	store, err := blob.OpenBucket(ctx, "file://"+testPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	dataset, err := Download(
-		ctx,
-		fortiblob.NewClientFromBucket(store),
-		&fortiblob.DatasetMeta{
-			Area:    "group_b",
-			Version: 2,
-		},
-		&config.Configuration{
-			Loader: config.Loader{
-				Type: "memory",
-			},
-		},
-	)
+func TestDownloadAndWrite(t *testing.T) {
+	dataset, err := downloadDataset()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,4 +50,47 @@ func Test(t *testing.T) {
 			t.Errorf("unexpected value: %f", val)
 		}
 	}
+}
+
+func TestWithinGeographicLimit(t *testing.T) {
+	dataset, err := downloadDataset()
+	if err != nil {
+		t.Fatalf("Expected to get back dataset; Got error: %s", err)
+	}
+
+	// Fake user request and lookup georesponse
+	reqLat := float32(59.1)
+	reqLong := float32(11)
+
+	georesponse := &lookup.GeoResponse{Distance: 500}
+	if !dataset.WithinGeographicLimit(georesponse, reqLat, reqLong) {
+		t.Error("Expected request to be within maximum distance; Got failed check for geopgraphic limit.")
+	}
+}
+
+func downloadDataset() (*Dataset, error) {
+	ctx := context.Background()
+	_, filename, _, _ := runtime.Caller(0)
+	log.Println(filename)
+	testPath := filepath.Clean(filepath.Dir(filename) + "/../../../../test/data")
+
+	store, err := blob.OpenBucket(ctx, "file://"+testPath)
+	if err != nil {
+		return nil, err
+	}
+
+	return Download(
+		ctx,
+		fortiblob.NewClientFromBucket(store),
+		&fortiblob.DatasetMeta{
+			Area:    "group_b",
+			Version: 2,
+		},
+		&config.Configuration{
+			Loader: config.Loader{
+				Type: "memory",
+			},
+			MaximumGridPointDistance: 10000,
+		},
+	)
 }
