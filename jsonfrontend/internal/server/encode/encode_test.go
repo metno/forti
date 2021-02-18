@@ -23,9 +23,6 @@ const configString = `
         }
     ],
     "data_expiry_offset": 1800,
-    "meta": {
-        "#radar_coverage": "precipitation_status"
-    },
     "parameters": {
         "instant": {
             "offset": 0,
@@ -66,8 +63,7 @@ const expectedJSONResponse = `{
 func TestEncode(t *testing.T) {
 	err := config.InitializeFromString(configString)
 	if err != nil {
-		t.Errorf("Failed to setup config for encoding; Got error %v", err)
-		return
+		t.Fatalf("Failed to setup config for encoding; Got error %v", err)
 	}
 
 	location := internalprotocol.Location{
@@ -131,5 +127,43 @@ func TestEncode(t *testing.T) {
 
 	if decoded.Geometry.Coordinates[1] != responseLatitude {
 		t.Errorf("Expected longitude in decoded response to be %f; Got %f.", responseLatitude, decoded.Geometry.Coordinates[1])
+	}
+}
+
+func TestEncodeSkipAltitude(t *testing.T) {
+	err := config.InitializeFromString(configString)
+	if err != nil {
+		t.Fatalf("Failed to setup config for encoding; Got error %v", err)
+	}
+	config.Configuration.SkipAltitude = true
+
+	location := internalprotocol.Location{
+		Latitude:  59,
+		Longitude: 11,
+	}
+	forecast := internalprotocol.Forecast{
+		ForecastStatus: internalprotocol.ForecastStatus_OK,
+		ForecastMeta: &internalprotocol.ForecastMeta{
+			UpdatedAt:    &timestamppb.Timestamp{},
+			NextUpdate:   &timestamppb.Timestamp{},
+			GridLocation: &location,
+		},
+		ParameterMeta: nil,
+		Data:          nil,
+	}
+
+	doc, err := Encode(&location, &forecast)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(doc.Geometry.Coordinates) != 2 {
+		t.Errorf("unexpected geometry: %v", doc.Geometry.Coordinates)
+	}
+	if doc.Geometry.Coordinates[0] != 11 {
+		t.Errorf("unexpected longitude: %f", doc.Geometry.Coordinates[0])
+	}
+	if doc.Geometry.Coordinates[1] != 59 {
+		t.Errorf("unexpected latitude: %f", doc.Geometry.Coordinates[1])
 	}
 }

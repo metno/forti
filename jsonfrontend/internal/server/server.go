@@ -105,14 +105,16 @@ func getLocation(r *http.Request) (*internalprotocol.Location, error) {
 		Longitude: longitude,
 	}
 
-	if _, ok := q["altitude"]; ok {
-		altitude, err := getParam(q, "altitude", -500, 9000)
-		if err != nil {
-			return nil, err
-		}
-		location.Altitude = &internalprotocol.Altitude{
-			Value:    altitude,
-			Override: true,
+	if !config.Configuration.SkipAltitude {
+		if _, ok := q["altitude"]; ok {
+			altitude, err := getParam(q, "altitude", -500, 9000)
+			if err != nil {
+				return nil, err
+			}
+			location.Altitude = &internalprotocol.Altitude{
+				Value:    altitude,
+				Override: true,
+			}
 		}
 	}
 
