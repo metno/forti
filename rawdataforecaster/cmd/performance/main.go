@@ -90,7 +90,7 @@ func randomRequest(client internalprotocol.ForecasterClient) (time.Duration, err
 
 	latitude := (rand.Float32() * 180) - 90
 	longitude := (rand.Float32() * 360) - 180
-	request := internalprotocol.Location{
+	request := internalprotocol.GetForecastRequest{
 		Latitude:  latitude,
 		Longitude: longitude,
 	}

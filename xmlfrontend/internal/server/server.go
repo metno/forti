@@ -107,7 +107,7 @@ func handleEmptyForecast(w http.ResponseWriter, doc *xmlformat.ForecastDocument,
 	http.Error(w, "404 page not found", http.StatusNotFound)
 }
 
-func getLocation(r *http.Request) (*internalprotocol.Location, error) {
+func getLocation(r *http.Request) (*internalprotocol.GetForecastRequest, error) {
 	q := r.URL.Query()
 	latitude, err := getParam(q, "lat", -90, 90)
 	if err != nil {
@@ -118,7 +118,7 @@ func getLocation(r *http.Request) (*internalprotocol.Location, error) {
 		return nil, err
 	}
 
-	location := internalprotocol.Location{
+	location := internalprotocol.GetForecastRequest{
 		Latitude:  latitude,
 		Longitude: longitude,
 	}

@@ -11,7 +11,7 @@ import (
 	"gitlab.met.no/forti/f2/parameters/weathersymbol"
 )
 
-func Encode(location *internalprotocol.Location, forecast *internalprotocol.Forecast) (*jsonformat.GeoJSON, error) {
+func Encode(forecast *internalprotocol.Forecast) (*jsonformat.GeoJSON, error) {
 	properties, err := getSerializationForecast(forecast)
 	if err != nil {
 		return nil, err
@@ -22,8 +22,9 @@ func Encode(location *internalprotocol.Location, forecast *internalprotocol.Fore
 		Geometry: jsonformat.Geometry{
 			Type: "Point",
 			Coordinates: []jsonformat.GeoJSONCoordinate{
-				jsonformat.GeoJSONCoordinate(location.Longitude),
-				jsonformat.GeoJSONCoordinate(location.Latitude),
+				// We assume that the caller has modified the GridLocation to match the request, if neccessary.
+				jsonformat.GeoJSONCoordinate(forecast.ForecastMeta.GridLocation.Longitude),
+				jsonformat.GeoJSONCoordinate(forecast.ForecastMeta.GridLocation.Latitude),
 			},
 		},
 		Properties: properties,

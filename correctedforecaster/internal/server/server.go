@@ -65,7 +65,7 @@ func New(upstream string, topographyFiles []string) (*Server, error) {
 
 func waitForUpstream(client internalprotocol.ForecasterClient) {
 	var ctx context.Context
-	request := internalprotocol.Location{
+	request := internalprotocol.GetForecastRequest{
 		Latitude:  60,
 		Longitude: 10,
 	}
@@ -82,7 +82,7 @@ func (s *Server) Close() error {
 	return s.conn.Close()
 }
 
-func (s *Server) GetForecast(ctx context.Context, in *internalprotocol.Location) (*internalprotocol.Forecast, error) {
+func (s *Server) GetForecast(ctx context.Context, in *internalprotocol.GetForecastRequest) (*internalprotocol.Forecast, error) {
 	forecast, err := s.client.GetForecast(ctx, in)
 	if err != nil {
 		return nil, fmt.Errorf("unable to get forecast from upstream: %w", err)
@@ -99,7 +99,7 @@ func (s *Server) GetForecast(ctx context.Context, in *internalprotocol.Location)
 	return forecast, nil
 }
 
-func (s *Server) correct(request *internalprotocol.Location, forecast *internalprotocol.Forecast) error {
+func (s *Server) correct(request *internalprotocol.GetForecastRequest, forecast *internalprotocol.Forecast) error {
 	interpreted := internalprotocol.InterpretValues(forecast)
 	if err := s.correctWithBetterTopography(request, interpreted); err != nil {
 		return err
@@ -110,7 +110,7 @@ func (s *Server) correct(request *internalprotocol.Location, forecast *internalp
 	return nil
 }
 
-func (s *Server) correctWithBetterTopography(request *internalprotocol.Location, interpreted map[string]internalprotocol.InterpretedData) error {
+func (s *Server) correctWithBetterTopography(request *internalprotocol.GetForecastRequest, interpreted map[string]internalprotocol.InterpretedData) error {
 	modelAltitude, ok := getAltitude(interpreted)
 	if !ok {
 		return nil
@@ -153,7 +153,7 @@ func getAltitude(interpreted map[string]internalprotocol.InterpretedData) (*floa
 }
 
 // correctWithRadarStatus removes all values for lwe_precipitation_rate if radar coverage is not ok.
-func (s *Server) correctWithRadarStatus(request *internalprotocol.Location, interpreted map[string]internalprotocol.InterpretedData, forecast *internalprotocol.Forecast) error {
+func (s *Server) correctWithRadarStatus(request *internalprotocol.GetForecastRequest, interpreted map[string]internalprotocol.InterpretedData, forecast *internalprotocol.Forecast) error {
 	if status, ok := interpreted["precipitation_status"]; ok {
 		if radar.Coverage(status.Values[0]) != radar.OK {
 			for _, m := range forecast.ParameterMeta {

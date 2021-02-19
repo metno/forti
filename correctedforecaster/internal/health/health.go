@@ -26,7 +26,7 @@ func (h *Server) Check(ctx context.Context, request *grpc_health_v1.HealthCheckR
 		status = grpc_health_v1.HealthCheckResponse_SERVICE_UNKNOWN
 	}
 
-	location := internalprotocol.Location{
+	location := internalprotocol.GetForecastRequest{
 		Latitude:  60,
 		Longitude: 10,
 	}

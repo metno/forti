@@ -8,10 +8,10 @@ option go_package = "gitlab.met.no/forti/f2/internalprotocol";
 
 
 service Forecaster {
-    rpc GetForecast (Location) returns (Forecast) {}
+    rpc GetForecast (GetForecastRequest) returns (Forecast) {}
 }
 
-message Location {
+message GetForecastRequest {
     float latitude = 1;
     float longitude = 2;
     Altitude altitude = 3;
@@ -41,6 +41,11 @@ message ForecastMeta {
     google.protobuf.Timestamp nextUpdate = 2;
     
     Location GridLocation = 3;
+}
+
+message Location {
+    float latitude = 1;
+    float longitude = 2;
 }
 
 message ParameterMeta {

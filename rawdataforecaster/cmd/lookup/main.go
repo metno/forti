@@ -28,7 +28,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
-	request := internalprotocol.Location{
+	request := internalprotocol.GetForecastRequest{
 		Latitude:  float32(*latitude),
 		Longitude: float32(*longitude),
 	}

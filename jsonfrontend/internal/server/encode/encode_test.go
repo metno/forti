@@ -66,14 +66,13 @@ func TestEncode(t *testing.T) {
 		t.Fatalf("Failed to setup config for encoding; Got error %v", err)
 	}
 
-	location := internalprotocol.Location{
-		Latitude:  59.124263,
-		Longitude: 10.00,
-	}
-
 	forecast := internalprotocol.Forecast{
 		ForecastMeta: &internalprotocol.ForecastMeta{
 			UpdatedAt: &timestamppb.Timestamp{},
+			GridLocation: &internalprotocol.Location{
+				Latitude:  59.124263,
+				Longitude: 10.00,
+			},
 		},
 		ParameterMeta: []*internalprotocol.ParameterMeta{
 			{
@@ -92,7 +91,7 @@ func TestEncode(t *testing.T) {
 		Data: []float32{12.1, 0},
 	}
 
-	geojson, err := Encode(&location, &forecast)
+	geojson, err := Encode(&forecast)
 	if err != nil {
 		t.Errorf("Expected correct GeoJSON; Got error: %v", err)
 	}
@@ -137,22 +136,21 @@ func TestEncodeSkipAltitude(t *testing.T) {
 	}
 	config.Configuration.SkipAltitude = true
 
-	location := internalprotocol.Location{
-		Latitude:  59,
-		Longitude: 11,
-	}
 	forecast := internalprotocol.Forecast{
 		ForecastStatus: internalprotocol.ForecastStatus_OK,
 		ForecastMeta: &internalprotocol.ForecastMeta{
-			UpdatedAt:    &timestamppb.Timestamp{},
-			NextUpdate:   &timestamppb.Timestamp{},
-			GridLocation: &location,
+			UpdatedAt:  &timestamppb.Timestamp{},
+			NextUpdate: &timestamppb.Timestamp{},
+			GridLocation: &internalprotocol.Location{
+				Latitude:  59,
+				Longitude: 11,
+			},
 		},
 		ParameterMeta: nil,
 		Data:          nil,
 	}
 
-	doc, err := Encode(&location, &forecast)
+	doc, err := Encode(&forecast)
 	if err != nil {
 		t.Fatal(err)
 	}
