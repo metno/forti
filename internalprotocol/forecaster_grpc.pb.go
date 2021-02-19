@@ -17,7 +17,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ForecasterClient interface {
-	GetForecast(ctx context.Context, in *Location, opts ...grpc.CallOption) (*Forecast, error)
+	GetForecast(ctx context.Context, in *GetForecastRequest, opts ...grpc.CallOption) (*Forecast, error)
 }
 
 type forecasterClient struct {
@@ -28,7 +28,7 @@ func NewForecasterClient(cc grpc.ClientConnInterface) ForecasterClient {
 	return &forecasterClient{cc}
 }
 
-func (c *forecasterClient) GetForecast(ctx context.Context, in *Location, opts ...grpc.CallOption) (*Forecast, error) {
+func (c *forecasterClient) GetForecast(ctx context.Context, in *GetForecastRequest, opts ...grpc.CallOption) (*Forecast, error) {
 	out := new(Forecast)
 	err := c.cc.Invoke(ctx, "/internalprotocol.Forecaster/GetForecast", in, out, opts...)
 	if err != nil {
@@ -41,7 +41,7 @@ func (c *forecasterClient) GetForecast(ctx context.Context, in *Location, opts .
 // All implementations must embed UnimplementedForecasterServer
 // for forward compatibility
 type ForecasterServer interface {
-	GetForecast(context.Context, *Location) (*Forecast, error)
+	GetForecast(context.Context, *GetForecastRequest) (*Forecast, error)
 	mustEmbedUnimplementedForecasterServer()
 }
 
@@ -49,7 +49,7 @@ type ForecasterServer interface {
 type UnimplementedForecasterServer struct {
 }
 
-func (UnimplementedForecasterServer) GetForecast(context.Context, *Location) (*Forecast, error) {
+func (UnimplementedForecasterServer) GetForecast(context.Context, *GetForecastRequest) (*Forecast, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetForecast not implemented")
 }
 func (UnimplementedForecasterServer) mustEmbedUnimplementedForecasterServer() {}
@@ -66,7 +66,7 @@ func RegisterForecasterServer(s grpc.ServiceRegistrar, srv ForecasterServer) {
 }
 
 func _Forecaster_GetForecast_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Location)
+	in := new(GetForecastRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func _Forecaster_GetForecast_Handler(srv interface{}, ctx context.Context, dec f
 		FullMethod: "/internalprotocol.Forecaster/GetForecast",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ForecasterServer).GetForecast(ctx, req.(*Location))
+		return srv.(ForecasterServer).GetForecast(ctx, req.(*GetForecastRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

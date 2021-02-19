@@ -13,7 +13,7 @@ import (
 	"gitlab.met.no/forti/f2/xmlfrontend/pkg/xmlformat"
 )
 
-func Encode(location *internalprotocol.Location, forecast *internalprotocol.Forecast) *xmlformat.ForecastDocument {
+func Encode(location *internalprotocol.GetForecastRequest, forecast *internalprotocol.Forecast) *xmlformat.ForecastDocument {
 	doc := xmlformat.ForecastDocument{
 		XMLName: xml.Name{Local: "weatherdata"},
 		Product: &xmlformat.ProductElement{
@@ -94,14 +94,14 @@ func sortByTime(forecast *internalprotocol.Forecast) []parsedForecast {
 	return ret
 }
 
-func getProductElement(location *internalprotocol.Location, forecast []parsedForecast) *xmlformat.ProductElement {
+func getProductElement(location *internalprotocol.GetForecastRequest, forecast []parsedForecast) *xmlformat.ProductElement {
 	return &xmlformat.ProductElement{
 		Class: "pointData",
 		Time:  getTimeElements(location, forecast),
 	}
 }
 
-func getTimeElements(location *internalprotocol.Location, forecast []parsedForecast) []xmlformat.TimeElement {
+func getTimeElements(location *internalprotocol.GetForecastRequest, forecast []parsedForecast) []xmlformat.TimeElement {
 
 	if config.Configuration.CutForecast {
 		forecast = cutForecast(forecast, config.Configuration.KeepCurrentTimeStep)
@@ -133,7 +133,7 @@ func cutForecast(forecast []parsedForecast, keepCurrentTimeStep bool) []parsedFo
 	return nil
 }
 
-func getElementsForTimestep(location *internalprotocol.Location, forecast *parsedForecast) []xmlformat.TimeElement {
+func getElementsForTimestep(location *internalprotocol.GetForecastRequest, forecast *parsedForecast) []xmlformat.TimeElement {
 
 	var ret []xmlformat.TimeElement
 
@@ -167,7 +167,7 @@ func getElementsForTimestep(location *internalprotocol.Location, forecast *parse
 	return ret
 }
 
-func getLocationElement(location *internalprotocol.Location, forecast *parsedForecast, elements *config.DataElement) xmlformat.LocationElement {
+func getLocationElement(location *internalprotocol.GetForecastRequest, forecast *parsedForecast, elements *config.DataElement) xmlformat.LocationElement {
 	var altitude int
 	if location.Altitude != nil {
 		altitude = int(math.Round(float64(location.Altitude.Value)))

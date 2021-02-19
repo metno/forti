@@ -39,7 +39,7 @@ func (s *Server) Close() error {
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	location, err := getLocation(r)
+	forecastRequest, err := getForecastRequest(r)
 	if err != nil {
 		//log.Println(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -49,9 +49,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 1500*time.Millisecond)
 	defer cancel()
 
-	data, err := s.client.GetForecast(ctx, location)
+	data, err := s.client.GetForecast(ctx, forecastRequest)
 	if err != nil {
-		log.Printf("location lat = %f lon = %f: %s", location.Latitude, location.Longitude, err)
+		log.Printf("location lat = %f lon = %f: %s", forecastRequest.Latitude, forecastRequest.Longitude, err)
 		http.Error(w, "service unavailable", http.StatusServiceUnavailable)
 		return
 	}
@@ -65,12 +65,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add(header.Key, header.Value)
 	}
 
-	if config.Configuration.LocationFromGrid {
-		location = data.ForecastMeta.GridLocation
+	if !config.Configuration.LocationFromGrid {
+		data.ForecastMeta.GridLocation.Latitude = forecastRequest.Latitude
+		data.ForecastMeta.GridLocation.Longitude = forecastRequest.Longitude
 	}
 
-	// output := encode.GetForecast(data)
-	output, err := encode.Encode(location, data)
+	output, err := encode.Encode(data)
 	if err != nil {
 		log.Println(err)
 		http.Error(w, "service unavailable", http.StatusServiceUnavailable)
@@ -89,7 +89,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getLocation(r *http.Request) (*internalprotocol.Location, error) {
+func getForecastRequest(r *http.Request) (*internalprotocol.GetForecastRequest, error) {
 	q := r.URL.Query()
 	latitude, err := getParam(q, "lat", -90, 90)
 	if err != nil {
@@ -100,7 +100,7 @@ func getLocation(r *http.Request) (*internalprotocol.Location, error) {
 		return nil, err
 	}
 
-	location := internalprotocol.Location{
+	location := internalprotocol.GetForecastRequest{
 		Latitude:  latitude,
 		Longitude: longitude,
 	}

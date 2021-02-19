@@ -55,7 +55,7 @@ func newForecastServer(conf *config.Configuration) (*forecastServer, error) {
 	}, nil
 }
 
-func (s *forecastServer) GetForecast(ctx context.Context, in *internalprotocol.Location) (*internalprotocol.Forecast, error) {
+func (s *forecastServer) GetForecast(ctx context.Context, in *internalprotocol.GetForecastRequest) (*internalprotocol.Forecast, error) {
 
 	locationData, err := s.forecast.Get(in.Latitude, in.Longitude)
 	if err != nil {
@@ -74,7 +74,10 @@ func (s *forecastServer) GetForecast(ctx context.Context, in *internalprotocol.L
 		parameterCount += len(data.ParameterMeta)
 	}
 	values := make([]float32, 0, dataSize)
-	gridLocation := internalprotocol.Location{Latitude: locationData.GridLocation.Lat, Longitude: locationData.GridLocation.Long}
+	gridLocation := internalprotocol.Location{
+		Latitude:  locationData.GridLocation.Lat,
+		Longitude: locationData.GridLocation.Long,
+	}
 
 	parameterMeta := make([]*internalprotocol.ParameterMeta, 0, parameterCount)
 
