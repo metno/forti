@@ -20,7 +20,7 @@ func Encode(location *internalprotocol.GetForecastRequest, forecast *internalpro
 			Class: "pointData",
 		},
 		XSI:     "http://www.w3.org/2001/XMLSchema-instance",
-		NsLoc:   "https://schema.api.met.no/schemas/weatherapi-0.4.xsd",
+		NsLoc:   config.Configuration.XMLSchemaLocation,
 		Created: time.Now().UTC().Round(time.Second),
 	}
 

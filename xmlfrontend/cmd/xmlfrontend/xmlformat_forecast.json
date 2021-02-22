@@ -6,6 +6,7 @@
             "value": "application/xml; charset=utf-8"
         }
     ],
+    "xml_schema_location": "https://schema.api.met.no/schemas/weatherapi-0.4.xsd",
     "elements": [
         {
             "offset": "0h",
