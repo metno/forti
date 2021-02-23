@@ -1,0 +1,54 @@
+{
+  "type": "Feature",
+  "geometry": {
+    "type": "Point",
+    "coordinates": [
+      11,
+      60,
+      148
+    ]
+  },
+  "properties": {
+    "meta": {
+      "updated_at": "2021-02-02T12:49:51Z",
+      "units": {
+        "air_temperature": "celsius",
+        "precipitation_amount": "mm",
+        "precipitation_rate": "mm/h",
+        "relative_humidity": "%",
+        "wind_from_direction": "degrees",
+        "wind_speed": "m/s",
+        "wind_speed_of_gust": "m/s"
+      },
+      "radar_coverage": "temporarily unavailable"
+    },
+    "timeseries": [
+      {
+        "time": "2021-02-02T12:50:00Z",
+        "data": {
+          "instant": {
+            "details": {
+              "air_temperature": -7.5,
+              "relative_humidity": 68.4,
+              "wind_from_direction": 27.1,
+              "wind_speed": 5,
+              "wind_speed_of_gust": 7.5
+            }
+          },
+          "next_1_hours": {
+            "summary": {
+              "symbol_code": "cloudy"
+            },
+            "details": {
+              "precipitation_amount": 0
+            }
+          }
+        }
+      },
+      {
+        "time": "2021-02-02T13:50:00Z",
+        "data": {}
+      }
+    ]
+  }
+}
