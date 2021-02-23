@@ -40,19 +40,19 @@ graph TD;
       Correctedforecaster["Correctedforecaster<br>[Container: Go GRPC server]<br>Request forecast data, adjust and serve."];
       Rawdataforecaster["Rawdataforecaster<br>[Container: Go GRPC server]<br>Serve forecast timeseries from memory cache or blob storage."];
       Azureblob["Azure Blob Storage<br>[Software-system]"];
-      JSONFrontend-->|GRPC|Correctedforecaster;
-      Correctedforecaster-->|GRPC|Rawdataforecaster;
+      JSONFrontend-->|GRPC req/reply|Correctedforecaster;
+      Correctedforecaster-->|GRPC req/reply|Rawdataforecaster;
       Rawdataforecaster-->|Read data|Azureblob;
       Healthz["Healthz<br>[Container: Go web server]<br>Periodically run integration tests and deliver status over REST."];
       Healthz-->|REST|JSONFrontend;
    end
    subgraph MET-infrastructure
       Ecflow["Ecflow<br>[Software-system]"];
-      PPI["PPI<br>[Software-system]"];
-      Fortiupload["Forti-upload<br>[Container: Ecflow PPI job]"];
+      PostProcessing["Post-processing<br>[Software-system]<br>Post-process input data and produce Forti datasets."];
+      Fortiupload["Forti-upload<br>[Container: Ecflow PPI job]<br>Upload Forti netcdf dataset from filesystem."];
       Fortiupload-->|Write data|Azureblob;
-      Ecflow-->|Schedule jobs|PPI;
-      PPI-->|Run job|Fortiupload;
+      Ecflow-->|Schedule jobs|PostProcessing;
+      PostProcessing-->|Run job|Fortiupload;
    end
 ```
 
