@@ -1,0 +1,61 @@
+{
+  "ok": false,
+  "locations": {
+    "bergen nowcast": {
+      "ok": false,
+      "problems": [
+        "Too few instances of parameter precipitation_rate under period instant. Expected at least 17; Got 0",
+        "Too short timeseries. Expected minimum 1h20m0s; Got 1h0m0s",
+        "Wrong duration between timestep 2021-02-02 12:50:00 +0000 UTC and 2021-02-02 13:50:00 +0000 UTC"
+      ]
+    },
+    "bodø nowcast": {
+      "ok": false,
+      "problems": [
+        "Too few instances of parameter precipitation_rate under period instant. Expected at least 17; Got 0",
+        "Too short timeseries. Expected minimum 1h20m0s; Got 1h0m0s",
+        "Wrong duration between timestep 2021-02-02 12:50:00 +0000 UTC and 2021-02-02 13:50:00 +0000 UTC"
+      ]
+    },
+    "hammerfest nowcast": {
+      "ok": false,
+      "problems": [
+        "Too few instances of parameter precipitation_rate under period instant. Expected at least 17; Got 0",
+        "Too short timeseries. Expected minimum 1h20m0s; Got 1h0m0s",
+        "Wrong duration between timestep 2021-02-02 12:50:00 +0000 UTC and 2021-02-02 13:50:00 +0000 UTC"
+      ]
+    },
+    "kristiansand nowcast": {
+      "ok": false,
+      "problems": [
+        "Too few instances of parameter precipitation_rate under period instant. Expected at least 17; Got 0",
+        "Too short timeseries. Expected minimum 1h20m0s; Got 1h0m0s",
+        "Wrong duration between timestep 2021-02-02 12:50:00 +0000 UTC and 2021-02-02 13:50:00 +0000 UTC"
+      ]
+    },
+    "lillehammer nowcast": {
+      "ok": false,
+      "problems": [
+        "Too few instances of parameter precipitation_rate under period instant. Expected at least 17; Got 0",
+        "Too short timeseries. Expected minimum 1h20m0s; Got 1h0m0s",
+        "Wrong duration between timestep 2021-02-02 12:50:00 +0000 UTC and 2021-02-02 13:50:00 +0000 UTC"
+      ]
+    },
+    "oslo nowcast": {
+      "ok": false,
+      "problems": [
+        "Too few instances of parameter precipitation_rate under period instant. Expected at least 17; Got 0",
+        "Too short timeseries. Expected minimum 1h20m0s; Got 1h0m0s",
+        "Wrong duration between timestep 2021-02-02 12:50:00 +0000 UTC and 2021-02-02 13:50:00 +0000 UTC"
+      ]
+    },
+    "trondheim nowcast": {
+      "ok": false,
+      "problems": [
+        "Too few instances of parameter precipitation_rate under period instant. Expected at least 17; Got 0",
+        "Too short timeseries. Expected minimum 1h20m0s; Got 1h0m0s",
+        "Wrong duration between timestep 2021-02-02 12:50:00 +0000 UTC and 2021-02-02 13:50:00 +0000 UTC"
+      ]
+    }
+  }
+}
