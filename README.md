@@ -11,6 +11,23 @@ The code for the batch jobs that produce the datasets are not included in this r
 ## Usage
 The application is meant to be run as containers. Each component has an associated Dockerfile.
 
+## Development
+### Test
+
+### Build
+Container images are built only when adding tags to a commit. Each component of the application get its own tag on the form:
+`componentname/version`. Each component is versioned separately.
+
+Tag each relevant component as the final step before merging a change into master.
+
+E.g:
+- xmlfrontend/0.3.1
+- rawdataforecaster/0.3.0
+- jsonfrontend/0.3.0
+- correctedforecaster/0.3.0
+- rawdataforecaster/0.1.6
+- healthz/0.1.0
+
 ## Run locally
 TODO: Describe setting up local development version of Forti.
 
