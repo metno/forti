@@ -29,8 +29,7 @@ E.g:
 - healthz/0.1.0
 
 ## Run locally
-TODO: Describe setting up local development version of Forti.
-
+[How to run f2 locally](run_locally.md)
 
 ## Architecture
 The application is made up of several binaries working together.
