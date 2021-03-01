@@ -115,6 +115,8 @@ func collectRawData(ctx context.Context, out io.Writer, variables []*netcdf.Vari
 
 func getScaleFactor(v *netcdf.Variable) float32 {
 	switch v.Name {
+	case "sea_floor_depth_below_sea_level":
+		return 1
 	case "altitude":
 		return 1
 	default:

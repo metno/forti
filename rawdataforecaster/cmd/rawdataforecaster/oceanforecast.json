@@ -6,7 +6,7 @@
         "ocean_nordic"
     ],
     "loader": {
-        "type": "memory",
+        "type": "blob",
         "configuration": {
             "max_size_gib": {
                 "ocean_nordic": 3
