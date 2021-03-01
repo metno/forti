@@ -14,7 +14,7 @@ import (
 func main() {
 	latitude := flag.Float64("lat", 59, "latitude to query")
 	longitude := flag.Float64("lon", 11, "longitude to query")
-	address := flag.String("address", "localhost:50051", "Server to connect to")
+	address := flag.String("address", "localhost:5052", "Server to connect to")
 	flag.Parse()
 
 	// Set up a connection to the server.
