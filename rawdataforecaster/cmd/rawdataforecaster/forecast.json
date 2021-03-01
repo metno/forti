@@ -3,10 +3,11 @@
         "bucket": "azblob://collected"
     },
     "areas": [
-        "ocean_nordic"
+        "arctic",
+        "nordic",
+        "world"
     ],
     "loader": {
         "type": "blob"
-    },
-    "maximum_gridpoint_distance": 10000
+    }
 }

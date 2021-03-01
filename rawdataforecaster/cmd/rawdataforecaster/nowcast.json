@@ -1,0 +1,16 @@
+{
+    "source": {
+        "bucket": "azblob://collected"
+    },
+    "areas": [
+        "nowcast"
+    ],
+    "loader": {
+        "type": "blob",
+        "configuration": {
+            "max_size_gib": {
+                "nowcast": 0.2
+            }
+        }
+    }
+}
