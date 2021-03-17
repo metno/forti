@@ -7,6 +7,7 @@ RUN go mod download
 
 COPY jsonfrontend/pkg/ /src/jsonfrontend/pkg/
 COPY xmlfrontend/pkg/ /src/xmlfrontend/pkg/
+COPY internalprotocol/ /src/internalprotocol/
 
 COPY healthz /src/healthz
 
