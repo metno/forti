@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"time"
 
-	"gitlab.met.no/forti/f2/healthz/internal/xml/config"
+	"gitlab.met.no/forti/f2/healthz/internal/health/xml/config"
 	"gitlab.met.no/forti/f2/xmlfrontend/pkg/xmlformat"
 )
 
