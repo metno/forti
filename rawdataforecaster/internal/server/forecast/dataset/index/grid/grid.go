@@ -9,22 +9,26 @@ import (
 	"errors"
 	"unsafe"
 
+	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index/grid/proj"
 	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
 
 // Area allows performing calculations on a geographic areas.
 type Grid struct {
-	projection      *projector
+	srs             string
 	polygon         *C.GEOSPreparedGeometry
 	originalPolygon *C.GEOSGeometry
 }
 
 // New creates a new Area struct, with the given Well-Known Text and Coordinate Reference System.
 func New(area fortiblob.GeographicArea) (*Grid, error) {
-	projection, err := newProjector(area.SRS)
+
+	// Check that the given SRS is valid
+	conv, err := proj.Get(area.SRS)
 	if err != nil {
 		return nil, err
 	}
+	conv.Return()
 
 	ctx := C.GEOS_init_r()
 	defer C.GEOS_finish_r(ctx)
@@ -43,7 +47,7 @@ func New(area fortiblob.GeographicArea) (*Grid, error) {
 	}
 
 	return &Grid{
-		projection:      projection,
+		srs:             area.SRS,
 		polygon:         prepared,
 		originalPolygon: polygon,
 	}, nil
@@ -55,12 +59,16 @@ func (a *Grid) Free() {
 	defer C.GEOS_finish_r(ctx)
 	C.GEOSPreparedGeom_destroy_r(ctx, a.polygon)
 	C.GEOSGeom_destroy_r(ctx, a.originalPolygon)
-	a.projection.Free()
 }
 
 // Contains tells if the given lat/lon is within our polygon. It panics on error.
 func (a *Grid) Contains(coord LatLon) bool {
-	xy := a.projection.Convert(coord)
+	converter, err := proj.Get(a.srs)
+	if err != nil {
+		panic(err)
+	}
+	xy := converter.Convert(coord.Longitude, coord.Latitude)
+	converter.Return()
 
 	ctx := C.GEOS_init_r()
 	defer C.GEOS_finish_r(ctx)

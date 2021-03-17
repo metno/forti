@@ -1,8 +1,12 @@
-package grid
+package proj
 
 import (
+	"context"
 	"math"
+	"math/rand"
+	"sync"
 	"testing"
+	"time"
 )
 
 // func TestConstructObjectCode(t *testing.T) {
@@ -32,12 +36,12 @@ import (
 // }
 
 func TestConvert(t *testing.T) {
-	p, err := newProjector("+ellps=WGS84 +proj=utm +zone=32")
+	p, err := Get("+ellps=WGS84 +proj=utm +zone=32")
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer p.Free()
-	coord := p.Convert(LatLon{Longitude: 8.31257, Latitude: 61.63639})
+	defer p.Return()
+	coord := p.Convert(8.31257, 61.63639)
 
 	tolerance := 5.0
 
@@ -46,5 +50,35 @@ func TestConvert(t *testing.T) {
 	}
 	if math.Abs(coord.Y-6833868) > tolerance {
 		t.Errorf("expected X coordinate to be 6833868, got %f", coord.Y)
+	}
+}
+
+func TestMultithreadConvert(t *testing.T) {
+
+	goroutines := 100
+	projDef := "+ellps=WGS84 +proj=utm +zone=32"
+
+	var wg sync.WaitGroup
+	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+	defer cancel()
+	for i := 0; i < goroutines; i++ {
+		wg.Add(1)
+		go func() {
+			for ctx.Err() == nil {
+				p, err := Get(projDef)
+				if err != nil {
+					panic(err)
+				}
+				p.Convert(rand.Float64()*360-180, rand.Float64()*180-90)
+				p.Return()
+			}
+			wg.Done()
+		}()
+	}
+
+	wg.Wait()
+	myPool := pool[projDef]
+	if len(myPool) > goroutines {
+		t.Errorf("too many entries in pool: %d", len(myPool))
 	}
 }
