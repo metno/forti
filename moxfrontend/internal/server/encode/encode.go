@@ -66,7 +66,10 @@ func Encode(forecast *internalprotocol.Forecast) (*mox.ForecastDocument, error) 
 				}
 				steps[t.AsTime()] = step
 			}
-			value := fmt.Sprintf("%.1f", forecast.Data[int(meta.SliceFrom)+timeIndex])
+			value := forecast.Data[int(meta.SliceFrom)+timeIndex]
+			format := func(value float32) string {
+				return fmt.Sprintf("%.1f", value)
+			}
 			switch meta.Parameter {
 			case "sea_ice_area_fraction":
 				step.SeaIcePresence = &mox.Data{
@@ -76,27 +79,27 @@ func Encode(forecast *internalprotocol.Forecast) (*mox.ForecastDocument, error) 
 			case "sea_surface_wave_from_direction":
 				step.MeanTotalWaveDirection = &mox.Data{
 					UOM:   "deg",
-					Value: value,
+					Value: format(flipAngle(value)),
 				}
 			case "sea_surface_wave_height":
 				step.SignificantTotalWaveHeight = &mox.Data{
 					UOM:   "m",
-					Value: value,
+					Value: format(value),
 				}
 			case "sea_water_speed":
 				step.SeaCurrentSpeed = &mox.Data{
 					UOM:   "m/s",
-					Value: value,
+					Value: format(value),
 				}
 			case "sea_water_temperature":
 				step.SeaTemperature = &mox.Data{
 					UOM:   "Cel",
-					Value: value,
+					Value: format(value),
 				}
 			case "sea_water_to_direction":
 				step.SeaCurrentDirection = &mox.Data{
 					UOM:   "deg",
-					Value: value,
+					Value: format(value),
 				}
 			}
 		}
@@ -130,6 +133,14 @@ func Encode(forecast *internalprotocol.Forecast) (*mox.ForecastDocument, error) 
 	ret.CollectedForecast = elements
 
 	return ret, nil
+}
+
+func flipAngle(angle float32) float32 {
+	angle += 180
+	if angle > 360 {
+		angle -= 360
+	}
+	return angle
 }
 
 func emptyDocument(longitude, latitude float32, depth int, issueTime time.Time, nextIssueTime time.Time) *mox.ForecastDocument {
