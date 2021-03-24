@@ -1,12 +1,15 @@
 FROM ubuntu:focal
 
+ARG GOLANG_VERSION=1.16.2
+ARG GOLANG_SHA256=542e936b19542e62679766194364f45141fde55169db2d8d01046555ca9eb4b8
+
 RUN apt-get update && apt-get -y install git curl
 
 RUN \
-    curl -L -O https://golang.org/dl/go1.15.5.linux-amd64.tar.gz && \
-    sha256sum go1.15.5.linux-amd64.tar.gz | grep -q 9a58494e8da722c3aef248c9227b0e9c528c7318309827780f16220998180a0d && \
-    tar -C /usr/local -xzf go1.15.5.linux-amd64.tar.gz && \
-    rm go1.15.5.linux-amd64.tar.gz
+    curl -L -O https://golang.org/dl/go${GOLANG_VERSION}.linux-amd64.tar.gz && \
+    sha256sum go${GOLANG_VERSION}.linux-amd64.tar.gz | grep -q ${GOLANG_VERSION} && \
+    tar -C /usr/local -xzf go${GOLANG_VERSION}.linux-amd64.tar.gz && \
+    rm go${GOLANG_VERSION}.linux-amd64.tar.gz
 
 ENV GOPATH=/go
 ENV PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
