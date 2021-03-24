@@ -137,7 +137,7 @@ func Encode(forecast *internalprotocol.Forecast) (*mox.ForecastDocument, error) 
 
 func flipAngle(angle float32) float32 {
 	angle += 180
-	if angle > 360 {
+	if angle >= 360 {
 		angle -= 360
 	}
 	return angle
