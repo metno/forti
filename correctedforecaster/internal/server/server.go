@@ -7,6 +7,7 @@ import (
 	"net"
 	"time"
 
+	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health/grpc_health_v1"
 
@@ -28,9 +29,15 @@ func Run(upstream string, port int, topographyFiles []string) error {
 		return err
 	}
 
-	s := grpc.NewServer()
+	s := grpc.NewServer(
+		grpc.UnaryInterceptor(grpc_prometheus.UnaryServerInterceptor),
+	)
 	internalprotocol.RegisterForecasterServer(s, server)
 	grpc_health_v1.RegisterHealthServer(s, health.NewServer(server.client))
+
+	grpc_prometheus.EnableHandlingTimeHistogram()
+	grpc_prometheus.Register(s)
+
 	return s.Serve(lis)
 }
 
@@ -44,7 +51,11 @@ type Server struct {
 }
 
 func New(upstream string, topographyFiles []string) (*Server, error) {
-	conn, err := grpc.Dial(upstream, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(upstream,
+		grpc.WithInsecure(),
+		grpc.WithBlock(),
+		grpc.WithUnaryInterceptor(grpc_prometheus.UnaryClientInterceptor),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("could not to upstream: %w", err)
 	}

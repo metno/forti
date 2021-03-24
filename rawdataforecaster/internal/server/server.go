@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 
+	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -30,9 +31,14 @@ func Run(conf *config.Configuration, port int) error {
 		return err
 	}
 
-	s := grpc.NewServer()
+	s := grpc.NewServer(
+		grpc.UnaryInterceptor(grpc_prometheus.UnaryServerInterceptor),
+	)
 	internalprotocol.RegisterForecasterServer(s, server)
 	grpc_health_v1.RegisterHealthServer(s, health.NewServer())
+
+	grpc_prometheus.EnableHandlingTimeHistogram()
+	grpc_prometheus.Register(s)
 
 	log.Printf("listening on %s", listenAddress)
 

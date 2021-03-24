@@ -53,6 +53,7 @@ func getConfig(file string) (*config.Configuration, error) {
 }
 
 func serveStats() {
+	log.Println("serving prometheus stats on http://localhost:8080/metrics")
 	http.Handle("/metrics", promhttp.Handler())
 	log.Println(http.ListenAndServe(":8080", nil))
 }
