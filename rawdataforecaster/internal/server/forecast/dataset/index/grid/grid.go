@@ -77,6 +77,7 @@ func (a *Grid) Contains(coord LatLon) bool {
 	if err != nil {
 		panic(err) // should never happen
 	}
+	defer C.GEOSGeom_destroy_r(ctx, point)
 
 	result := byte(C.GEOSPreparedContains_r(ctx, a.polygon, point))
 	if result == byte(2) {
