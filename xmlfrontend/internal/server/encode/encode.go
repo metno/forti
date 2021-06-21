@@ -214,7 +214,7 @@ func getDataElements(forecast *parsedForecast, elements *config.DataElement) []x
 			}
 			value, err := f(value, &forecast.Values)
 			if err != nil {
-				log.Println(err)
+				// log.Println(err)
 				continue
 			}
 			dataElement.Attr = append(dataElement.Attr, xml.Attr{
