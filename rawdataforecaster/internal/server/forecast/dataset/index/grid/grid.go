@@ -63,12 +63,7 @@ func (a *Grid) Free() {
 
 // Contains tells if the given lat/lon is within our polygon. It panics on error.
 func (a *Grid) Contains(coord LatLon) bool {
-	converter, err := proj.Get(a.srs)
-	if err != nil {
-		panic(err)
-	}
-	xy := converter.Convert(coord.Longitude, coord.Latitude)
-	converter.Return()
+	xy := a.reproject(coord)
 
 	ctx := C.GEOS_init_r()
 	defer C.GEOS_finish_r(ctx)
@@ -84,6 +79,16 @@ func (a *Grid) Contains(coord LatLon) bool {
 		panic("error when checking geometry")
 	}
 	return result == byte(1)
+}
+
+func (a *Grid) reproject(coord LatLon) proj.Point {
+	converter, err := proj.Get(a.srs)
+	defer converter.Return()
+	if err != nil {
+		panic(err)
+	}
+	xy := converter.Convert(coord.Longitude, coord.Latitude)
+	return xy
 }
 
 func readGeometry(ctx C.GEOSContextHandle_t, wkt string) (*C.GEOSGeometry, error) {

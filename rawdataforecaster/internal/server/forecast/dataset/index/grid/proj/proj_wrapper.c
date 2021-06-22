@@ -1,17 +1,16 @@
 #include "proj_wrapper.h"
 
 
-static double deg2rad(double deg)
-{
-    return deg / (180.0f / 3.14159265359f);
-}
-
-
 struct coord convert(PJ *pj, double longitude, double latitude) {
     // since PJ_COORD is a union, it is hard to implement this clearly in pure go.
-    PJ_COORD coord = proj_coord(deg2rad(longitude), deg2rad(latitude), 0, 0);
+    PJ_COORD coord = proj_coord(proj_torad(longitude), proj_torad(latitude), 0, 0);
 
     coord = proj_trans(pj, PJ_FWD, coord);
+
+    if (proj_angular_output(pj, PJ_FWD)) {
+        coord.xy.x = proj_todeg(coord.xy.x);
+        coord.xy.y = proj_todeg(coord.xy.y);
+    }
 
     struct coord c;
     c.x = coord.xy.x;

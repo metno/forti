@@ -12,28 +12,45 @@ import (
 )
 
 func Encode(forecast *internalprotocol.Forecast) (*jsonformat.GeoJSON, error) {
+	ret := baseForecast(forecast.ForecastMeta.GridLocation)
+
 	properties, err := getSerializationForecast(forecast)
 	if err != nil {
 		return nil, err
 	}
 
-	ret := jsonformat.GeoJSON{
-		Type: "Feature",
-		Geometry: jsonformat.Geometry{
-			Type: "Point",
-			Coordinates: []jsonformat.GeoJSONCoordinate{
-				// We assume that the caller has modified the GridLocation to match the request, if neccessary.
-				jsonformat.GeoJSONCoordinate(forecast.ForecastMeta.GridLocation.Longitude),
-				jsonformat.GeoJSONCoordinate(forecast.ForecastMeta.GridLocation.Latitude),
-			},
-		},
-		Properties: properties,
-	}
+	ret.Properties = properties
 	if !config.Configuration.SkipAltitude {
 		ret.Geometry.Coordinates = append(ret.Geometry.Coordinates, jsonformat.GeoJSONCoordinate(getAltitude(forecast)))
 	}
 
-	return &ret, nil
+	return ret, nil
+}
+
+func EncodeError(forecast *internalprotocol.Forecast, message string) *jsonformat.GeoJSON {
+	ret := baseForecast(forecast.ForecastMeta.GridLocation)
+	ret.Properties = &jsonformat.Forecast{
+		Meta: jsonformat.Metadata{
+			UpdatedAt: time.Now().Truncate(time.Minute).UTC(),
+			Error:     message,
+			Units:     make(map[string]string),
+		},
+		Timeseries: make([]jsonformat.TimeStep, 0),
+	}
+	return ret
+}
+
+func baseForecast(location *internalprotocol.Location) *jsonformat.GeoJSON {
+	return &jsonformat.GeoJSON{
+		Type: "Feature",
+		Geometry: jsonformat.Geometry{
+			Type: "Point",
+			Coordinates: []jsonformat.GeoJSONCoordinate{
+				jsonformat.GeoJSONCoordinate(location.Longitude),
+				jsonformat.GeoJSONCoordinate(location.Latitude),
+			},
+		},
+	}
 }
 
 func getSerializationForecast(forecast *internalprotocol.Forecast) (*jsonformat.Forecast, error) {

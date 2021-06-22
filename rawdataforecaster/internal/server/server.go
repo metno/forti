@@ -68,6 +68,22 @@ func (s *forecastServer) GetForecast(ctx context.Context, in *internalprotocol.G
 		if errors.Is(err, forecast.ErrOutsideAllGrids) {
 			return &internalprotocol.Forecast{
 				ForecastStatus: internalprotocol.ForecastStatus_OutsideAllGrids,
+				ForecastMeta: &internalprotocol.ForecastMeta{
+					GridLocation: &internalprotocol.Location{
+						Latitude:  in.Latitude,
+						Longitude: in.Longitude,
+					},
+				},
+			}, nil
+		} else if errors.Is(err, forecast.ErrPointTooFarAway) {
+			return &internalprotocol.Forecast{
+				ForecastStatus: internalprotocol.ForecastStatus_PointTooFarAway,
+				ForecastMeta: &internalprotocol.ForecastMeta{
+					GridLocation: &internalprotocol.Location{
+						Latitude:  in.Latitude,
+						Longitude: in.Longitude,
+					},
+				},
 			}, nil
 		}
 		return nil, err

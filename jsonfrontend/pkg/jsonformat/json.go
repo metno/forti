@@ -12,6 +12,7 @@ type Forecast struct {
 
 type Metadata struct {
 	UpdatedAt     time.Time         `json:"updated_at"`
+	Error         string            `json:"error,omitempty"`
 	Units         map[string]string `json:"units"`
 	RadarCoverage string            `json:"radar_coverage,omitempty"`
 }

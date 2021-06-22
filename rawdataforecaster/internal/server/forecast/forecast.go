@@ -59,7 +59,14 @@ func newFromClient(store *fortiblob.Client, cfg *config.Configuration) (*Forecas
 // ErrOutsideAllGrids is returned by Forecast.Get if no grids can be found for the given latitude and longitude.
 var ErrOutsideAllGrids = errors.New("outside all grids")
 
-// Get returns a forecast for the given latitude and longitude. Returns ErrOutsideAllGrids if outside all grids.
+// ErrPointTooFarAway is returned by Forecast.Get if a maximum distance to
+// returned grid point is defined, and the point has a greater distance
+// than that.
+var ErrPointTooFarAway = errors.New("returned point is too far away")
+
+// Get returns a forecast for the given latitude and longitude. Returns
+// ErrOutsideAllGrids if outside all grids, or ErrPointTooFarAway if grid
+// point is too far away.
 func (f *Forecast) Get(latitude, longitude float32) (*dataset.LocationData, error) {
 	f.m.RLock()
 	defer f.m.RUnlock()
@@ -98,12 +105,15 @@ func (f *Forecast) bestArea(latitude, longitude float32) (*bestDataset, error) {
 			selectedLocation = closestLocation
 		}
 	}
-	if !selected.WithinGeographicLimit(selectedLocation, latitude, longitude) {
-		return nil, ErrOutsideAllGrids
-	}
 
 	if selected == nil {
 		return nil, errors.New("no datasets available")
+	}
+	if !selected.WithinGeographicArea(latitude, longitude) {
+		return nil, ErrOutsideAllGrids
+	}
+	if !selected.ResponseHasAcceptableDistance(selectedLocation) {
+		return nil, ErrPointTooFarAway
 	}
 
 	distanceHistogram.With(prometheus.Labels{"area": selected.Meta.Area}).Observe(float64(selectedLocation.Distance))

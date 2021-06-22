@@ -52,18 +52,13 @@ func TestDownloadAndWrite(t *testing.T) {
 	}
 }
 
-func TestWithinGeographicLimit(t *testing.T) {
+func TestAcceptableDistance(t *testing.T) {
 	dataset, err := downloadDataset()
 	if err != nil {
 		t.Fatalf("Expected to get back dataset; Got error: %s", err)
 	}
-
-	// Fake user request and lookup georesponse
-	reqLat := float32(59.1)
-	reqLong := float32(11)
-
 	georesponse := &lookup.GeoResponse{Distance: 500}
-	if !dataset.WithinGeographicLimit(georesponse, reqLat, reqLong) {
+	if !dataset.ResponseHasAcceptableDistance(georesponse) {
 		t.Error("Expected request to be within maximum distance; Got failed check for geopgraphic limit.")
 	}
 }

@@ -58,7 +58,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if data.ForecastStatus == internalprotocol.ForecastStatus_OutsideAllGrids {
+	if data.ForecastStatus != internalprotocol.ForecastStatus_OK {
 		http.NotFound(w, r)
 		return
 	}
