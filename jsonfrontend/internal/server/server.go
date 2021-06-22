@@ -14,6 +14,7 @@ import (
 	"gitlab.met.no/forti/f2/internalprotocol"
 	"gitlab.met.no/forti/f2/jsonfrontend/internal/server/config"
 	"gitlab.met.no/forti/f2/jsonfrontend/internal/server/encode"
+	"gitlab.met.no/forti/f2/jsonfrontend/pkg/jsonformat"
 	"google.golang.org/grpc"
 )
 
@@ -56,36 +57,46 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if data.ForecastStatus == internalprotocol.ForecastStatus_OutsideAllGrids {
-		http.NotFound(w, r)
-		return
+	if !config.Configuration.LocationFromGrid || data.ForecastMeta.GridLocation == nil {
+		data.ForecastMeta.GridLocation = &internalprotocol.Location{
+			Latitude:  forecastRequest.Latitude,
+			Longitude: forecastRequest.Longitude,
+		}
 	}
 
+	var doc *jsonformat.GeoJSON
+	switch data.ForecastStatus {
+	case internalprotocol.ForecastStatus_OutsideAllGrids:
+		http.Error(w, "Outside of coverage area", http.StatusNotFound)
+		return
+	case internalprotocol.ForecastStatus_PointTooFarAway:
+		doc = encode.EncodeError(data, "no data at the given location")
+	default:
+		var err error
+		doc, err = encode.Encode(data)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, "service unavailable", http.StatusServiceUnavailable)
+			return
+		}
+	}
+
+	addHttpHeaders(w)
+
+	if err := json.NewEncoder(w).Encode(doc); err != nil {
+		log.Println(err)
+	}
+}
+
+func addHttpHeaders(w http.ResponseWriter) {
 	for _, header := range config.Configuration.HTTPHeaders {
 		w.Header().Add(header.Key, header.Value)
 	}
-
-	if !config.Configuration.LocationFromGrid {
-		data.ForecastMeta.GridLocation.Latitude = forecastRequest.Latitude
-		data.ForecastMeta.GridLocation.Longitude = forecastRequest.Longitude
-	}
-
-	output, err := encode.Encode(data)
-	if err != nil {
-		log.Println(err)
-		http.Error(w, "service unavailable", http.StatusServiceUnavailable)
-		return
-	}
-
 	now := time.Now()
 	w.Header().Add("Last-Modified", now.Format(http.TimeFormat))
 	if config.Configuration.DataExpiryOffset != 0 {
 		expiry := now.Add(time.Duration(config.Configuration.DataExpiryOffset) * time.Second)
 		w.Header().Add("Expires", expiry.Format(http.TimeFormat))
-	}
-
-	if err := json.NewEncoder(w).Encode(output); err != nil {
-		log.Println(err)
 	}
 }
 

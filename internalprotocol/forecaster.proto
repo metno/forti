@@ -25,6 +25,7 @@ message Altitude {
 enum ForecastStatus {
     OK = 0;
     OutsideAllGrids = 1;
+    PointTooFarAway = 2;
 }
 
 message Forecast {

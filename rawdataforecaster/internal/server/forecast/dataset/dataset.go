@@ -167,18 +167,24 @@ func (d *Dataset) ClosestGridLocation(latitude, longitude float32) (*lookup.GeoR
 	return min, nil
 }
 
-// WithinGeographicLimit checks if forecast request is outside allowed geographic bounds.
-// Limits are checked first for distance and then for a polygon mask.
-func (d *Dataset) WithinGeographicLimit(georesponse *lookup.GeoResponse, reqLat, reqLong float32) bool {
+// ResponseHasAcceptableDistance checks if a GeoResponse is valid for a point
+// that is too far away from the requested point.
+func (d *Dataset) ResponseHasAcceptableDistance(georesponse *lookup.GeoResponse) bool {
 	if d.GridLimit.MaximumGridPointDistance > 0 {
 		if int(georesponse.Distance) > d.GridLimit.MaximumGridPointDistance {
 			return false
 		}
 	}
+	return true
+}
+
+// WithinGeographicArea tells if the given latitude/longitude is within the
+// dataset's geographic area.
+func (d *Dataset) WithinGeographicArea(lat, lon float32) bool {
 	if d.HasPolygon() {
 		location := grid.LatLon{
-			Latitude:  float64(reqLat),
-			Longitude: float64(reqLong),
+			Latitude:  float64(lat),
+			Longitude: float64(lon),
 		}
 		return d.GridLimit.Polygon.Contains(location)
 	}

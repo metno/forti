@@ -57,7 +57,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var output *mox.ForecastDocument
-	if data.ForecastStatus != internalprotocol.ForecastStatus_OutsideAllGrids {
+	if data.ForecastStatus == internalprotocol.ForecastStatus_OK {
 		// Use coordinates from query, rather than returned coordinates
 		data.ForecastMeta.GridLocation.Latitude = forecastRequest.Latitude
 		data.ForecastMeta.GridLocation.Longitude = forecastRequest.Longitude
