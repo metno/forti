@@ -92,7 +92,7 @@ func forceName(value float32, allValues *map[string]float32) (string, error) {
 }
 
 func windDirection(value float32, allValues *map[string]float32) (string, error) {
-	if value < 0 || value >= 360 {
+	if value < 0 || value > 360 {
 		return "", fmt.Errorf("windDirection value of %f", value)
 	} else if value < 22.5 {
 		return "N", nil
