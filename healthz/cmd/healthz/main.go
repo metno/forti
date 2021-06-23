@@ -16,11 +16,25 @@ func main() {
 	runServer := flag.Bool("run-server", false, "Run a server on port 8080, continously serving status.")
 	configFile := flag.String("config", "/etc/forti/checks.json", "Read check configuration from the given file.")
 	upstreamGRPC := flag.String("upstream-grpc-host", "", "Check status against the given grpc server")
+	onlyCheckConfig := flag.Bool("only-check-config", false, "Do not run checks. Only verify configuration, then exit")
+
 	flag.Parse()
 
 	conf, err := config.Read(*configFile)
 	if err != nil {
 		log.Fatalln(err)
+	}
+
+	if errs := conf.Problems(); len(errs) != 0 {
+		log.Println("Problems in configuration:")
+		for _, e := range errs {
+			log.Printf("* %s", e)
+		}
+		log.Fatalln("Cannot proceed")
+	}
+	if *onlyCheckConfig {
+		log.Println("ok")
+		return
 	}
 
 	if *runServer {
