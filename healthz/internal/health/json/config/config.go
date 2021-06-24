@@ -8,6 +8,7 @@ import (
 	"html/template"
 	"net/url"
 	"os"
+	"regexp"
 	"time"
 )
 
@@ -52,6 +53,25 @@ type NamedRequest struct {
 	Name      string
 	URL       *url.URL
 	Blueprint Blueprint
+}
+
+// Problems returns a list of errors in the configuration, but only errors
+// that are so severe that checks cannot be based on this config.
+func (cc *CheckConfiguration) Problems() []error {
+	var ret []error
+	if match, _ := regexp.MatchString(`^https?$`, cc.Request.Protocol); !match {
+		ret = append(ret, fmt.Errorf("invalid protocol: %s", cc.Request.Protocol))
+	}
+	if match, _ := regexp.MatchString(`\{\{\ *.Latitude *\}\}`, cc.Request.PathTemplate); !match {
+		ret = append(ret, errors.New("missing {{.Latitude}} in path template"))
+	}
+	if match, _ := regexp.MatchString(`\{\{\ *.Longitude *\}\}`, cc.Request.PathTemplate); !match {
+		ret = append(ret, errors.New("missing {{.Longitude}} in path template"))
+	}
+	if cc.Response.MaxFailures >= len(cc.Response.Locations) {
+		ret = append(ret, errors.New("max failures cannot be larger than length of check locations"))
+	}
+	return ret
 }
 
 // GetRequests returns a list of all possible permutations of server address
