@@ -32,6 +32,9 @@ func NewChecker(conf *config.CheckConfiguration) *Checker {
 
 func (c *Checker) ServeSimple(w http.ResponseWriter, r *http.Request) {
 	result := c.Check()
+	if !result.OK {
+		w.WriteHeader(http.StatusServiceUnavailable)
+	}
 
 	w.Header().Add("Content-Type", "text/plain;charset=UTF-8")
 	fmt.Fprintln(w, result)
@@ -39,6 +42,9 @@ func (c *Checker) ServeSimple(w http.ResponseWriter, r *http.Request) {
 
 func (c *Checker) ServeJSON(w http.ResponseWriter, r *http.Request) {
 	result := c.Check()
+	if !result.OK {
+		w.WriteHeader(http.StatusServiceUnavailable)
+	}
 
 	w.Header().Add("Content-Type", "application/json;charset=UTF-8")
 	enc := json.NewEncoder(w)
