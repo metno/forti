@@ -17,7 +17,7 @@ import (
 
 // Forecast gives the latest weather forecast for a location.
 type Forecast struct {
-	store *fortiblob.Client
+	store fortiblob.Client
 
 	cfg *config.Configuration
 
@@ -42,7 +42,7 @@ func New(cfg *config.Configuration) (*Forecast, error) {
 	return f, nil
 }
 
-func newFromClient(store *fortiblob.Client, cfg *config.Configuration) (*Forecast, error) {
+func newFromClient(store fortiblob.Client, cfg *config.Configuration) (*Forecast, error) {
 	f := &Forecast{
 		store:    store,
 		cfg:      cfg,
