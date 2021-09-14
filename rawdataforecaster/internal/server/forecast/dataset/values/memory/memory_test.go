@@ -10,6 +10,7 @@ import (
 
 func TestRead(t *testing.T) {
 	r := getSampleReader()
+	defer r.Close()
 
 	val, err := r.Read(3)
 	if err != nil {
@@ -56,14 +57,18 @@ func getSampleReader() *MemoryReader {
 		},
 		LocationCount: 3,
 	}
+
+	mad := allocate(3 * 4)
+	mad.Values = []int16{
+		-10, 1, 1,
+		0, 1, 1,
+		100, 1, 1,
+		10000, 1, 1,
+	}
+
 	return &MemoryReader{
 		MetaCollection: meta,
-		data: []int16{
-			-10, 1, 1,
-			0, 1, 1,
-			100, 1, 1,
-			10000, 1, 1,
-		},
+		mad:            mad,
 	}
 
 }

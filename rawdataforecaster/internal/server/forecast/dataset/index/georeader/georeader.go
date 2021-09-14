@@ -17,10 +17,10 @@ import (
 
 // Reader connects to a model provider, and gets geo data from it
 type Reader struct {
-	source *fortiblob.Client
+	source fortiblob.Client
 }
 
-func New(source *fortiblob.Client) *Reader {
+func New(source fortiblob.Client) *Reader {
 	return &Reader{source: source}
 }
 

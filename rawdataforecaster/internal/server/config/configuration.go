@@ -9,7 +9,7 @@ import (
 	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
 
-type DownloadFunction func(ctx context.Context, source *fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, gridid string, config map[string]interface{}) (values.Reader, error)
+type DownloadFunction func(ctx context.Context, source fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, gridid string, config map[string]interface{}) (values.Reader, error)
 
 type Configuration struct {
 	Source                   DataSource `json:"source"`

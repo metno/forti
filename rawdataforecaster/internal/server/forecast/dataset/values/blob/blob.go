@@ -11,7 +11,7 @@ import (
 )
 
 type Reader struct {
-	source *fortiblob.Client
+	source fortiblob.Client
 	prefix string
 
 	datasetMeta fortiblob.DatasetMeta
@@ -19,7 +19,7 @@ type Reader struct {
 	grid        string
 }
 
-func Download(ctx context.Context, source *fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, grid string, config map[string]interface{}) (values.Reader, error) {
+func Download(ctx context.Context, source fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, grid string, config map[string]interface{}) (values.Reader, error) {
 	meta, err := source.GetGridMeta(ctx, datasetMeta, grid)
 	if err != nil {
 		return nil, err

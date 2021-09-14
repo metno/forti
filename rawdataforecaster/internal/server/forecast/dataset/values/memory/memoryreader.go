@@ -10,11 +10,12 @@ import (
 // MemoryReader serves forecast data.
 type MemoryReader struct {
 	fortiblob.MetaCollection
-	data []int16
+	mad *manuallyAllocatedData
 }
 
 // Close releases any resources held by this object.
 func (r *MemoryReader) Close() error {
+	r.mad.Free()
 	return nil
 }
 
@@ -23,11 +24,11 @@ func (r *MemoryReader) Read(idx int) (*values.LocationDataCollection, error) {
 	sliceFrom := idx * r.LocationCount
 	sliceTo := sliceFrom + r.LocationCount
 
-	if sliceTo > len(r.data) {
+	if sliceTo > len(r.mad.Values) {
 		return nil, errors.New("out of bounds")
 	}
 
-	in := r.data[sliceFrom:sliceTo]
+	in := r.mad.Values[sliceFrom:sliceTo]
 	out := make([]float32, len(in))
 
 	for _, meta := range r.Parameters {

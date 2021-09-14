@@ -38,11 +38,9 @@ func main() {
 		log.Fatalf("could not greet: %v", err)
 	}
 
-	// b, err := json.MarshalIndent(r, "", "  ")
-	// if err != nil {
-	// 	log.Fatalln(err)
-	// }
-	// fmt.Println(string(b))
+	if forecast.ForecastStatus != internalprotocol.ForecastStatus_OK {
+		log.Fatalln(forecast.ForecastStatus)
+	}
 
 	fmt.Printf("updated at: %v\n", forecast.ForecastMeta.UpdatedAt.AsTime())
 	fmt.Printf("next update: %v\n", forecast.ForecastMeta.NextUpdate.AsTime())

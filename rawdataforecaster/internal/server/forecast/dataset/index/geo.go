@@ -39,7 +39,7 @@ func init() {
 }
 
 // Add creates or returns a cached lookup object from the given reader and id.
-func Add(ctx context.Context, source *fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, gridid string) (Nearester, error) {
+func Add(ctx context.Context, source fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, gridid string) (Nearester, error) {
 
 	gridReader := georeader.New(source)
 

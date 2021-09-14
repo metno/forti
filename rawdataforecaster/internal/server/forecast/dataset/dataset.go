@@ -38,7 +38,7 @@ type Meta struct {
 }
 
 // Download creates and returns a Dataset from the given specification.
-func Download(ctx context.Context, source *fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, cfg *config.Configuration) (*Dataset, error) {
+func Download(ctx context.Context, source fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, cfg *config.Configuration) (*Dataset, error) {
 	grids, err := source.GetGridInfo(ctx, datasetMeta)
 	if err != nil {
 		return nil, err
