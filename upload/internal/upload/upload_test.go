@@ -11,7 +11,7 @@ import (
 	_ "gocloud.dev/blob/memblob"
 )
 
-func makeTestingClient() *fortiblob.Client {
+func makeTestingClient() fortiblob.Client {
 	ctx := context.Background()
 
 	bucket, err := blob.OpenBucket(ctx, "mem://test")

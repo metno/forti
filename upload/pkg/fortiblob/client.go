@@ -12,11 +12,23 @@ import (
 	"gocloud.dev/blob"
 )
 
-type Client struct {
+type Client interface {
+	Close() error
+	Latest(ctx context.Context) (map[string]int, error)
+	GetMeta(ctx context.Context, area string, version int) (*DatasetMeta, error)
+	GetGridInfo(ctx context.Context, d *DatasetMeta) ([]GridInfo, error)
+	GetGridMeta(ctx context.Context, d *DatasetMeta, gridid string) (*MetaCollection, error)
+	GetData(ctx context.Context, d *DatasetMeta, gridid string) (DataReader, error)
+	GetDataRange(ctx context.Context, d *DatasetMeta, hash string, from, length int) (io.ReadCloser, error)
+	GetLatitude(ctx context.Context, d *DatasetMeta, gridid string) (DataReader, error)
+	GetLongitude(ctx context.Context, d *DatasetMeta, gridid string) (DataReader, error)
+}
+
+type client struct {
 	bucket *blob.Bucket
 }
 
-func NewClient(connectURL string) (*Client, error) {
+func NewClient(connectURL string) (Client, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -28,15 +40,15 @@ func NewClient(connectURL string) (*Client, error) {
 	return NewClientFromBucket(bucket), nil
 }
 
-func NewClientFromBucket(bucket *blob.Bucket) *Client {
-	return &Client{bucket}
+func NewClientFromBucket(bucket *blob.Bucket) Client {
+	return &client{bucket}
 }
 
-func (c *Client) Close() error {
+func (c *client) Close() error {
 	return c.bucket.Close()
 }
 
-func (c *Client) Latest(ctx context.Context) (map[string]int, error) {
+func (c *client) Latest(ctx context.Context) (map[string]int, error) {
 	prefix := "latest/"
 
 	ret := make(map[string]int)
@@ -68,7 +80,7 @@ func (c *Client) Latest(ctx context.Context) (map[string]int, error) {
 	return ret, nil
 }
 
-func (c *Client) GetMeta(ctx context.Context, area string, version int) (*DatasetMeta, error) {
+func (c *client) GetMeta(ctx context.Context, area string, version int) (*DatasetMeta, error) {
 	path := fmt.Sprintf("%s/%d/complete.json", area, version)
 
 	r, err := c.bucket.NewReader(ctx, path, nil)
@@ -90,7 +102,7 @@ type GridInfo struct {
 	RawDataSize int64
 }
 
-func (c *Client) GetGridInfo(ctx context.Context, d *DatasetMeta) ([]GridInfo, error) {
+func (c *client) GetGridInfo(ctx context.Context, d *DatasetMeta) ([]GridInfo, error) {
 	var gridids []GridInfo
 	it := c.bucket.List(
 		&blob.ListOptions{
@@ -129,7 +141,7 @@ func (c *Client) GetGridInfo(ctx context.Context, d *DatasetMeta) ([]GridInfo, e
 	return gridids, nil
 }
 
-func (c *Client) GetGridMeta(ctx context.Context, d *DatasetMeta, gridid string) (*MetaCollection, error) {
+func (c *client) GetGridMeta(ctx context.Context, d *DatasetMeta, gridid string) (*MetaCollection, error) {
 	path := fmt.Sprintf("%s/%d/%s/meta.json", d.Area, d.Version, gridid)
 
 	r, err := c.bucket.NewReader(ctx, path, nil)
@@ -151,11 +163,11 @@ type DataReader interface {
 	Size() int64
 }
 
-func (c *Client) GetData(ctx context.Context, d *DatasetMeta, gridid string) (DataReader, error) {
+func (c *client) GetData(ctx context.Context, d *DatasetMeta, gridid string) (DataReader, error) {
 	return c.getStream(ctx, fmt.Sprintf("%s/%d/%s/data", d.Area, d.Version, gridid))
 }
 
-func (c *Client) GetDataRange(ctx context.Context, d *DatasetMeta, hash string, from, length int) (io.ReadCloser, error) {
+func (c *client) GetDataRange(ctx context.Context, d *DatasetMeta, hash string, from, length int) (io.ReadCloser, error) {
 	path := fmt.Sprintf("%s/%d/%s/data", d.Area, d.Version, hash)
 	r, err := c.bucket.NewRangeReader(ctx, path, int64(from), int64(length), nil)
 	if err != nil {
@@ -165,15 +177,15 @@ func (c *Client) GetDataRange(ctx context.Context, d *DatasetMeta, hash string, 
 	return r, nil
 }
 
-func (c *Client) GetLatitude(ctx context.Context, d *DatasetMeta, gridid string) (DataReader, error) {
+func (c *client) GetLatitude(ctx context.Context, d *DatasetMeta, gridid string) (DataReader, error) {
 	return c.getStream(ctx, fmt.Sprintf("%s/%d/%s/latitude", d.Area, d.Version, gridid))
 }
 
-func (c *Client) GetLongitude(ctx context.Context, d *DatasetMeta, gridid string) (DataReader, error) {
+func (c *client) GetLongitude(ctx context.Context, d *DatasetMeta, gridid string) (DataReader, error) {
 	return c.getStream(ctx, fmt.Sprintf("%s/%d/%s/longitude", d.Area, d.Version, gridid))
 }
 
-func (c *Client) getStream(ctx context.Context, path string) (DataReader, error) {
+func (c *client) getStream(ctx context.Context, path string) (DataReader, error) {
 	r, err := c.bucket.NewReader(ctx, path, nil)
 	if err != nil {
 		return nil, err
