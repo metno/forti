@@ -29,44 +29,44 @@ func TestJSONCheck(t *testing.T) {
 		Data: map[string]config.TimestepData{
 			"instant": {
 				Details: map[string]config.CheckSpecification{
-					"air_temperature":            config.CheckSpecification{MinimumCount: count, MinimumValue: temperatureMin, MaximumValue: temperatureMax},
-					"wind_from_direction":        config.CheckSpecification{MinimumCount: count},
-					"wind_speed":                 config.CheckSpecification{MinimumCount: count},
-					"air_pressure_at_sea_level":  config.CheckSpecification{MinimumCount: count},
-					"relative_humidity":          config.CheckSpecification{MinimumCount: count},
-					"cloud_area_fraction":        config.CheckSpecification{MinimumCount: count},
-					"cloud_area_fraction_low":    config.CheckSpecification{MinimumCount: count},
-					"cloud_area_fraction_medium": config.CheckSpecification{MinimumCount: count},
-					"cloud_area_fraction_high":   config.CheckSpecification{MinimumCount: count},
-					"dew_point_temperature":      config.CheckSpecification{MinimumCount: count},
-					"wind_speed_of_gust":         config.CheckSpecification{MinimumCount: count},
-					"fog_area_fraction":          config.CheckSpecification{MinimumCount: count},
+					"air_temperature":            {MinimumCount: count, MinimumValue: temperatureMin, MaximumValue: temperatureMax},
+					"wind_from_direction":        {MinimumCount: count},
+					"wind_speed":                 {MinimumCount: count},
+					"air_pressure_at_sea_level":  {MinimumCount: count},
+					"relative_humidity":          {MinimumCount: count},
+					"cloud_area_fraction":        {MinimumCount: count},
+					"cloud_area_fraction_low":    {MinimumCount: count},
+					"cloud_area_fraction_medium": {MinimumCount: count},
+					"cloud_area_fraction_high":   {MinimumCount: count},
+					"dew_point_temperature":      {MinimumCount: count},
+					"wind_speed_of_gust":         {MinimumCount: count},
+					"fog_area_fraction":          {MinimumCount: count},
 				},
 			},
 			"next_1_hours": {
 				Details: map[string]config.CheckSpecification{
-					"precipitation_amount":         config.CheckSpecification{MinimumCount: count},
-					"probability_of_precipitation": config.CheckSpecification{MinimumCount: count},
+					"precipitation_amount":         {MinimumCount: count},
+					"probability_of_precipitation": {MinimumCount: count},
 				},
 				Summary: map[string]config.CheckSpecification{
-					"symbol_code": config.CheckSpecification{MinimumCount: count},
+					"symbol_code": {MinimumCount: count},
 				},
 			},
 			"next_6_hours": {
 				Details: map[string]config.CheckSpecification{
-					"precipitation_amount":         config.CheckSpecification{MinimumCount: count},
-					"probability_of_precipitation": config.CheckSpecification{MinimumCount: count},
+					"precipitation_amount":         {MinimumCount: count},
+					"probability_of_precipitation": {MinimumCount: count},
 				},
 				Summary: map[string]config.CheckSpecification{
-					"symbol_code": config.CheckSpecification{MinimumCount: count},
+					"symbol_code": {MinimumCount: count},
 				},
 			},
 			"next_12_hours": {
 				Details: map[string]config.CheckSpecification{
-					"probability_of_precipitation": config.CheckSpecification{MinimumCount: count},
+					"probability_of_precipitation": {MinimumCount: count},
 				},
 				Summary: map[string]config.CheckSpecification{
-					"symbol_code": config.CheckSpecification{MinimumCount: count},
+					"symbol_code": {MinimumCount: count},
 				},
 			},
 		},

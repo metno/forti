@@ -14,7 +14,6 @@ import (
 
 // URL runs the set of tests specified by blueprint against the given URL.
 func URL(location *url.URL, expected config.Blueprint) LocationResult {
-	fmt.Println(location.String())
 	resp, err := http.Get(location.String())
 	if err != nil {
 		return LocationResult{

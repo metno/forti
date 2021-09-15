@@ -35,6 +35,11 @@ func TestForecastServiceUnavailable(t *testing.T) {
 					Latitude:  60,
 					Longitude: 10,
 				},
+				{
+					Name:      "AlwaysFail2",
+					Latitude:  50,
+					Longitude: 10,
+				},
 			},
 			MaxFailures: 0,
 		},
