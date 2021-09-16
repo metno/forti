@@ -82,13 +82,8 @@ func (c *Checker) refresh() {
 	c.lastRun = now
 	c.nextRun = now.Add(time.Minute)
 
-	log.Println("running checks")
+	log.Println("Running checks...")
 	result := runChecks(c.conf)
-
-	log.Printf("%v\n", result)
-	if !result.OK || !c.lastResultOK {
-		log.Println(c.lastResult)
-	}
 
 	c.lastResultOK = result.OK
 	c.lastResult = result
@@ -99,16 +94,20 @@ func runChecks(conf *config.CheckConfiguration) check.Result {
 
 	var failedRequests int
 	for _, request := range conf.GetRequests() {
+		log.Printf("Check %s on url %s ...\n", request.Name, request.URL)
+		locationResult := check.URL(request.URL, request.Blueprint)
+		log.Printf("---> Result: %v\n", locationResult)
 
-		problems := check.URL(request.URL, request.Blueprint)
-		if !problems.OK {
+		if !locationResult.OK {
 			failedRequests++
-			result.Locations[request.Name] = problems
+			result.Locations[request.Name] = locationResult
 		}
 	}
 	if failedRequests > conf.Response.MaxFailures {
 		result.OK = false
 	}
+
+	log.Printf("Total result of all checks: %v\n", result)
 
 	return result
 }

@@ -1,6 +1,7 @@
 package check
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -30,15 +31,23 @@ func (r Result) String() string {
 		}
 	}
 	var uniqueMessages []string
-	for msg := range messages {
-		uniqueMessages = append(uniqueMessages, msg)
+	for msg, count := range messages {
+		uniqueMessages = append(uniqueMessages, fmt.Sprintf("%s:%d", msg, count))
 	}
 
-	return strings.Join(uniqueMessages, ", ")
+	return fmt.Sprintf("Not OK,  checks failed for %d locations, caused by these errors: %v\n",
+		len(r.Locations), strings.Join(uniqueMessages, ", "))
 }
 
 // LocationResult is the result of a set of checks on a single location
 type LocationResult struct {
 	OK       bool     `json:"ok"`
 	Problems []string `json:"problems,omitempty"`
+}
+
+func (lr LocationResult) String() string {
+	if lr.OK {
+		return "OK"
+	}
+	return "Not OK, caused by: " + strings.Join(lr.Problems, ", ")
 }
