@@ -71,8 +71,6 @@ func getRequest(ctx context.Context, location *url.URL) (*http.Request, error) {
 		req.SetBasicAuth(username, password)
 	}
 
-	log.Println(req)
-
 	return req, nil
 }
 
