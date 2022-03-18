@@ -225,7 +225,8 @@ func checkSummaryParameters(doc *jsonformat.Forecast, expected config.Blueprint)
 					continue
 				}
 
-				if timeStep.Data[expectedPeriod].Summary == nil {
+				summary := timeStep.Data[expectedPeriod].Summary
+				if summary == nil {
 					problems = append(problems, fmt.Sprintf("Missing summary object under period type %s for time %s",
 						expectedPeriod, timeStep.Time))
 					continue
@@ -233,10 +234,10 @@ func checkSummaryParameters(doc *jsonformat.Forecast, expected config.Blueprint)
 
 				var value string
 				if expectedParam == "symbol_code" {
-					value = timeStep.Data[expectedPeriod].Summary.SymbolCode
+					value = summary.SymbolCode
 				}
 				if expectedParam == "symbol_confidence" {
-					value = timeStep.Data[expectedPeriod].Summary.SymbolConfidence
+					value = summary.SymbolConfidence
 				}
 
 				if value == "" {
