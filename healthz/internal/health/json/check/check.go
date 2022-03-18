@@ -66,7 +66,7 @@ func getRequest(ctx context.Context, location *url.URL) (*http.Request, error) {
 
 	username := os.Getenv("FORTI_USER")
 	if username != "" {
-		log.Printf("authenticating with user %s", username)
+		log.Printf("authenticating as user %s", username)
 		password := os.Getenv("FORTI_PASSWORD")
 		req.SetBasicAuth(username, password)
 	}
