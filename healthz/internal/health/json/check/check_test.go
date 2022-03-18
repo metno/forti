@@ -78,7 +78,7 @@ func TestJSONCheck(t *testing.T) {
 		t.Error("expected errors when checking forecast")
 	}
 
-	expectedErrors := 5
+	expectedErrors := 7
 	if len(result.Problems) != expectedErrors {
 		errString := fmt.Sprintf("Expected %d errors in JSON, got: %d. These are the errors: \n", expectedErrors, len(result.Problems))
 		for _, e := range result.Problems {
@@ -211,9 +211,6 @@ const faultyJSON = `
              }
            },
            "next_1_hours": {
-             "summary": {
-               "symbol_code": "rain"
-             },
              "details": {
                "precipitation_amount": 0.5,
                "precipitation_amount_max": 1,

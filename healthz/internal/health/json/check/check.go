@@ -75,7 +75,7 @@ func checkUpdatedAge(doc *jsonformat.Forecast, maxAge config.Duration) (problems
 		problems = append(problems, "Updated time not specified in forecast.")
 	}
 
-	if time.Now().Sub(updatedAt) > maxAge.Duration {
+	if time.Since(updatedAt) > maxAge.Duration {
 		problems = append(problems, fmt.Sprintf("Forecast data too old, last updated at: %v", updatedAt))
 	}
 
@@ -191,12 +191,19 @@ func checkSummaryParameters(doc *jsonformat.Forecast, expected config.Blueprint)
 					continue
 				}
 
+				summary := timeStep.Data[expectedPeriod].Summary
+				if summary == nil {
+					problems = append(problems, fmt.Sprintf("Missing summary object under period type %s for time %s",
+						expectedPeriod, timeStep.Time))
+					continue
+				}
+
 				var value string
 				if expectedParam == "symbol_code" {
-					value = timeStep.Data[expectedPeriod].Summary.SymbolCode
+					value = summary.SymbolCode
 				}
 				if expectedParam == "symbol_confidence" {
-					value = timeStep.Data[expectedPeriod].Summary.SymbolConfidence
+					value = summary.SymbolConfidence
 				}
 
 				if value == "" {
