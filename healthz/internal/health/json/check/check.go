@@ -109,7 +109,7 @@ func checkUpdatedAge(doc *jsonformat.Forecast, maxAge config.Duration) (problems
 		problems = append(problems, "Updated time not specified in forecast.")
 	}
 
-	if time.Now().Sub(updatedAt) > maxAge.Duration {
+	if time.Since(updatedAt) > maxAge.Duration {
 		problems = append(problems, fmt.Sprintf("Forecast data too old, last updated at: %v", updatedAt))
 	}
 
@@ -222,6 +222,12 @@ func checkSummaryParameters(doc *jsonformat.Forecast, expected config.Blueprint)
 
 				// Skip timesteps in forecast where period is missing, e.g next_6_hours
 				if _, exists := timeStep.Data[expectedPeriod]; !exists {
+					continue
+				}
+
+				if timeStep.Data[expectedPeriod].Summary == nil {
+					problems = append(problems, fmt.Sprintf("Missing summary object under period type %s for time %s",
+						expectedPeriod, timeStep.Time))
 					continue
 				}
 
