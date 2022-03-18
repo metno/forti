@@ -1,10 +1,13 @@
 package check
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"sort"
 	"time"
 
@@ -14,7 +17,18 @@ import (
 
 // URL runs the set of tests specified by blueprint against the given URL.
 func URL(location *url.URL, expected config.Blueprint) LocationResult {
-	resp, err := http.Get(location.String())
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	req, err := getRequest(ctx, location)
+	if err != nil {
+		return LocationResult{
+			OK:       false,
+			Problems: []string{fmt.Sprintf("unable to initialize request for %s: %s", location.String(), err)},
+		}
+	}
+
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return LocationResult{
 			OK:       false,
@@ -40,6 +54,26 @@ func URL(location *url.URL, expected config.Blueprint) LocationResult {
 	}
 
 	return runChecks(document.Properties, expected)
+}
+
+func getRequest(ctx context.Context, location *url.URL) (*http.Request, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", location.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("User-Agent", "drifty healthz")
+
+	username := os.Getenv("FORTI_USER")
+	if username != "" {
+		log.Printf("authenticating with user %s", username)
+		password := os.Getenv("FORTI_PASSWORD")
+		req.SetBasicAuth(username, password)
+	}
+
+	log.Println(req)
+
+	return req, nil
 }
 
 func runChecks(doc *jsonformat.Forecast, expected config.Blueprint) LocationResult {
