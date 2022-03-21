@@ -62,7 +62,7 @@ func getRequest(ctx context.Context, location *url.URL) (*http.Request, error) {
 		return nil, err
 	}
 
-	req.Header.Add("User-Agent", "drifty healthz")
+	req.Header.Add("User-Agent", "forti healthz")
 
 	username := os.Getenv("FORTI_USER")
 	if username != "" {
