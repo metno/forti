@@ -77,6 +77,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		doc = encode.EncodeError(data, "no data at the given location")
 		metrics.PointTooFarAway.Add(1)
 	default:
+		metrics.UnspecifiedError.Add(1)
 		var err error
 		doc, err = encode.Encode(data)
 		if err != nil {

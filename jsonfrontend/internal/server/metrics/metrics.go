@@ -42,3 +42,12 @@ var PointTooFarAway = promauto.NewCounter(
 		Help:      "Total number of requests where the request refers to a point too far away from a valid data point",
 	},
 )
+
+var UnspecifiedError = promauto.NewCounter(
+	prometheus.CounterOpts{
+		Namespace: "forti",
+		Subsystem: "jsonfrontend",
+		Name:      "unspecified_error",
+		Help:      "unspecified errors when getting data",
+	},
+)
