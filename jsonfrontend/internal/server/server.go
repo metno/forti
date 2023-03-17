@@ -75,6 +75,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	case internalprotocol.ForecastStatus_PointTooFarAway:
 		doc = encode.EncodeError(data, "no data at the given location")
+		metrics.PointTooFarAway.Add(1)
 	default:
 		var err error
 		doc, err = encode.Encode(data)
