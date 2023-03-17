@@ -14,6 +14,7 @@ import (
 	"gitlab.met.no/forti/f2/internalprotocol"
 	"gitlab.met.no/forti/f2/jsonfrontend/internal/server/config"
 	"gitlab.met.no/forti/f2/jsonfrontend/internal/server/encode"
+	"gitlab.met.no/forti/f2/jsonfrontend/internal/server/metrics"
 	"gitlab.met.no/forti/f2/jsonfrontend/pkg/jsonformat"
 	"google.golang.org/grpc"
 )
@@ -40,6 +41,8 @@ func (s *Server) Close() error {
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
 	forecastRequest, err := getForecastRequest(r)
 	if err != nil {
 		//log.Println(err)
@@ -68,6 +71,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch data.ForecastStatus {
 	case internalprotocol.ForecastStatus_OutsideAllGrids:
 		http.Error(w, "Outside of coverage area", http.StatusNotFound)
+		metrics.OutsideAllGrids.Add(1)
 		return
 	case internalprotocol.ForecastStatus_PointTooFarAway:
 		doc = encode.EncodeError(data, "no data at the given location")
@@ -81,11 +85,22 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	jsonDoc, err := json.Marshal(doc)
+	if err != nil {
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		log.Println(err)
+		return
+	}
+
+	metrics.UpstreamProcessingDuration.Observe(time.Since(startTime).Seconds())
+
 	addHttpHeaders(w)
 
-	if err := json.NewEncoder(w).Encode(doc); err != nil {
+	if _, err := w.Write(jsonDoc); err != nil {
 		log.Println(err)
 	}
+
+	metrics.TotalProcessingDuration.Observe(time.Since(startTime).Seconds())
 }
 
 func addHttpHeaders(w http.ResponseWriter) {
