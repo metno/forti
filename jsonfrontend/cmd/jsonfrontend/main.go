@@ -2,15 +2,18 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 
 	"gitlab.met.no/forti/f2/jsonfrontend/internal/server"
 	"gitlab.met.no/forti/f2/jsonfrontend/internal/server/config"
+	"gitlab.met.no/forti/f2/jsonfrontend/internal/server/metrics"
 )
 
 func main() {
 	upstream := flag.String("upstream", "localhost:5051", "get data from the given grpc server")
+	metricsPort := flag.Int("metricsPort", 9090, "serve metrics on the given port")
 	configFile := flag.String("config", "jsonformat.json", "read json formatting instructions from the given file")
 	flag.Parse()
 
@@ -21,6 +24,14 @@ func main() {
 	server, err := server.New(*upstream)
 	if err != nil {
 		log.Fatalln(err)
+	}
+
+	if *metricsPort != 0 {
+		log.Printf("serving stats at port %d", *metricsPort)
+		addr := fmt.Sprintf(":%d", *metricsPort)
+		go func() {
+			log.Fatalln(metrics.Serve(addr))
+		}()
 	}
 
 	http.Handle("/", server)
