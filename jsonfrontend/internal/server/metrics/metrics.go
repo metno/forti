@@ -1,9 +1,19 @@
 package metrics
 
 import (
+	"net/http"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
+
+func Serve(addr string) error {
+	mux := http.NewServeMux()
+	mux.Handle("/metrics", promhttp.Handler())
+
+	return http.ListenAndServe(addr, mux)
+}
 
 var UpstreamProcessingDuration = promauto.NewHistogram(
 	prometheus.HistogramOpts{
