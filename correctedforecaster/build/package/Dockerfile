@@ -1,16 +1,16 @@
-FROM ubuntu:focal
+FROM ubuntu:jammy
 
-ARG GOLANG_VERSION=1.17.1
-ARG GOLANG_SHA256=dab7d9c34361dc21ec237d584590d72500652e7c909bf082758fb63064fca0ef
-
+ARG GOLANG_VERSION=1.20.2
+ARG GOLANG_SHA256=4eaea32f59cde4dc635fbc42161031d13e1c780b87097f4b4234cfce671f1768
+ARG ARCH=amd64
 
 RUN apt-get update && apt-get -y install git curl
 
 RUN \
-    curl -L -O https://golang.org/dl/go${GOLANG_VERSION}.linux-amd64.tar.gz && \
-    sha256sum go${GOLANG_VERSION}.linux-amd64.tar.gz | grep -q ${GOLANG_VERSION} && \
-    tar -C /usr/local -xzf go${GOLANG_VERSION}.linux-amd64.tar.gz && \
-    rm go${GOLANG_VERSION}.linux-amd64.tar.gz
+    curl -L -O https://golang.org/dl/go${GOLANG_VERSION}.linux-${ARCH}.tar.gz && \
+    sha256sum go${GOLANG_VERSION}.linux-${ARCH}.tar.gz | grep -q ${GOLANG_VERSION} && \
+    tar -C /usr/local -xzf go${GOLANG_VERSION}.linux-${ARCH}.tar.gz && \
+    rm go${GOLANG_VERSION}.linux-${ARCH}.tar.gz
 
 ENV GOPATH=/go
 ENV PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
