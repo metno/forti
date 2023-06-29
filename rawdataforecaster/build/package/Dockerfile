@@ -1,15 +1,19 @@
-FROM ubuntu:focal
+FROM ubuntu:22.04
 
-ARG GOLANG_VERSION=1.17.1
-ARG GOLANG_SHA256=dab7d9c34361dc21ec237d584590d72500652e7c909bf082758fb63064fca0ef
+ARG GOLANG_VERSION=1.20.5
+# ARG GOLANG_SHA256=aa2fab0a7da20213ff975fa7876a66d47b48351558d98851b87d1cfef4360d09
+ARG TARGETARCH
 
 RUN apt-get update && apt-get -y install git curl
 
+COPY rawdataforecaster/build/package/golang_checksums.txt /tmp/golang_checksums.txt
+
 RUN \
-    curl -L -O https://golang.org/dl/go${GOLANG_VERSION}.linux-amd64.tar.gz && \
-    sha256sum go${GOLANG_VERSION}.linux-amd64.tar.gz | grep -q ${GOLANG_VERSION} && \
-    tar -C /usr/local -xzf go${GOLANG_VERSION}.linux-amd64.tar.gz && \
-    rm go${GOLANG_VERSION}.linux-amd64.tar.gz
+    curl -L -O https://go.dev/dl/go${GOLANG_VERSION}.linux-${TARGETARCH}.tar.gz && \
+    GOLANG_SHA256=$(grep "go${GOLANG_VERSION}.linux-${TARGETARCH}.tar.gz" /tmp/golang_checksums.txt | awk '{print $1}') && \
+    sha256sum go${GOLANG_VERSION}.linux-${TARGETARCH}.tar.gz | grep -q ${GOLANG_SHA256} && \
+    tar -C /usr/local -xzf go${GOLANG_VERSION}.linux-${TARGETARCH}.tar.gz && \
+    rm go${GOLANG_VERSION}.linux-${TARGETARCH}.tar.gz
 
 ENV GOPATH=/go
 ENV PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
@@ -23,12 +27,22 @@ RUN apt-get update && apt-get install -y \
 
 
 WORKDIR /src
-RUN git clone https://github.com/google/s2geometry.git && \
-    cd s2geometry && \
-    git checkout 2c02e21040e0b82aa5719e96033d02b8ce7c0eff && \
+
+RUN git clone https://github.com/abseil/abseil-cpp.git && \
+    cd abseil-cpp && \
+    git checkout c2435f8342c2d0ed8101cb43adfd605fdc52dca2 && \
     mkdir build && \
     cd build/ && \
-    cmake .. && \
+    cmake -DCMAKE_CXX_STANDARD=17 -DCMAKE_POSITION_INDEPENDENT_CODE=ON .. && \
+    make && \
+    make install
+
+RUN git clone https://github.com/google/s2geometry.git && \
+    cd s2geometry && \
+    git checkout 7773d518b1f29caa1c2045eb66ec519e025be108 && \
+    mkdir build && \
+    cd build/ && \
+    cmake  -DCMAKE_CXX_STANDARD=17 .. && \
     make && \
     make install
 
@@ -53,17 +67,23 @@ WORKDIR /src/rawdataforecaster/cmd/rawdataforecaster
 RUN go build
 
 
-FROM ubuntu:focal
+FROM ubuntu:22.04
+
+ARG TARGETARCH
 
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y \
-    libgflags2.2 libgoogle-glog0v5 libssl1.1 \
-    libgeos-c1v5 libproj15 \
+    libgflags2.2 libgoogle-glog0v5 libssl3 \
+    libgeos-c1v5 libproj22 \
     curl
 
-RUN curl -L -o /bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v0.3.6/grpc_health_probe-linux-amd64 && \
-    sha256sum /bin/grpc_health_probe | grep -q c78e988a4aad5e9e599c6a69e681ac68579c000b8f0571593325ccbc0c1638b7 && \
+COPY rawdataforecaster/build/package/grpc_health_probe_checksums.txt /tmp/grpc_health_probe_checksums.txt
+RUN  grep "grpc_health_probe-linux-${TARGETARCH}" /tmp/grpc_health_probe_checksums.txt
+
+
+RUN curl -L -o /bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v0.4.19/grpc_health_probe-linux-${TARGETARCH} && \
+    sha256sum /bin/grpc_health_probe | grep -q $(grep "grpc_health_probe-linux-${TARGETARCH}" /tmp/grpc_health_probe_checksums.txt | awk '{print $1}') && \
     chmod +x /bin/grpc_health_probe
 
 EXPOSE 8080

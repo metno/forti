@@ -3,7 +3,7 @@ package grid
 // #define GEOS_USE_ONLY_R_API
 // #include <geos_c.h>
 // #include <stdlib.h>
-// #cgo LDFLAGS: -lgeos_c
+// #cgo pkg-config: geos
 import "C"
 import (
 	"errors"
