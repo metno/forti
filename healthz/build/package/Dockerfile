@@ -1,4 +1,4 @@
-FROM golang:1.17
+FROM golang:1.20
 
 COPY go.mod /src/go.mod
 COPY go.sum /src/go.sum
@@ -17,7 +17,7 @@ WORKDIR /src/healthz/cmd/healthz
 
 RUN go build
 
-FROM ubuntu:focal
+FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y ca-certificates
 
