@@ -1,6 +1,7 @@
 package lookup
 
-// #cgo LDFLAGS: -lgdal
+// #cgo pkg-config: gdal
+// #cgo CXXFLAGS: -std=c++11
 // #include "topo.h"
 // #include <stdlib.h>
 import "C"

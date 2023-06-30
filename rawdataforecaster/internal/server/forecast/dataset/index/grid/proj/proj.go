@@ -2,7 +2,7 @@ package proj
 
 // #include "proj_wrapper.h"
 // #include <stdlib.h>
-// #cgo LDFLAGS: -lproj
+// #cgo pkg-config: proj
 import "C"
 import (
 	"errors"
