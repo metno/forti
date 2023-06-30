@@ -42,11 +42,13 @@ RUN go build
 
 FROM ubuntu:22.04
 
+ARG TARGETARCH
+
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y libgdal26 curl
+RUN apt-get update && apt-get install -y libgdal30 curl
 
-COPY rawdataforecaster/build/package/grpc_health_probe_checksums.txt /tmp/grpc_health_probe_checksums.txt
+COPY correctedforecaster/build/package/grpc_health_probe_checksums.txt /tmp/grpc_health_probe_checksums.txt
 RUN curl -L -o /bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v0.4.19/grpc_health_probe-linux-${TARGETARCH} && \
     sha256sum /bin/grpc_health_probe | grep -q $(grep "grpc_health_probe-linux-${TARGETARCH}" /tmp/grpc_health_probe_checksums.txt | awk '{print $1}') && \
     chmod +x /bin/grpc_health_probe
