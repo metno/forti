@@ -1,16 +1,18 @@
-FROM ubuntu:jammy
+FROM ubuntu:22.04
 
-ARG GOLANG_VERSION=1.20.2
-ARG GOLANG_SHA256=4eaea32f59cde4dc635fbc42161031d13e1c780b87097f4b4234cfce671f1768
-ARG ARCH=amd64
+ARG GOLANG_VERSION=1.20.5
+ARG TARGETARCH
 
 RUN apt-get update && apt-get -y install git curl
 
+COPY rawdataforecaster/build/package/golang_checksums.txt /tmp/golang_checksums.txt
+
 RUN \
-    curl -L -O https://golang.org/dl/go${GOLANG_VERSION}.linux-${ARCH}.tar.gz && \
-    sha256sum go${GOLANG_VERSION}.linux-${ARCH}.tar.gz | grep -q ${GOLANG_VERSION} && \
-    tar -C /usr/local -xzf go${GOLANG_VERSION}.linux-${ARCH}.tar.gz && \
-    rm go${GOLANG_VERSION}.linux-${ARCH}.tar.gz
+    curl -L -O https://go.dev/dl/go${GOLANG_VERSION}.linux-${TARGETARCH}.tar.gz && \
+    GOLANG_SHA256=$(grep "go${GOLANG_VERSION}.linux-${TARGETARCH}.tar.gz" /tmp/golang_checksums.txt | awk '{print $1}') && \
+    sha256sum go${GOLANG_VERSION}.linux-${TARGETARCH}.tar.gz | grep -q ${GOLANG_SHA256} && \
+    tar -C /usr/local -xzf go${GOLANG_VERSION}.linux-${TARGETARCH}.tar.gz && \
+    rm go${GOLANG_VERSION}.linux-${TARGETARCH}.tar.gz
 
 ENV GOPATH=/go
 ENV PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
@@ -38,14 +40,15 @@ WORKDIR /src/correctedforecaster/cmd/correctedforecaster
 RUN go build
 
 
-FROM ubuntu:focal
+FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y libgdal26 curl
 
-RUN curl -L -o /bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v0.3.6/grpc_health_probe-linux-amd64 && \
-    sha256sum /bin/grpc_health_probe | grep -q c78e988a4aad5e9e599c6a69e681ac68579c000b8f0571593325ccbc0c1638b7 && \
+COPY rawdataforecaster/build/package/grpc_health_probe_checksums.txt /tmp/grpc_health_probe_checksums.txt
+RUN curl -L -o /bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v0.4.19/grpc_health_probe-linux-${TARGETARCH} && \
+    sha256sum /bin/grpc_health_probe | grep -q $(grep "grpc_health_probe-linux-${TARGETARCH}" /tmp/grpc_health_probe_checksums.txt | awk '{print $1}') && \
     chmod +x /bin/grpc_health_probe
 
 

@@ -1,7 +1,6 @@
 FROM ubuntu:22.04
 
 ARG GOLANG_VERSION=1.20.5
-# ARG GOLANG_SHA256=aa2fab0a7da20213ff975fa7876a66d47b48351558d98851b87d1cfef4360d09
 ARG TARGETARCH
 
 RUN apt-get update && apt-get -y install git curl
@@ -79,9 +78,6 @@ RUN apt-get update && apt-get install -y \
     curl
 
 COPY rawdataforecaster/build/package/grpc_health_probe_checksums.txt /tmp/grpc_health_probe_checksums.txt
-RUN  grep "grpc_health_probe-linux-${TARGETARCH}" /tmp/grpc_health_probe_checksums.txt
-
-
 RUN curl -L -o /bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v0.4.19/grpc_health_probe-linux-${TARGETARCH} && \
     sha256sum /bin/grpc_health_probe | grep -q $(grep "grpc_health_probe-linux-${TARGETARCH}" /tmp/grpc_health_probe_checksums.txt | awk '{print $1}') && \
     chmod +x /bin/grpc_health_probe
