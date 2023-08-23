@@ -1,6 +1,10 @@
+services:
+  - name: docker:24-dind
+    alias: docker
+
 build_docker: 
   tags:
-    - k8s-root
+    - teampunkt
   rules:
     - if: '$CI_COMMIT_TAG'
   script:
