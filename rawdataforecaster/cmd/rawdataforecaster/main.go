@@ -10,6 +10,7 @@ import (
 
 	_ "gocloud.dev/blob/azureblob"
 	_ "gocloud.dev/blob/fileblob"
+	_ "gocloud.dev/blob/s3blob"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server"
