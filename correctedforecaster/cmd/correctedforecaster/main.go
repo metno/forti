@@ -18,13 +18,14 @@ import (
 func main() {
 	upstream := flag.String("upstream", "localhost:5052", "get data from the given grpc server")
 	bucket := flag.String("download-from", "", "download data from the given bucket")
+	downloadTimeout := flag.Int("download-timeout", 240, "Timeout in seconds for downloading all topography files.")
 	workdir := flag.String("workdir", "/data/", "use files in the given directory")
 	port := flag.Int("port", 5051, "Listen port for incoming grpc requests.")
 	stats := flag.Bool("serve-stats", false, "serve prometheus stats")
 
 	flag.Parse()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(*downloadTimeout)*time.Second)
 	defer cancel()
 	topographyFiles, err := download.Get(ctx, *bucket, *workdir)
 	if err != nil {
