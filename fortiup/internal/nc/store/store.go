@@ -8,10 +8,10 @@ import (
 	"log"
 	"strings"
 
-	"gitlab.met.no/forti/f2/upload/internal/nc/store/collect"
-	"gitlab.met.no/forti/f2/upload/internal/nc/store/netcdf"
-	"gitlab.met.no/forti/f2/upload/internal/upload"
-	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
+	"gitlab.met.no/forti/f2/fortiup/internal/nc/store/collect"
+	"gitlab.met.no/forti/f2/fortiup/internal/nc/store/netcdf"
+	"gitlab.met.no/forti/f2/fortiup/internal/upload"
+	"gitlab.met.no/forti/f2/fortiup/pkg/fortiblob"
 )
 
 func Store(ctx context.Context, u *upload.Uploader, meta *fortiblob.DatasetMeta, files []string) error {

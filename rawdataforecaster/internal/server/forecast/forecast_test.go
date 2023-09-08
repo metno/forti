@@ -11,8 +11,8 @@ import (
 	"gocloud.dev/blob"
 	_ "gocloud.dev/blob/fileblob"
 
+	"gitlab.met.no/forti/f2/fortiup/pkg/fortiblob"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/config"
-	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
 
 func Test(t *testing.T) {

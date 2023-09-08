@@ -29,14 +29,14 @@ COPY go.sum /src/go.sum
 WORKDIR /src
 RUN go mod download
 
-COPY upload/internal /src/upload/internal 
-COPY upload/pkg /src/upload/pkg
+COPY fortiup/internal /src/fortiup/internal 
+COPY fortiup/pkg /src/fortiup/pkg
 
 RUN go test ./...
 
-COPY upload/cmd /src/upload/cmd
+COPY fortiup/cmd /src/fortiup/cmd
 
-WORKDIR /src/upload/cmd/fortiup
+WORKDIR /src/fortiup/cmd/fortiup
 RUN go build
 
 FROM ubuntu:22.04
@@ -45,4 +45,9 @@ ARG TARGETARCH
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-COPY --from=0 /src/upload/cmd/fortiup/fortiup /usr/local/bin/
+RUN apt-get update && apt-get install -y libnetcdf19
+
+COPY --from=0 /src/fortiup/cmd/fortiup/fortiup /usr/local/bin/
+
+# Make sure that it runs
+RUN ldd /usr/local/bin/fortiup

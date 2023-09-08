@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
+	"gitlab.met.no/forti/f2/fortiup/pkg/fortiblob"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/values"
-	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
 
 type Reader struct {

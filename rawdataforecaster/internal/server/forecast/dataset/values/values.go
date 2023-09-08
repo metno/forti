@@ -4,7 +4,7 @@ package values
 import (
 	"io"
 
-	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
+	"gitlab.met.no/forti/f2/fortiup/pkg/fortiblob"
 )
 
 // LocationDataCollection contains forecast information for a single point
