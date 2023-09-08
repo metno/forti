@@ -18,7 +18,4 @@ build_docker:
     - export IMAGE="fortiregistry.azurecr.io/$NAME:$VERSION"
     - docker build -t "$IMAGE" -f "$NAME/build/package/Dockerfile" .
     # - docker push "$IMAGE"
-    - pwd
-    - echo $CI_PROJECT_DIR/$CI_COMMIT_REF_SLUG
     - docker run --rm --entrypoint cat "$IMAGE" "/usr/local/bin/$NAME" > $CI_COMMIT_REF_SLUG
-    - file $CI_COMMIT_REF_SLUG
