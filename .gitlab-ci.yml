@@ -10,7 +10,7 @@ build_docker:
   artifacts:
     name: "$CI_COMMIT_REF_SLUG"
     paths:
-      - "/$CI_COMMIT_REF_SLUG"
+      - "$CI_COMMIT_REF_SLUG"
   script:
     - docker login -u $azure_registry_username -p $azure_registry_password fortiregistry.azurecr.io
     - export NAME=$(echo $CI_COMMIT_TAG | sed 's-/.*--')
@@ -19,5 +19,5 @@ build_docker:
     - docker build -t "$IMAGE" -f "$NAME/build/package/Dockerfile" .
     - docker push "$IMAGE"
     - if [ -f "/usr/local/bin/$NAME"]; then
-          docker run --rm --entrypoint cat "$IMAGE" "/usr/local/bin/$NAME" > /$CI_COMMIT_REF_SLUG;
+          docker run --rm --entrypoint cat "$IMAGE" "/usr/local/bin/$NAME" > $CI_COMMIT_REF_SLUG;
         fi
