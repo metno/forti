@@ -24,7 +24,7 @@ type TimeStep struct {
 
 type TimestepData struct {
 	Summary *Summary        `json:"summary,omitempty"`
-	Details ForecastDetails `json:"details,omitempty"`
+	Details ForecastDetails `json:"details"`
 }
 
 type Summary struct {
