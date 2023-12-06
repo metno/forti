@@ -7,8 +7,8 @@ import (
 	"io"
 	"log"
 
+	"gitlab.met.no/forti/f2/fortiup/pkg/fortiblob"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/values"
-	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
 
 func Download(ctx context.Context, source fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, gridid string, config map[string]interface{}) (values.Reader, error) {

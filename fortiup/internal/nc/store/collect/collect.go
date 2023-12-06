@@ -8,8 +8,8 @@ import (
 	"math"
 	"time"
 
-	"gitlab.met.no/forti/f2/upload/internal/nc/store/netcdf"
-	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
+	"gitlab.met.no/forti/f2/fortiup/internal/nc/store/netcdf"
+	"gitlab.met.no/forti/f2/fortiup/pkg/fortiblob"
 )
 
 func Collect(ctx context.Context, variables []*netcdf.Variable, out io.Writer) (*fortiblob.MetaCollection, error) {

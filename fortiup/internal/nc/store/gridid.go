@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 
-	"gitlab.met.no/forti/f2/upload/internal/nc/store/netcdf"
+	"gitlab.met.no/forti/f2/fortiup/internal/nc/store/netcdf"
 )
 
 func getGridIds(area string, version int, files []string) (map[string][]string, error) {

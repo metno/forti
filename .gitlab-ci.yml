@@ -1,16 +1,41 @@
+stages:
+  - build
+  - publish artifacts
+
 services:
   - name: docker:24-dind
     alias: docker
 
-build_docker: 
+build docker: 
   tags:
     - teampunkt
+  stage: build
   rules:
     - if: '$CI_COMMIT_TAG'
   script:
-    - docker login -u $azure_registry_username -p $azure_registry_password fortiregistry.azurecr.io
     - export NAME=$(echo $CI_COMMIT_TAG | sed 's-/.*--')
     - export VERSION=$(echo $CI_COMMIT_TAG | sed 's-.*/--')
     - export IMAGE="fortiregistry.azurecr.io/$NAME:$VERSION"
+    - docker login -u $azure_registry_username -p $azure_registry_password fortiregistry.azurecr.io
     - docker build -t "$IMAGE" -f "$NAME/build/package/Dockerfile" .
     - docker push "$IMAGE"
+
+
+publish artifacts:
+  tags:
+    - teampunkt
+  stage: publish artifacts
+  rules:
+    - if: "$CI_COMMIT_TAG =~ /^fortiup.*/"
+  artifacts:
+    name: "$CI_COMMIT_REF_SLUG"
+    paths:
+      - "$CI_COMMIT_REF_SLUG"
+  script:
+    - export NAME=$(echo $CI_COMMIT_TAG | sed 's-/.*--')
+    - export VERSION=$(echo $CI_COMMIT_TAG | sed 's-.*/--')
+    - export IMAGE="fortiregistry.azurecr.io/$NAME:$VERSION"
+    - docker login -u $azure_registry_username -p $azure_registry_password fortiregistry.azurecr.io
+    - docker pull "$IMAGE"
+    - docker run --rm --entrypoint cat "$IMAGE" "/usr/local/bin/$NAME" > $CI_COMMIT_REF_SLUG
+    - chmod +x $CI_COMMIT_REF_SLUG

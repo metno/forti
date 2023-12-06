@@ -3,7 +3,7 @@ package grid
 import (
 	"testing"
 
-	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
+	"gitlab.met.no/forti/f2/fortiup/pkg/fortiblob"
 )
 
 func TestConstructNotPolygon(t *testing.T) {

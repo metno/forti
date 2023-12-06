@@ -5,9 +5,9 @@ import (
 	"io"
 	"log"
 
-	"gitlab.met.no/forti/f2/upload/internal/blob2blob/modelprovider"
-	"gitlab.met.no/forti/f2/upload/internal/upload"
-	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
+	"gitlab.met.no/forti/f2/fortiup/internal/blob2blob/modelprovider"
+	"gitlab.met.no/forti/f2/fortiup/internal/upload"
+	"gitlab.met.no/forti/f2/fortiup/pkg/fortiblob"
 )
 
 type Collector struct {

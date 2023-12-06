@@ -6,8 +6,8 @@ import (
 	"log"
 	"time"
 
-	"gitlab.met.no/forti/f2/upload/internal/blob2blob/collector"
-	"gitlab.met.no/forti/f2/upload/internal/blob2blob/modelprovider"
+	"gitlab.met.no/forti/f2/fortiup/internal/blob2blob/collector"
+	"gitlab.met.no/forti/f2/fortiup/internal/blob2blob/modelprovider"
 )
 
 func main() {
