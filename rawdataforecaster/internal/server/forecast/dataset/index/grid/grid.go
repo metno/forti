@@ -9,8 +9,8 @@ import (
 	"errors"
 	"unsafe"
 
+	"gitlab.met.no/forti/f2/fortiup/pkg/fortiblob"
 	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index/grid/proj"
-	"gitlab.met.no/forti/f2/upload/pkg/fortiblob"
 )
 
 // Area allows performing calculations on a geographic areas.

@@ -1,0 +1,97 @@
+package collector
+
+import (
+	"context"
+	"crypto/md5"
+	"encoding/hex"
+	"fmt"
+	"io"
+	"log"
+
+	"gitlab.met.no/forti/f2/fortiup/internal/blob2blob/collector/grid"
+	"gitlab.met.no/forti/f2/fortiup/internal/blob2blob/modelprovider"
+	"gitlab.met.no/forti/f2/fortiup/internal/upload"
+	"gitlab.met.no/forti/f2/fortiup/pkg/fortiblob"
+	"gocloud.dev/blob"
+)
+
+func Get(ctx context.Context, blobIn, blobOut, group string, version int) error {
+	in, err := modelprovider.NewBlobClient(blobIn)
+	if err != nil {
+		return fmt.Errorf("unable to connect to input source: %w", err)
+	}
+	defer in.Close()
+
+	bucket, err := blob.OpenBucket(ctx, blobOut)
+	if err != nil {
+		return fmt.Errorf("unable to connect to output source: %w", err)
+	}
+	defer bucket.Close()
+	out := upload.New(bucket)
+
+	dataset, err := in.GetDataSet(ctx, group, version)
+	if err != nil {
+		return err
+	}
+
+	grids, err := getGrids(ctx, in, &dataset)
+	if err != nil {
+		return err
+	}
+	gridCollector := grid.New(ctx, in, out, group, version)
+
+	for grid, parameters := range grids {
+		log.Println(grid)
+
+		var rg []modelprovider.Meta
+		for _, parameter := range parameters {
+			id := modelprovider.ID{
+				Group:   group,
+				Version: version,
+				Param:   parameter,
+			}
+			meta, err := in.Meta(ctx, id)
+			if err != nil {
+				return err
+			}
+			rg = append(rg, meta)
+		}
+
+		if err := gridCollector.Collect(ctx, grid, rg); err != nil {
+			return err
+		}
+	}
+
+	meta := fortiblob.DatasetMeta{
+		Area:          group,
+		Version:       version,
+		TimeUntilNext: dataset.TimeUntilNext,
+	}
+	return out.SetDatasetMeta(ctx, &meta)
+}
+
+func getGrids(ctx context.Context, in *modelprovider.Client, dataset *modelprovider.DataSet) (map[string][]string, error) {
+	geos := make(map[string][]string)
+
+	for _, parameter := range dataset.Parameters {
+		id := modelprovider.ID{
+			Group:   dataset.Group,
+			Version: dataset.Version,
+			Param:   parameter,
+		}
+		lat, err := in.Latitude(ctx, id)
+		if err != nil {
+			return nil, err
+		}
+		defer lat.Close()
+
+		checksumStream := md5.New()
+		if _, err := io.Copy(checksumStream, lat); err != nil {
+			return nil, err
+		}
+
+		checksum := hex.EncodeToString(checksumStream.Sum(nil))
+		geos[checksum] = append(geos[checksum], parameter)
+	}
+	return geos, nil
+}
