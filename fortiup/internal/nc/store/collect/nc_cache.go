@@ -6,13 +6,13 @@ import (
 	"gitlab.met.no/forti/f2/fortiup/internal/nc/store/netcdf"
 )
 
-type singleValueCache struct {
+type singleParamCache struct {
 	data      []netcdf.Float
 	chunkSize int
 	idx       int
 }
 
-func newSingleValueCache(v *netcdf.Variable) (*singleValueCache, error) {
+func newSingleParamCache(v *netcdf.Variable) (*singleParamCache, error) {
 	if len(v.Dimensions) > 2 {
 		return nil, fmt.Errorf("%s has too many dimensions", v.Name)
 	}
@@ -27,14 +27,14 @@ func newSingleValueCache(v *netcdf.Variable) (*singleValueCache, error) {
 		return nil, err
 	}
 
-	return &singleValueCache{
+	return &singleParamCache{
 		data:      data,
 		chunkSize: timeSize,
 	}, nil
 }
 
 // Next returns the next chunk, or nil if there are no more chunks.
-func (c *singleValueCache) Next() []netcdf.Float {
+func (c *singleParamCache) Next() []netcdf.Float {
 	if c.idx >= len(c.data) {
 		return nil
 	}

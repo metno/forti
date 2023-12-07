@@ -68,9 +68,9 @@ func getMetaCollection(ctx context.Context, variables []*netcdf.Variable) (*fort
 }
 
 func collectAllRawData(ctx context.Context, out io.Writer, variables []*netcdf.Variable) error {
-	var caches []*singleValueCache
+	var caches []*singleParamCache
 	for _, v := range variables {
-		cache, err := newSingleValueCache(v)
+		cache, err := newSingleParamCache(v)
 		if err != nil {
 			return err
 		}
