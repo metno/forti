@@ -18,11 +18,8 @@ func Collect(ctx context.Context, variables []*netcdf.Variable, out io.Writer) (
 		return nil, err
 	}
 
-	size := variables[0].Dimensions[0].Size
-	for i := 0; i < size; i++ {
-		if err := collectRawData(ctx, out, variables, i); err != nil {
-			return nil, err
-		}
+	if err := collectAllRawData(ctx, out, variables); err != nil {
+		return nil, err
 	}
 
 	return ret, nil
@@ -70,47 +67,43 @@ func getMetaCollection(ctx context.Context, variables []*netcdf.Variable) (*fort
 	return &ret, nil
 }
 
-func collectRawData(ctx context.Context, out io.Writer, variables []*netcdf.Variable, idx int) error {
-	for _, variable := range variables {
-		if len(variable.Dimensions) > 2 {
-			return fmt.Errorf("%s has too many dimensions", variable.Name)
-		}
-
-		timeSize := 1
-		if variable.Dimensions[len(variable.Dimensions)-1].Name == "time" {
-			timeSize = variable.Dimensions[len(variable.Dimensions)-1].Size
-		}
-
-		floats := make([]netcdf.Float, timeSize)
-
-		start := []netcdf.Size{
-			netcdf.Size(idx),
-			0,
-		}
-		count := []netcdf.Size{
-			1,
-			netcdf.Size(timeSize),
-		}
-		if err := variable.GetFloats(floats, start[:len(variable.Dimensions)], count[:len(variable.Dimensions)]); err != nil {
-			return fmt.Errorf("error when reading %s, idx %d: %w", variable.Name, idx, err)
-		}
-
-		scaleFactor := getScaleFactor(variable)
-		data := make([]int16, len(floats))
-		for i, val := range floats {
-			value := math.Round(float64(val) / float64(scaleFactor))
-			if value > 32767 || value < -32768 {
-				return fmt.Errorf("value for %s is out of range: %f", variable.Name, value)
-			}
-
-			data[i] = int16(value)
-		}
-		if err := binary.Write(out, binary.LittleEndian, data); err != nil {
+func collectAllRawData(ctx context.Context, out io.Writer, variables []*netcdf.Variable) error {
+	var caches []*singleParamCache
+	for _, v := range variables {
+		cache, err := newSingleParamCache(v)
+		if err != nil {
 			return err
+		}
+		caches = append(caches, cache)
+	}
+
+	for ctx.Err() == nil {
+		for i, c := range caches {
+			values := c.Next()
+			if values == nil {
+				return ctx.Err()
+			}
+			if err := write(variables[i], values, out); err != nil {
+				return err
+			}
 		}
 	}
 
 	return ctx.Err()
+}
+
+func write(variable *netcdf.Variable, floats []netcdf.Float, out io.Writer) error {
+	scaleFactor := getScaleFactor(variable)
+	data := make([]int16, len(floats))
+	for i, val := range floats {
+		value := math.Round(float64(val) / float64(scaleFactor))
+		if value > 32767 || value < -32768 {
+			return fmt.Errorf("value for %s is out of range: %f", variable.Name, value)
+		}
+
+		data[i] = int16(value)
+	}
+	return binary.Write(out, binary.LittleEndian, data)
 }
 
 func getScaleFactor(v *netcdf.Variable) float32 {

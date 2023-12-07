@@ -6,6 +6,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"log"
+	"sort"
 	"strings"
 
 	"gitlab.met.no/forti/f2/fortiup/internal/nc/store/collect"
@@ -60,6 +61,7 @@ func storeGrid(ctx context.Context, u *upload.Uploader, area string, version int
 		}
 		variables = append(variables, v)
 	}
+	sort.Slice(variables, func(i, j int) bool { return variables[i].Name < variables[j].Name })
 
 	if err := storeLatLon(ctx, u, area, version, grid, ncfiles[variables[0].Name]); err != nil {
 		return err
