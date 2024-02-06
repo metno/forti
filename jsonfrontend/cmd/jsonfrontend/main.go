@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/http/pprof"
 
 	"gitlab.met.no/forti/f2/jsonfrontend/internal/server"
 	"gitlab.met.no/forti/f2/jsonfrontend/internal/server/config"
@@ -34,8 +35,13 @@ func main() {
 		}()
 	}
 
-	http.Handle("/", server)
+	go func() {
+		r := http.NewServeMux()
+		r.HandleFunc("/debug/pprof/profile", pprof.Profile)
+		log.Fatal(http.ListenAndServe(":6080", r))
+	}()
 
+	http.Handle("/", server)
 	log.Println("ready")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
