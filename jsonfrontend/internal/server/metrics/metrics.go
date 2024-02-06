@@ -35,6 +35,24 @@ var TotalProcessingDuration = promauto.NewHistogram(
 	},
 )
 
+var RequestsWithGzip = promauto.NewCounter(
+	prometheus.CounterOpts{
+		Namespace: "forti",
+		Subsystem: "jsonfrontend",
+		Name:      "responses_with_gzip",
+		Help:      "Response was sent gzipped",
+	},
+)
+
+var RequestsWithoutGzip = promauto.NewCounter(
+	prometheus.CounterOpts{
+		Namespace: "forti",
+		Subsystem: "jsonfrontend",
+		Name:      "responses_without_gzip",
+		Help:      "Response was not sent gzipped",
+	},
+)
+
 var OutsideAllGrids = promauto.NewCounter(
 	prometheus.CounterOpts{
 		Namespace: "forti",
