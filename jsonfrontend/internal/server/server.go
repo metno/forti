@@ -1,14 +1,17 @@
 package server
 
 import (
+	"compress/gzip"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"gitlab.met.no/forti/f2/internalprotocol"
@@ -98,11 +101,30 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	addHttpHeaders(w)
 
-	if _, err := w.Write(jsonDoc); err != nil {
+	var out io.Writer = w
+	if config.Configuration.OfferGzip && requestsGzip(r) {
+		metrics.RequestsWithGzip.Inc()
+		w.Header().Set("Content-Encoding", "gzip")
+		z := gzip.NewWriter(w)
+		defer func() {
+			if err := z.Close(); err != nil {
+				log.Println(err)
+			}
+		}()
+		out = z
+	} else {
+		metrics.RequestsWithoutGzip.Inc()
+	}
+
+	if _, err := out.Write(jsonDoc); err != nil {
 		log.Println(err)
 	}
 
 	metrics.TotalProcessingDuration.Observe(time.Since(startTime).Seconds())
+}
+
+func requestsGzip(r *http.Request) bool {
+	return strings.Contains(r.Header.Get("Accept-Encoding"), "gzip")
 }
 
 func addHttpHeaders(w http.ResponseWriter) {
