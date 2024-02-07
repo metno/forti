@@ -35,11 +35,16 @@ func main() {
 		}()
 	}
 
-	go func() {
-		r := http.NewServeMux()
-		r.HandleFunc("/debug/pprof/profile", pprof.Profile)
-		log.Fatal(http.ListenAndServe(":6080", r))
-	}()
+	if config.Configuration.EnableProfiling {
+		profilePort := 6080
+		log.Printf("serving profiles at port %d", profilePort)
+		addr := fmt.Sprintf(":%d", profilePort)
+		go func() {
+			r := http.NewServeMux()
+			r.HandleFunc("/debug/pprof/profile", pprof.Profile)
+			log.Fatal(http.ListenAndServe(addr, r))
+		}()
+	}
 
 	http.Handle("/", server)
 	log.Println("ready")
