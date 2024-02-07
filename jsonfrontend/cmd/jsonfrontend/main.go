@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/http/pprof"
 
 	"gitlab.met.no/forti/f2/jsonfrontend/internal/server"
 	"gitlab.met.no/forti/f2/jsonfrontend/internal/server/config"
@@ -14,6 +15,7 @@ import (
 func main() {
 	upstream := flag.String("upstream", "localhost:5051", "get data from the given grpc server")
 	metricsPort := flag.Int("metricsPort", 9090, "serve metrics on the given port")
+	profilePort := flag.Int("profilePort", 0, "serve cpu profiles on the given port")
 	configFile := flag.String("config", "jsonformat.json", "read json formatting instructions from the given file")
 	flag.Parse()
 
@@ -34,8 +36,17 @@ func main() {
 		}()
 	}
 
-	http.Handle("/", server)
+	if *profilePort != 0 {
+		log.Printf("serving cpu profiles at port %d", *profilePort)
+		addr := fmt.Sprintf(":%d", *profilePort)
+		go func() {
+			r := http.NewServeMux()
+			r.HandleFunc("/debug/pprof/profile", pprof.Profile)
+			log.Fatalln(http.ListenAndServe(addr, r))
+		}()
+	}
 
+	http.Handle("/", server)
 	log.Println("ready")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
