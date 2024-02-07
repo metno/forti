@@ -15,6 +15,7 @@ import (
 func main() {
 	upstream := flag.String("upstream", "localhost:5051", "get data from the given grpc server")
 	metricsPort := flag.Int("metricsPort", 9090, "serve metrics on the given port")
+	profilePort := flag.Int("profilePort", 0, "serve cpu profiles on the given port")
 	configFile := flag.String("config", "jsonformat.json", "read json formatting instructions from the given file")
 	flag.Parse()
 
@@ -35,14 +36,13 @@ func main() {
 		}()
 	}
 
-	if config.Configuration.EnableProfiling {
-		profilePort := 6080
-		log.Printf("serving profiles at port %d", profilePort)
-		addr := fmt.Sprintf(":%d", profilePort)
+	if *profilePort != 0 {
+		log.Printf("serving cpu profiles at port %d", *profilePort)
+		addr := fmt.Sprintf(":%d", *profilePort)
 		go func() {
 			r := http.NewServeMux()
 			r.HandleFunc("/debug/pprof/profile", pprof.Profile)
-			log.Fatal(http.ListenAndServe(addr, r))
+			log.Fatalln(http.ListenAndServe(addr, r))
 		}()
 	}
 

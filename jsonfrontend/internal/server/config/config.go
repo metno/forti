@@ -44,7 +44,6 @@ type Elements struct {
 	LocationFromGrid bool                 `json:"location_from_grid,omitempty"`
 	HTTPHeaders      []HTTPHeader         `json:"http_headers"`
 	OfferGzip        bool                 `json:"offer_gzip"`
-	EnableProfiling  bool                 `json:"enable_profiling"`
 	SkipAltitude     bool                 `json:"skip_altitude,omitempty"`
 	DataExpiryOffset int                  `json:"data_expiry_offset"`
 	Meta             Meta                 `json:"meta,omitempty"`

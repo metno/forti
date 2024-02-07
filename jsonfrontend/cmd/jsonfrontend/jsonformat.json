@@ -8,7 +8,6 @@
         }
     ],
     "offer_gzip": true,
-    "enable_profiling": true,
     "skip_altitude": false,
     "data_expiry_offset": 1800,
     "meta": {
