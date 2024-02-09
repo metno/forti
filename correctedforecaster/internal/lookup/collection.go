@@ -14,7 +14,8 @@ var (
 			Name:      "topolookup_duration_seconds",
 			Help:      "The time to lookup an altitude from the topography files.",
 			Buckets:   []float64{0.0001, 0.001, 0.01, 0.1, 0.2, 0.5, 1},
-		})
+		},
+	)
 
 	amountOfLookups = prometheus.NewHistogram(
 		prometheus.HistogramOpts{
