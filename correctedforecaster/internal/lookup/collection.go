@@ -21,7 +21,7 @@ var (
 			Namespace: "forti",
 			Subsystem: "correctedforecaster",
 			Name:      "topolookup_files_amount",
-			Help:      "Number of topography file lookups pr request.",
+			Help:      "Amount of topography files looked up pr request.",
 			Buckets:   prometheus.LinearBuckets(float64(1), float64(120), 10),
 		},
 	)
