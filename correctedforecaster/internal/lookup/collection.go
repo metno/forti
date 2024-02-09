@@ -6,17 +6,25 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-var topoLookupTime = prometheus.NewHistogram(prometheus.HistogramOpts{
-	Name:    "correctedforecaster_topolookup_duration_seconds",
-	Help:    "The time to lookup an altitute from the topography files.",
-	Buckets: []float64{0.0001, 0.001, 0.01, 0.1, 0.2, 0.5, 1},
-})
+var (
+	totalLookupTime = prometheus.NewHistogram(
+		prometheus.HistogramOpts{
+			Namespace: "forti",
+			Subsystem: "correctedforecaster",
+			Name:      "topolookup_duration_seconds",
+			Help:      "The time to lookup an altitude from the topography files.",
+			Buckets:   []float64{0.0001, 0.001, 0.01, 0.1, 0.2, 0.5, 1},
+		})
 
-var topoNumberOfLookups = prometheus.NewGauge(
-	prometheus.GaugeOpts{
-		Name: "correctedforecaster_topolookup_files_count",
-		Help: "Number of topography files lookups pr request.",
-	},
+	amountOfLookups = prometheus.NewHistogram(
+		prometheus.HistogramOpts{
+			Namespace: "forti",
+			Subsystem: "correctedforecaster",
+			Name:      "topolookup_files_amount",
+			Help:      "Number of topography file lookups pr request.",
+			Buckets:   prometheus.LinearBuckets(float64(1), float64(120), 10),
+		},
+	)
 )
 
 // Collection maintains a prioritized list of Lookup objects, performing
@@ -66,7 +74,7 @@ func (c *Collection) Lookup(latitude, longitude float64) (float32, error) {
 	start := time.Now()
 	defer func() {
 		duration := time.Since(start).Seconds()
-		topoLookupTime.Observe(duration)
+		totalLookupTime.Observe(duration)
 	}()
 
 	type xy struct {
@@ -89,10 +97,10 @@ func (c *Collection) Lookup(latitude, longitude float64) (float32, error) {
 			if IsOutOfBounds(err) || IsMissingData(err) {
 				continue
 			}
-			topoNumberOfLookups.Set(float64(i))
+			amountOfLookups.Observe(float64(i))
 			return 0, err
 		}
-		topoNumberOfLookups.Set(float64(i))
+		amountOfLookups.Observe(float64(i))
 		return val, nil
 	}
 
