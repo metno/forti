@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"log"
 	"math"
 	"net"
 	"time"
@@ -96,6 +97,7 @@ func (s *Server) Close() error {
 func (s *Server) GetForecast(ctx context.Context, in *internalprotocol.GetForecastRequest) (*internalprotocol.Forecast, error) {
 	forecast, err := s.client.GetForecast(ctx, in)
 	if err != nil {
+		log.Printf("unable to get forecast from rawdataforecaster: %s", err)
 		return nil, fmt.Errorf("unable to get forecast from upstream: %w", err)
 	}
 
@@ -137,6 +139,7 @@ func (s *Server) correctWithBetterTopography(request *internalprotocol.GetForeca
 			if lookup.IsOutOfBounds(err) {
 				realAltitude = *modelAltitude
 			} else {
+				log.Printf("unable to lookup topography for location: %s", err)
 				return fmt.Errorf("unable to lookup topography for location: %w", err)
 			}
 		}

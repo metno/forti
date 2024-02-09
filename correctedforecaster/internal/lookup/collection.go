@@ -1,5 +1,33 @@
 package lookup
 
+import (
+	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
+)
+
+var (
+	totalLookupTime = prometheus.NewHistogram(
+		prometheus.HistogramOpts{
+			Namespace: "forti",
+			Subsystem: "correctedforecaster",
+			Name:      "topolookup_duration_seconds",
+			Help:      "The time to lookup an altitude from the topography files.",
+			Buckets:   []float64{0.0001, 0.001, 0.01, 0.1, 0.2, 0.5, 1},
+		},
+	)
+
+	amountOfLookups = prometheus.NewHistogram(
+		prometheus.HistogramOpts{
+			Namespace: "forti",
+			Subsystem: "correctedforecaster",
+			Name:      "topolookup_files_amount",
+			Help:      "Amount of topography files looked up pr request.",
+			Buckets:   prometheus.LinearBuckets(float64(1), float64(120), 10),
+		},
+	)
+)
+
 // Collection maintains a prioritized list of Lookup objects, performing
 // queries on all added topography files.
 type Collection struct {
@@ -44,13 +72,19 @@ func (c *Collection) add(filename string) error {
 // Will return an error if not found. This case can be detected by calling
 // IsOutOfBounds on the error.
 func (c *Collection) Lookup(latitude, longitude float64) (float32, error) {
+	start := time.Now()
+	defer func() {
+		duration := time.Since(start).Seconds()
+		totalLookupTime.Observe(duration)
+	}()
+
 	type xy struct {
 		x float64
 		y float64
 	}
 	idxs := make(map[string]xy)
 
-	for _, l := range c.lookups {
+	for i, l := range c.lookups {
 		idx, ok := idxs[l.Projection()]
 		if !ok {
 			x, y := l.Transformation()(latitude, longitude)
@@ -64,8 +98,10 @@ func (c *Collection) Lookup(latitude, longitude float64) (float32, error) {
 			if IsOutOfBounds(err) || IsMissingData(err) {
 				continue
 			}
+			amountOfLookups.Observe(float64(i))
 			return 0, err
 		}
+		amountOfLookups.Observe(float64(i))
 		return val, nil
 	}
 
