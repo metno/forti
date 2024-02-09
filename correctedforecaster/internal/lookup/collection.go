@@ -4,10 +4,11 @@ import (
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
 var (
-	totalLookupTime = prometheus.NewHistogram(
+	totalLookupTime = promauto.NewHistogram(
 		prometheus.HistogramOpts{
 			Namespace: "forti",
 			Subsystem: "correctedforecaster",
@@ -17,7 +18,7 @@ var (
 		},
 	)
 
-	amountOfLookups = prometheus.NewHistogram(
+	amountOfLookups = promauto.NewHistogram(
 		prometheus.HistogramOpts{
 			Namespace: "forti",
 			Subsystem: "correctedforecaster",
