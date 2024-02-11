@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	rand "math/rand/v2"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -134,7 +135,8 @@ func addHttpHeaders(w http.ResponseWriter) {
 	now := time.Now()
 	w.Header().Add("Last-Modified", now.Format(http.TimeFormat))
 	if config.Configuration.DataExpiryOffset != 0 {
-		expiry := now.Add(time.Duration(config.Configuration.DataExpiryOffset) * time.Second)
+		offset := config.Configuration.DataExpiryOffset
+		expiry := now.Add(time.Duration(offset+rand.IntN(offset/5)) * time.Second)
 		w.Header().Add("Expires", expiry.Format(http.TimeFormat))
 	}
 }
