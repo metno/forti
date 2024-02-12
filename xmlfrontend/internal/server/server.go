@@ -78,7 +78,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Last-Modified", now.Format(http.TimeFormat))
 	if config.Configuration.DataExpiryOffset != 0 {
 		offset := config.Configuration.DataExpiryOffset
-		expiry := now.Add(time.Duration(offset+rand.IntN(offset/5)) * time.Second)
+		expiry := now.Add(time.Duration(offset-(offset/5)+rand.IntN(offset/5)) * time.Second)
 		w.Header().Add("Expires", expiry.Format(http.TimeFormat))
 	}
 
