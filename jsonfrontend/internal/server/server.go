@@ -191,8 +191,9 @@ func getParam(q url.Values, name string, from float32, to float32) (float32, err
 	return value, nil
 }
 
-// expires returns a time.Time value and expects current time and maxOffset in seconds as arguments.
-// Returns current time + 1 second if 0 maxOffset, or a value between current and current + maxOffset.
+// expires returns a randomized time.Time for use as a value to the Expires header.
+// Maximum value is current + maxOffset seconds.
+// Returns current time + 1 minute if maxOffset <=0.
 func expires(current time.Time, maxOffset int) time.Time {
 	if maxOffset > 0 {
 		baseOffset := maxOffset - (maxOffset / 5)
@@ -200,6 +201,6 @@ func expires(current time.Time, maxOffset int) time.Time {
 
 		return current.Add(time.Duration(baseOffset+randomOffset) * time.Second)
 	} else {
-		return current.Add(time.Second)
+		return current.Add(60 * time.Second)
 	}
 }
