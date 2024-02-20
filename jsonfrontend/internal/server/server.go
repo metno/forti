@@ -134,11 +134,9 @@ func addHttpHeaders(w http.ResponseWriter) {
 	}
 	now := time.Now()
 	w.Header().Add("Last-Modified", now.Format(http.TimeFormat))
-	if config.Configuration.DataExpiryOffset != 0 {
-		offset := config.Configuration.DataExpiryOffset
-		expiry := now.Add(time.Duration(offset-(offset/5)+rand.IntN(offset/5)) * time.Second)
-		w.Header().Add("Expires", expiry.Format(http.TimeFormat))
-	}
+
+	expiry := expires(now, config.Configuration.DataExpiryOffset)
+	w.Header().Add("Expires", expiry.Format(http.TimeFormat))
 }
 
 func getForecastRequest(r *http.Request) (*internalprotocol.GetForecastRequest, error) {
@@ -191,4 +189,17 @@ func getParam(q url.Values, name string, from float32, to float32) (float32, err
 	}
 
 	return value, nil
+}
+
+// expires returns a time.Time value and expects current time and maxOffset in seconds as arguments.
+// Returns current time + 1 second if 0 maxOffset, or a value between current and current + maxOffset.
+func expires(current time.Time, maxOffset int) time.Time {
+	if maxOffset > 0 {
+		baseOffset := maxOffset - (maxOffset / 5)
+		randomOffset := rand.IntN(maxOffset / 5)
+
+		return current.Add(time.Duration(baseOffset+randomOffset) * time.Second)
+	} else {
+		return current.Add(time.Second)
+	}
 }

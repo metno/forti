@@ -1,6 +1,6 @@
 module gitlab.met.no/forti/f2
 
-go 1.21
+go 1.22
 
 require (
 	github.com/golang/protobuf v1.5.3
