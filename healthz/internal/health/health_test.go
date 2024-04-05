@@ -28,6 +28,10 @@ func TestForecastServiceUnavailable(t *testing.T) {
 			},
 			PathTemplate: "/api/forecast/v2/complete?lat={{.Latitude}}&lon={{.Longitude}}",
 		},
+		Window: config.Window{
+			Size:      1,
+			Threshold: 0,
+		},
 		Response: config.Response{
 			Locations: []config.Location{
 				{

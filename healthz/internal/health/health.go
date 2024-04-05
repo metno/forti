@@ -20,6 +20,7 @@ type Checker struct {
 	lastRun time.Time
 	nextRun time.Time
 
+	resultWindow []check.Result
 	lastResult   check.Result
 	lastResultOK bool
 }
@@ -31,8 +32,8 @@ func NewChecker(conf *config.CheckConfiguration) *Checker {
 }
 
 func (c *Checker) ServeSimple(w http.ResponseWriter, r *http.Request) {
-	result := c.Check()
-	if !result.OK {
+	result, ok := c.Check()
+	if !ok {
 		w.WriteHeader(http.StatusServiceUnavailable)
 	}
 
@@ -41,8 +42,8 @@ func (c *Checker) ServeSimple(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *Checker) ServeJSON(w http.ResponseWriter, r *http.Request) {
-	result := c.Check()
-	if !result.OK {
+	result, ok := c.Check()
+	if !ok {
 		w.WriteHeader(http.StatusServiceUnavailable)
 	}
 
@@ -52,7 +53,7 @@ func (c *Checker) ServeJSON(w http.ResponseWriter, r *http.Request) {
 	enc.Encode(result)
 }
 
-func (c *Checker) Check() check.Result {
+func (c *Checker) Check() (check.Result, bool) {
 	now := time.Now()
 
 	c.mutex.RLock()
@@ -65,7 +66,7 @@ func (c *Checker) Check() check.Result {
 		c.refresh()
 		c.mutex.RLock()
 	}
-	return c.lastResult
+	return c.lastResult, c.lastResultOK
 }
 
 func (c *Checker) refresh() {
@@ -83,10 +84,32 @@ func (c *Checker) refresh() {
 	c.nextRun = now.Add(time.Minute)
 
 	log.Println("Running checks...")
-	result := runChecks(c.conf)
+	c.setResult(runChecks(c.conf))
+}
 
-	c.lastResultOK = result.OK
-	c.lastResult = result
+// setResult will set the result of the check based on a window of previous checks.
+// If last check failed and more than conf.Window.Threshold of the last conf.Window.Size checks
+// has failed the result will be not OK.
+func (c *Checker) setResult(lastResult check.Result) {
+	c.resultWindow = append(c.resultWindow, lastResult)
+	if len(c.resultWindow) > c.conf.Window.Size {
+		c.resultWindow = c.resultWindow[1:]
+	}
+
+	var failed int
+	for _, v := range c.resultWindow {
+		if !v.OK {
+			failed++
+		}
+	}
+
+	if failed > c.conf.Window.Threshold &&
+		!lastResult.OK {
+		c.lastResultOK = false
+	} else {
+		c.lastResultOK = true
+	}
+	c.lastResult = lastResult
 }
 
 func runChecks(conf *config.CheckConfiguration) check.Result {

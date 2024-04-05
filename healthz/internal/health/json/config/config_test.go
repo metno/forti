@@ -19,6 +19,10 @@ const nowcastConfig = `{
 	    ],                                                                                                                                                                                                                                                                 
 	    "path_template": "/api/nowcast/v2/complete?lat={{.Latitude}}&lon={{.Longitude}}"                                                                                                                                                                           
 	},
+	"window": {
+		"size": 7,
+		"threshold": 3
+	},
 	"response": {
 		"max_failures": 1,
 		"locations": [
