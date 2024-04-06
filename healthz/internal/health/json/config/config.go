@@ -26,27 +26,27 @@ func Read(configFile string) (*CheckConfiguration, error) {
 	if err := dec.Decode(&conf); err != nil {
 		return nil, fmt.Errorf("unable to read checks config: %s", err)
 	}
-	setDefaultWindow(&conf)
+	setDefaultCheckWindow(&conf)
 
 	return &conf, nil
 }
 
 // setDefaultWindow sets default check window if size is zero or negative.
 // default window settings will accept 1 failure in 3 checks.
-func setDefaultWindow(conf *CheckConfiguration) {
-	if conf.Window.Size < 1 {
-		conf.Window.Size = 3
-		conf.Window.Threshold = 1
+func setDefaultCheckWindow(conf *CheckConfiguration) {
+	if conf.CheckWindow.Size < 1 {
+		conf.CheckWindow.Size = 5
+		conf.CheckWindow.FailThreshold = 1
 	}
 }
 
 // CheckConfiguration contains a spec for how to execute sanity checks on
 // various locationforecast servers- and locations.
 type CheckConfiguration struct {
-	Headers  map[string]string `json:"headers"`
-	Window   Window            `json:"window"`
-	Request  Request           `json:"request"`
-	Response Response          `json:"response"`
+	Headers     map[string]string `json:"headers"`
+	CheckWindow CheckWindow       `json:"check_window"`
+	Request     Request           `json:"request"`
+	Response    Response          `json:"response"`
 }
 
 type Request struct {
@@ -55,9 +55,9 @@ type Request struct {
 	PathTemplate string   `json:"path_template"`
 }
 
-type Window struct {
-	Size      int `json:"size"`
-	Threshold int `json:"threshold"`
+type CheckWindow struct {
+	Size          int `json:"size"`
+	FailThreshold int `json:"fail_threshold"`
 }
 type Response struct {
 	MaxFailures int        `json:"max_failures"`

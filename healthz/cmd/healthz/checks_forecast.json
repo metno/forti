@@ -11,6 +11,10 @@
        ],                                                                                                                                                                                                                                                                 
        "path_template": "/api/forecast/v2/complete?lat={{.Latitude}}&lon={{.Longitude}}"                                                                                                                                                                           
     },
+    "check_window": {
+        "size": 1,
+        "fail_threshold": 0
+    },
     "response": {
        "max_failures": 0,
        "locations": [

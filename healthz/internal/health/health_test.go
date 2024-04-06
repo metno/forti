@@ -11,13 +11,9 @@ import (
 )
 
 func TestForecastServiceUnavailable(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusServiceUnavailable)
-		fmt.Fprint(w, "always fail")
-	}))
-	serverURL, err := url.Parse(server.URL)
+	serverURL, err := MockServerURL()
 	if err != nil {
-		t.Errorf("could not setup test http server; Failed with %v", err)
+		t.Errorf("failed to get mock server: %s", err)
 	}
 
 	conf := config.CheckConfiguration{
@@ -28,9 +24,9 @@ func TestForecastServiceUnavailable(t *testing.T) {
 			},
 			PathTemplate: "/api/forecast/v2/complete?lat={{.Latitude}}&lon={{.Longitude}}",
 		},
-		Window: config.Window{
-			Size:      1,
-			Threshold: 0,
+		CheckWindow: config.CheckWindow{
+			Size:          1,
+			FailThreshold: 0,
 		},
 		Response: config.Response{
 			Locations: []config.Location{
@@ -50,7 +46,7 @@ func TestForecastServiceUnavailable(t *testing.T) {
 	}
 	checker := NewChecker(&conf)
 
-	req := httptest.NewRequest("GET", server.URL, nil)
+	req := httptest.NewRequest("GET", serverURL.RequestURI(), nil)
 	w := httptest.NewRecorder()
 
 	checker.ServeSimple(w, req)
@@ -59,4 +55,64 @@ func TestForecastServiceUnavailable(t *testing.T) {
 	if resp.StatusCode != http.StatusServiceUnavailable {
 		t.Errorf("Expected status code 503; Got statuscode: %v", resp.StatusCode)
 	}
+}
+
+func TestCheckWithFailureWindow(t *testing.T) {
+	serverURL, err := MockServerURL()
+	if err != nil {
+		t.Errorf("failed to get mock server: %s", err)
+	}
+
+	conf := config.CheckConfiguration{
+		Request: config.Request{
+			Protocol: "http",
+			Servers: []string{
+				serverURL.Host,
+			},
+			PathTemplate: "/api/forecast/v2/complete?lat={{.Latitude}}&lon={{.Longitude}}",
+		},
+		CheckWindow: config.CheckWindow{
+			Size:          3,
+			FailThreshold: 1,
+		},
+		Response: config.Response{
+			Locations: []config.Location{
+				{
+					Name:      "AlwaysFail",
+					Latitude:  60,
+					Longitude: 10,
+				},
+				{
+					Name:      "AlwaysFail2",
+					Latitude:  50,
+					Longitude: 10,
+				},
+			},
+			MaxFailures: 0,
+		},
+	}
+	checker := NewChecker(&conf)
+
+	checker.setResult(runChecks(&conf))
+	if !checker.lastResultOK {
+		t.Errorf("Reported failure, but expected ok")
+	}
+
+	checker.setResult(runChecks(&conf))
+	if checker.lastResultOK {
+		t.Errorf("Reported ok, but expected failure.")
+	}
+}
+
+func MockServerURL() (*url.URL, error) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusServiceUnavailable)
+		fmt.Fprint(w, "always fail")
+	}))
+	serverURL, err := url.Parse(server.URL)
+	if err != nil {
+		return nil, fmt.Errorf("could not setup test http server; Failed with %v", err)
+	}
+
+	return serverURL, nil
 }

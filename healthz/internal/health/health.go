@@ -20,7 +20,7 @@ type Checker struct {
 	lastRun time.Time
 	nextRun time.Time
 
-	resultWindow []check.Result
+	checkWindow  []check.Result
 	lastResult   check.Result
 	lastResultOK bool
 }
@@ -91,19 +91,19 @@ func (c *Checker) refresh() {
 // If last check failed and more than conf.Window.Threshold of the last conf.Window.Size checks
 // has failed the result will be not OK.
 func (c *Checker) setResult(lastResult check.Result) {
-	c.resultWindow = append(c.resultWindow, lastResult)
-	if len(c.resultWindow) > c.conf.Window.Size {
-		c.resultWindow = c.resultWindow[1:]
+	c.checkWindow = append(c.checkWindow, lastResult)
+	if len(c.checkWindow) > c.conf.CheckWindow.Size {
+		c.checkWindow = c.checkWindow[1:]
 	}
 
 	var failed int
-	for _, v := range c.resultWindow {
+	for _, v := range c.checkWindow {
 		if !v.OK {
 			failed++
 		}
 	}
 
-	if failed > c.conf.Window.Threshold &&
+	if failed > c.conf.CheckWindow.FailThreshold &&
 		!lastResult.OK {
 		c.lastResultOK = false
 	} else {
