@@ -32,10 +32,10 @@ func Read(configFile string) (*CheckConfiguration, error) {
 }
 
 // setDefaultWindow sets default check window if size is zero or negative.
-// default window settings will accept 1 failure in 3 checks.
+// default window settings will accept 1 failure in 10 checks.
 func setDefaultCheckWindow(conf *CheckConfiguration) {
 	if conf.CheckWindow.Size < 1 {
-		conf.CheckWindow.Size = 5
+		conf.CheckWindow.Size = 10
 		conf.CheckWindow.FailThreshold = 1
 	}
 }
