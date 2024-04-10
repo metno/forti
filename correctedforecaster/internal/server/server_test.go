@@ -21,7 +21,7 @@ func TestCorrectWithBetterTopography(t *testing.T) {
 
 	var times []time.Time
 	d := time.Date(2024, 4, 9, 0, 0, 0, 0, time.UTC)
-	for h := time.Hour; h < timeSteps*time.Hour; h += time.Hour {
+	for h := time.Duration(0); h < timeSteps*time.Hour; h += time.Hour {
 		times = append(times, d.Add(h))
 	}
 
@@ -68,13 +68,13 @@ func TestCorrectWithBetterTopography(t *testing.T) {
 		}
 	}
 
-	for i := 0; i < timeSteps-1; i++ {
+	for i := 0; i < timeSteps; i++ {
 		symbol := weathersymbol.WeatherSymbol(interpreted["weather_symbol"].Values[i])
 		if symbol != weathersymbol.Snow {
 			t.Errorf("expected %s for 1h weather symbol at timestep %d, got %s", weathersymbol.Snow, i, symbol)
 		}
 	}
-	for i := 0; i < timeSteps-1; i++ {
+	for i := 0; i < timeSteps; i++ {
 		symbol := weathersymbol.WeatherSymbol(interpreted["weather_symbol_6h"].Values[i])
 		if symbol != weathersymbol.Snow {
 			t.Errorf("expected %s for 1h weather symbol at timestep %d, got %s", weathersymbol.Snow, i, symbol)

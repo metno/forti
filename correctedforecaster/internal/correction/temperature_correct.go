@@ -22,24 +22,24 @@ func UpdateTemperature(interpreted map[string]internalprotocol.InterpretedData, 
 	}
 }
 
-// UpdateSymbols modifies a symbol to take into account any changes in
+// UpdateSymbols1h modifies a symbol to take into account any changes in
 // temperature after the symbol was generated.
-func UpdateSymbols(interpreted map[string]internalprotocol.InterpretedData) {
+func UpdateSymbols1h(interpreted map[string]internalprotocol.InterpretedData) {
 	symbols, ok := interpreted["weather_symbol"]
 	if !ok {
 		return
 	}
-	instant := "air_temperature_2m"
+	parameter := "air_temperature_2m"
 
-	sorted := internalprotocol.SortByTime(interpreted, instant)
+	timesteps := internalprotocol.ReorganizeByTime(interpreted, parameter)
 
 	for i, t := range symbols.Times {
-		values, ok := sorted[t]
+		values, ok := timesteps[t]
 		if !ok {
 			// no temperature data related to symbol
 			continue
 		}
-		t, ok := values[instant]
+		t, ok := values[parameter]
 		if ok {
 			symbol := weathersymbol.FromValue(symbols.Values[i])
 			symbol = symbol.WithCorrectedTemperature(t)
@@ -59,10 +59,10 @@ func UpdateSymbols6h(interpreted map[string]internalprotocol.InterpretedData) {
 	max := "air_temperature_2m_max6h"
 	instant := "air_temperature_2m"
 
-	sorted := internalprotocol.SortByTime(interpreted, min, max, instant)
+	timesteps := internalprotocol.ReorganizeByTime(interpreted, min, max, instant)
 
 	for i, t := range symbols.Times {
-		values, ok := sorted[t]
+		values, ok := timesteps[t]
 		if !ok {
 			// no temperature data related to symbol
 			continue
@@ -95,7 +95,7 @@ func UpdateDewpointTemperature(interpreted map[string]internalprotocol.Interpret
 
 	temperature := "air_temperature_2m"
 	humidity := "relative_humidity_2m"
-	sorted := internalprotocol.SortByTime(interpreted, humidity, temperature)
+	sorted := internalprotocol.ReorganizeByTime(interpreted, humidity, temperature)
 
 	for i, t := range dewPoint.Times {
 		timestep, ok := sorted[t]
