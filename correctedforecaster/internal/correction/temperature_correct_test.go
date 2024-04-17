@@ -4,9 +4,6 @@ import (
 	"math"
 	"testing"
 	"time"
-
-	"gitlab.met.no/forti/f2/internalprotocol"
-	"gitlab.met.no/forti/f2/parameters/weathersymbol"
 )
 
 func TestDewPointTemperature(t *testing.T) {
@@ -17,45 +14,87 @@ func TestDewPointTemperature(t *testing.T) {
 	}
 }
 
-func TestWeatherSymbol6h(t *testing.T) {
-	const timeSteps = 4
+func testingTimesteps() map[time.Time]map[string]float32 {
+	ret := make(map[time.Time]map[string]float32)
 
-	var times []time.Time
-	d := time.Date(2024, 4, 9, 0, 0, 0, 0, time.UTC)
-	for h := time.Duration(0); h < timeSteps*time.Hour; h += time.Hour {
-		times = append(times, d.Add(h))
-	}
-
-	forecast := map[string]internalprotocol.InterpretedData{
-		"weather_symbol_6h": {
-			Times:  times,
-			Values: repeat(weathersymbol.Snow.ToValue(), timeSteps),
-		},
-		"air_temperature_2m_min6h": {
-			Times:  times,
-			Values: repeat(7, timeSteps),
-		},
-		"air_temperature_2m_max6h": {
-			Times:  times,
-			Values: repeat(9, timeSteps),
-		},
-	}
-
-	UpdateSymbols6h(forecast)
-
-	symbols := forecast["weather_symbol_6h"]
-	for i := 0; i < timeSteps; i++ {
-		symbol := weathersymbol.WeatherSymbol(symbols.Values[i])
-		if symbol != weathersymbol.Rain {
-			t.Errorf("expected %s for weather symbol at timestep %d, got %s", weathersymbol.Rain, i, symbol)
+	startingTime := time.Date(2024, 4, 17, 0, 0, 0, 0, time.UTC)
+	for i := 0; i < 6; i++ {
+		ret[startingTime.Add(time.Duration(i)*time.Hour)] = map[string]float32{
+			airTemperature2m:      4,
+			airTemperature2mMin6h: 8,
+			airTemperature2mMax6h: 16,
 		}
+	}
+	for i := 6; i < 12; i++ {
+		ret[startingTime.Add(time.Duration(i)*time.Hour)] = map[string]float32{
+			airTemperature2m: 2,
+		}
+	}
+
+	return ret
+}
+
+func TestAvgTemperature1h(t *testing.T) {
+	timeSteps := testingTimesteps()
+	timeStep := time.Date(2024, 4, 17, 0, 0, 0, 0, time.UTC)
+	ta, ok := avgTemperature1h(timeStep, timeSteps)
+	if !ok {
+		t.Error("could not get temperature")
+	}
+	expected := 4
+	if ta != float32(expected) {
+		t.Errorf("expected value %v, got %v", expected, ta)
+	}
+
+	if _, ok := avgTemperature1h(timeStep.Add(-time.Hour), timeSteps); ok {
+		t.Error("expected lookup for non-existing time to fail")
 	}
 }
 
-func repeat(value float32, times int) []float32 {
-	ret := make([]float32, times)
-	for i := 0; i < times; i++ {
-		ret[i] = value
+func TestAvgTemperature6h_fromMinMax(t *testing.T) {
+	timeSteps := testingTimesteps()
+	timeStep := time.Date(2024, 4, 17, 0, 0, 0, 0, time.UTC)
+	ta, ok := avgTemperature6h(timeStep, timeSteps)
+	if !ok {
+		t.Error("could not get temperature")
 	}
-	return ret
+	expected := 12
+	if ta != float32(expected) {
+		t.Errorf("expected value %v, got %v", expected, ta)
+	}
+}
+
+func TestAvgTemperature6h_fromHourly(t *testing.T) {
+	timeSteps := testingTimesteps()
+	timeStep := time.Date(2024, 4, 17, 6, 0, 0, 0, time.UTC)
+	ta, ok := avgTemperature6h(timeStep, timeSteps)
+	if !ok {
+		t.Error("could not get temperature")
+	}
+	expected := 2
+	if ta != float32(expected) {
+		t.Errorf("expected value %v, got %v", expected, ta)
+	}
+}
+
+func TestAvgTemperature6h_missing(t *testing.T) {
+	timeSteps := testingTimesteps()
+	timeStep := time.Date(2024, 4, 16, 23, 0, 0, 0, time.UTC)
+
+	if _, ok := avgTemperature6h(timeStep.Add(-time.Hour), timeSteps); ok {
+		t.Error("expected lookup for non-existing time to fail")
+	}
+}
+
+func TestAvgTemperature12h(t *testing.T) {
+	timeSteps := testingTimesteps()
+	timeStep := time.Date(2024, 4, 17, 0, 0, 0, 0, time.UTC)
+	ta, ok := avgTemperature12h(timeStep, timeSteps)
+	if !ok {
+		t.Error("could not get temperature")
+	}
+	expected := 7
+	if ta != float32(expected) {
+		t.Errorf("expected value %v, got %v", expected, ta)
+	}
 }

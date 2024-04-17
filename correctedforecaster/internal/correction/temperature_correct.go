@@ -3,6 +3,7 @@ package correction
 import (
 	"math"
 	"strings"
+	"time"
 
 	"gitlab.met.no/forti/f2/internalprotocol"
 	"gitlab.met.no/forti/f2/parameters/weathersymbol"
@@ -22,79 +23,102 @@ func UpdateTemperature(interpreted map[string]internalprotocol.InterpretedData, 
 	}
 }
 
-// UpdateSymbols1h modifies a symbol to take into account any changes in
-// temperature after the symbol was generated.
-func UpdateSymbols1h(interpreted map[string]internalprotocol.InterpretedData) {
-	symbols, ok := interpreted["weather_symbol"]
-	if !ok {
-		return
+func UpdateSymbols(interpreted map[string]internalprotocol.InterpretedData) {
+
+	timesteps := internalprotocol.ReorganizeByTime(interpreted,
+		weatherSymbol, weatherSymbol6h, weatherSymbol12h,
+		airTemperature2m, airTemperature2mMin6h, airTemperature2mMax6h,
+	)
+
+	if symbols, ok := interpreted[weatherSymbol]; ok {
+		updateSymbols(symbols, timesteps, avgTemperature1h)
 	}
-	parameter := "air_temperature_2m"
 
-	timesteps := internalprotocol.ReorganizeByTime(interpreted, parameter)
+	if symbols, ok := interpreted[weatherSymbol6h]; ok {
+		updateSymbols(symbols, timesteps, avgTemperature6h)
+	}
 
-	for i, t := range symbols.Times {
-		values, ok := timesteps[t]
-		if !ok {
-			// no temperature data related to symbol
-			continue
-		}
-		t, ok := values[parameter]
-		if ok {
-			symbol := weathersymbol.FromValue(symbols.Values[i])
-			symbol = symbol.WithCorrectedTemperature(t)
-			symbols.Values[i] = symbol.ToValue()
-		}
+	if symbols, ok := interpreted[weatherSymbol12h]; ok {
+		updateSymbols(symbols, timesteps, avgTemperature12h)
 	}
 }
 
-// UpdateSymbols6h modifies 6-hourly weather symbols, in the same way as
-// UpdateSymbols does.
-func UpdateSymbols6h(interpreted map[string]internalprotocol.InterpretedData) {
-	symbols, ok := interpreted["weather_symbol_6h"]
-	if !ok {
-		return
-	}
-	min := "air_temperature_2m_min6h"
-	max := "air_temperature_2m_max6h"
-	instant := "air_temperature_2m"
-
-	timesteps := internalprotocol.ReorganizeByTime(interpreted, min, max, instant)
-
+func updateSymbols(symbols internalprotocol.InterpretedData, timesteps map[time.Time]map[string]float32, getTemperature func(atTime time.Time, timesteps map[time.Time]map[string]float32) (value float32, ok bool)) {
 	for i, t := range symbols.Times {
-		values, ok := timesteps[t]
+		temperature, ok := getTemperature(t, timesteps)
 		if !ok {
-			// no temperature data related to symbol
 			continue
 		}
-
-		a, aok := values[min]
-		b, bok := values[max]
-		if aok && bok {
-			symbol := weathersymbol.FromValue(symbols.Values[i])
-			symbol = symbol.WithCorrectedTemperature((a + b) / 2)
-			symbols.Values[i] = symbol.ToValue()
-		} else {
-			t, ok := values[instant]
-			if ok {
-				symbol := weathersymbol.FromValue(symbols.Values[i])
-				symbol = symbol.WithCorrectedTemperature(t)
-				symbols.Values[i] = symbol.ToValue()
-			}
-		}
+		symbol := weathersymbol.FromValue(symbols.Values[i])
+		symbol = symbol.WithCorrectedTemperature(temperature)
+		symbols.Values[i] = symbol.ToValue()
 	}
+}
+
+func avgTemperature12h(atTime time.Time, timesteps map[time.Time]map[string]float32) (value float32, ok bool) {
+	return avg(2, 6*time.Hour, atTime, timesteps, avgTemperature6h)
+}
+
+func avgTemperature6h(atTime time.Time, timesteps map[time.Time]map[string]float32) (value float32, ok bool) {
+	timestep, ok := timesteps[atTime]
+	if !ok {
+		return float32(math.NaN()), false
+	}
+
+	minTemperature, ok := timestep[airTemperature2mMin6h]
+	if !ok {
+		return avg(6, time.Hour, atTime, timesteps, avgTemperature1h)
+	}
+	maxTemperature, ok := timestep[airTemperature2mMax6h]
+	if !ok {
+		return avg(6, time.Hour, atTime, timesteps, avgTemperature1h)
+	}
+	return (minTemperature + maxTemperature) / 2, true
+}
+
+func avgTemperature1h(atTime time.Time, timesteps map[time.Time]map[string]float32) (value float32, ok bool) {
+	timestep, ok := timesteps[atTime]
+	if !ok {
+		return float32(math.NaN()), false
+	}
+	value, ok = timestep[airTemperature2m]
+	if !ok {
+		return float32(math.NaN()), false
+	}
+	return
+}
+
+// avg reads values from <f>, by calling it <count> times.
+// The time parameter to <f> at starts at <startTime>, and increases by <offset> each time <f> is called.
+// The return value is the average of the values read.
+func avg(
+	count int,
+	offset time.Duration,
+	startTime time.Time,
+	timesteps map[time.Time]map[string]float32,
+	f func(atTime time.Time, timesteps map[time.Time]map[string]float32) (value float32, ok bool),
+) (value float32, ok bool) {
+	for i := 0; i < count; i++ {
+		next, ok := f(startTime, timesteps)
+		if !ok {
+			return float32(math.NaN()), false
+		}
+		value += next
+		startTime = startTime.Add(offset)
+	}
+	return value / float32(count), true
 }
 
 // UpdateDewpointTemperature recalculates dew point temperature, based on
 // relative humidity and air temperature.
 func UpdateDewpointTemperature(interpreted map[string]internalprotocol.InterpretedData) {
-	dewPoint, ok := interpreted["dew_point_temperature_2m"]
+	dewPoint, ok := interpreted[dewPointTemperature2m]
 	if !ok {
 		return
 	}
 
-	temperature := "air_temperature_2m"
-	humidity := "relative_humidity_2m"
+	temperature := airTemperature2m
+	humidity := relativeHumidity2m
 	sorted := internalprotocol.ReorganizeByTime(interpreted, humidity, temperature)
 
 	for i, t := range dewPoint.Times {

@@ -1,0 +1,12 @@
+package correction
+
+const (
+	weatherSymbol         = "weather_symbol"
+	weatherSymbol6h       = "weather_symbol_6h"
+	weatherSymbol12h      = "weather_symbol_12h"
+	airTemperature2m      = "air_temperature_2m"
+	airTemperature2mMin6h = "air_temperature_2m_min6h"
+	airTemperature2mMax6h = "air_temperature_2m_max6h"
+	dewPointTemperature2m = "dew_point_temperature_2m"
+	relativeHumidity2m    = "relative_humidity_2m"
+)
