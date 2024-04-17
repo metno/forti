@@ -37,7 +37,7 @@ func testingTimesteps() map[time.Time]map[string]float32 {
 func TestAvgTemperature1h(t *testing.T) {
 	timeSteps := testingTimesteps()
 	timeStep := time.Date(2024, 4, 17, 0, 0, 0, 0, time.UTC)
-	ta, ok := avgTemperature1h(timeStep, timeSteps)
+	ta, ok := temperature1h(timeStep, timeSteps)
 	if !ok {
 		t.Error("could not get temperature")
 	}
@@ -46,7 +46,7 @@ func TestAvgTemperature1h(t *testing.T) {
 		t.Errorf("expected value %v, got %v", expected, ta)
 	}
 
-	if _, ok := avgTemperature1h(timeStep.Add(-time.Hour), timeSteps); ok {
+	if _, ok := temperature1h(timeStep.Add(-time.Hour), timeSteps); ok {
 		t.Error("expected lookup for non-existing time to fail")
 	}
 }

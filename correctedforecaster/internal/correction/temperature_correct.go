@@ -23,21 +23,25 @@ func UpdateTemperature(interpreted map[string]internalprotocol.InterpretedData, 
 	}
 }
 
+// UpdateSymbols changes all weather symbols in the given interpreted data to have the correct precipitation phase (snow, sleet, rain).
+// It does this based on the temperatures found in the data.
 func UpdateSymbols(interpreted map[string]internalprotocol.InterpretedData) {
-
 	timesteps := internalprotocol.ReorganizeByTime(interpreted,
 		weatherSymbol, weatherSymbol6h, weatherSymbol12h,
 		airTemperature2m, airTemperature2mMin6h, airTemperature2mMax6h,
 	)
 
+	// Update 1h symbols
 	if symbols, ok := interpreted[weatherSymbol]; ok {
-		updateSymbols(symbols, timesteps, avgTemperature1h)
+		updateSymbols(symbols, timesteps, temperature1h)
 	}
 
+	// Update 6h symbols
 	if symbols, ok := interpreted[weatherSymbol6h]; ok {
 		updateSymbols(symbols, timesteps, avgTemperature6h)
 	}
 
+	// Update 12h symbols
 	if symbols, ok := interpreted[weatherSymbol12h]; ok {
 		updateSymbols(symbols, timesteps, avgTemperature12h)
 	}
@@ -47,6 +51,7 @@ func updateSymbols(symbols internalprotocol.InterpretedData, timesteps map[time.
 	for i, t := range symbols.Times {
 		temperature, ok := getTemperature(t, timesteps)
 		if !ok {
+			// Unable to determine a temperature for the symbol - we leave it unchanged.
 			continue
 		}
 		symbol := weathersymbol.FromValue(symbols.Values[i])
@@ -67,16 +72,16 @@ func avgTemperature6h(atTime time.Time, timesteps map[time.Time]map[string]float
 
 	minTemperature, ok := timestep[airTemperature2mMin6h]
 	if !ok {
-		return avg(6, time.Hour, atTime, timesteps, avgTemperature1h)
+		return avg(6, time.Hour, atTime, timesteps, temperature1h)
 	}
 	maxTemperature, ok := timestep[airTemperature2mMax6h]
 	if !ok {
-		return avg(6, time.Hour, atTime, timesteps, avgTemperature1h)
+		return avg(6, time.Hour, atTime, timesteps, temperature1h)
 	}
 	return (minTemperature + maxTemperature) / 2, true
 }
 
-func avgTemperature1h(atTime time.Time, timesteps map[time.Time]map[string]float32) (value float32, ok bool) {
+func temperature1h(atTime time.Time, timesteps map[time.Time]map[string]float32) (value float32, ok bool) {
 	timestep, ok := timesteps[atTime]
 	if !ok {
 		return float32(math.NaN()), false
