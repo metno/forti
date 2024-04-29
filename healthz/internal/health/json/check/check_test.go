@@ -10,17 +10,8 @@ import (
 	"gitlab.met.no/forti/f2/jsonfrontend/pkg/jsonformat"
 )
 
-func TestJSONCheck(t *testing.T) {
-	var forecast jsonformat.GeoJSON
-	if err := json.Unmarshal([]byte(faultyJSON), &forecast); err != nil {
-		t.Errorf("failed to decode json;expected correct json: Got faulty json: %v", err)
-	}
-
-	var count int = 2
-	temperatureMin := float32(-90.0)
-	temperatureMax := float32(90.0)
-
-	blueprint := config.Blueprint{
+func testingBlueprint(count int, temperatureMin, temperatureMax float32) config.Blueprint {
+	return config.Blueprint{
 		MaxAge: config.Duration{Duration: time.Duration(time.Minute * 60)},
 		Timeseries: config.Timeseries{
 			Timeresolution: []config.Duration{{Duration: time.Duration(time.Minute * 60)}},
@@ -71,6 +62,15 @@ func TestJSONCheck(t *testing.T) {
 			},
 		},
 	}
+}
+
+func TestJSONCheck(t *testing.T) {
+	var forecast jsonformat.GeoJSON
+	if err := json.Unmarshal([]byte(faultyJSON), &forecast); err != nil {
+		t.Errorf("failed to decode json;expected correct json: Got faulty json: %v", err)
+	}
+
+	blueprint := testingBlueprint(2, -90, 90)
 
 	result := runChecks(forecast.Properties, blueprint)
 
@@ -85,6 +85,14 @@ func TestJSONCheck(t *testing.T) {
 			errString += fmt.Sprintln(e)
 		}
 		t.Errorf(errString)
+	}
+}
+
+func TestEmptyJSON(t *testing.T) {
+	var forecast jsonformat.GeoJSON
+	results := runChecks(forecast.Properties, testingBlueprint(2, -90, 90))
+	if results.OK {
+		t.Error("expected empty json to fail")
 	}
 }
 

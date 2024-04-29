@@ -75,6 +75,13 @@ func getRequest(ctx context.Context, location *url.URL) (*http.Request, error) {
 }
 
 func runChecks(doc *jsonformat.Forecast, expected config.Blueprint) LocationResult {
+	if doc == nil {
+		return LocationResult{
+			OK:       false,
+			Problems: []string{"document contains no forecast data"},
+		}
+	}
+
 	var problemsList []string
 
 	problems := checkUpdatedAge(doc, expected.MaxAge)
