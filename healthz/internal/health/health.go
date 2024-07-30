@@ -20,9 +20,9 @@ type Checker struct {
 	lastRun time.Time
 	nextRun time.Time
 
-	checkWindow  []check.Result
-	lastResult   check.Result
-	lastResultOK bool
+	checkHistory []check.Result
+	lastCheck    check.Result
+	isHealthy    bool
 }
 
 func NewChecker(conf *config.CheckConfiguration) *Checker {
@@ -32,27 +32,28 @@ func NewChecker(conf *config.CheckConfiguration) *Checker {
 }
 
 func (c *Checker) ServeSimple(w http.ResponseWriter, r *http.Request) {
-	result, ok := c.Check()
-	if !ok {
+	lastCheck, isHealthy := c.Check()
+	if !isHealthy {
 		w.WriteHeader(http.StatusServiceUnavailable)
 	}
 
 	w.Header().Add("Content-Type", "text/plain;charset=UTF-8")
-	fmt.Fprintln(w, result)
+	fmt.Fprintln(w, lastCheck)
 }
 
 func (c *Checker) ServeJSON(w http.ResponseWriter, r *http.Request) {
-	result, ok := c.Check()
-	if !ok {
+	lastCheck, isHealthy := c.Check()
+	if !isHealthy {
 		w.WriteHeader(http.StatusServiceUnavailable)
 	}
 
 	w.Header().Add("Content-Type", "application/json;charset=UTF-8")
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
-	enc.Encode(result)
+	enc.Encode(lastCheck)
 }
 
+// Check performs a health check and returns the result and a boolean indicating if the check was successful.
 func (c *Checker) Check() (check.Result, bool) {
 	now := time.Now()
 
@@ -66,7 +67,7 @@ func (c *Checker) Check() (check.Result, bool) {
 		c.refresh()
 		c.mutex.RLock()
 	}
-	return c.lastResult, c.lastResultOK
+	return c.lastCheck, c.isHealthy
 }
 
 func (c *Checker) refresh() {
@@ -87,29 +88,29 @@ func (c *Checker) refresh() {
 	c.setResult(runChecks(c.conf))
 }
 
-// setResult will set the result of the check based on a window of previous checks.
+// setResult will decide on the overall health of the system based on the last check and a window of previous checks.
 // If last check failed and more than conf.Window.Threshold of the last conf.Window.Size checks
 // has failed the result will be not OK.
-func (c *Checker) setResult(lastResult check.Result) {
-	c.checkWindow = append(c.checkWindow, lastResult)
-	if len(c.checkWindow) > c.conf.CheckWindow.Size {
-		c.checkWindow = c.checkWindow[1:]
+func (c *Checker) setResult(lastCheck check.Result) {
+	c.checkHistory = append(c.checkHistory, lastCheck)
+	if len(c.checkHistory) > c.conf.CheckWindow.Size {
+		c.checkHistory = c.checkHistory[1:]
 	}
 
 	var failed int
-	for _, v := range c.checkWindow {
+	for _, v := range c.checkHistory {
 		if !v.OK {
 			failed++
 		}
 	}
 
 	if failed > c.conf.CheckWindow.FailThreshold &&
-		!lastResult.OK {
-		c.lastResultOK = false
+		!lastCheck.OK {
+		c.isHealthy = false
 	} else {
-		c.lastResultOK = true
+		c.isHealthy = true
 	}
-	c.lastResult = lastResult
+	c.lastCheck = lastCheck
 }
 
 func runChecks(conf *config.CheckConfiguration) check.Result {

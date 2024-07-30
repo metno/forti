@@ -94,12 +94,12 @@ func TestCheckWithFailureWindow(t *testing.T) {
 	checker := NewChecker(&conf)
 
 	checker.setResult(runChecks(&conf))
-	if !checker.lastResultOK {
+	if !checker.isHealthy {
 		t.Errorf("Reported failure, but expected ok")
 	}
 
 	checker.setResult(runChecks(&conf))
-	if checker.lastResultOK {
+	if checker.isHealthy {
 		t.Errorf("Reported ok, but expected failure.")
 	}
 }

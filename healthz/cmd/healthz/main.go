@@ -65,13 +65,13 @@ func serveHTTP(conf *config.CheckConfiguration, upstreamGRPC string) error {
 func checkOnce(conf *config.CheckConfiguration) {
 	checker := health.NewChecker(conf)
 
-	result, ok := checker.Check()
+	lastCheck, isHealthy := checker.Check()
 	enc := json.NewEncoder(os.Stdout)
 	enc.SetIndent("", "  ")
-	if err := enc.Encode(result); err != nil {
+	if err := enc.Encode(lastCheck); err != nil {
 		panic(err)
 	}
-	if !ok {
+	if !isHealthy {
 		os.Exit(1)
 	}
 }
