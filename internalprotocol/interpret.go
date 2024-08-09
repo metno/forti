@@ -28,7 +28,7 @@ func InterpretValues(forecast *Forecast) map[string]InterpretedData {
 }
 
 // ReorganizeByTime returns a reorganized subset of the given data and parameters.
-// The returned map gives allows looup from time to a map of all parameter/value pairs for that particular time.
+// The returned map allows looup from time to a map of all parameter/value pairs for that particular time.
 func ReorganizeByTime(interpretedData map[string]InterpretedData, parameters ...string) map[time.Time]map[string]float32 {
 	ret := make(map[time.Time]map[string]float32)
 
