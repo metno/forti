@@ -27,12 +27,12 @@ func UpdateTemperature(interpreted map[string]internalprotocol.InterpretedData, 
 // It does this based on the temperatures found in the data.
 func UpdateSymbols(interpreted map[string]internalprotocol.InterpretedData) {
 	timesteps := internalprotocol.ReorganizeByTime(interpreted,
-		weatherSymbol, weatherSymbol6h, weatherSymbol12h,
+		weatherSymbol1h, weatherSymbol6h, weatherSymbol12h,
 		airTemperature2m, airTemperature2mMin6h, airTemperature2mMax6h,
 	)
 
 	// Update 1h symbols
-	if symbols, ok := interpreted[weatherSymbol]; ok {
+	if symbols, ok := interpreted[weatherSymbol1h]; ok {
 		updateSymbols(symbols, timesteps, temperature1h)
 	}
 
