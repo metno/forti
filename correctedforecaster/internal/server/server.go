@@ -151,7 +151,6 @@ func (s *Server) correctWithBetterTopography(request *internalprotocol.GetForeca
 		correction.UpdateTemperature(interpreted, altitudeDiff)
 		correction.UpdateDewpointTemperature(interpreted)
 		correction.UpdateSymbols(interpreted)
-		correction.UpdateSymbols6h(interpreted)
 	}
 	*modelAltitude = realAltitude
 
