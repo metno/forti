@@ -1,5 +1,7 @@
 package correction
 
+// These are the expected parameter names from rawdataforecaster's grpc message
+
 const (
 	weatherSymbol         = "weather_symbol"
 	weatherSymbol6h       = "weather_symbol_6h"
