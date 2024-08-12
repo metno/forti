@@ -35,7 +35,7 @@ func New(conf *config.CheckConfiguration) *Health {
 func (h *Health) Start() {
 	go func() {
 		for {
-			h.check()
+			h.Check()
 			time.Sleep(time.Minute)
 		}
 	}()
@@ -51,10 +51,6 @@ func (h *Health) Health() (check.Result, bool) {
 
 // Check will run a health check immediately.
 func (h *Health) Check() {
-	h.check()
-}
-
-func (h *Health) check() {
 	log.Println("Running checks...")
 	h.setHealth(runChecks(h.conf))
 }

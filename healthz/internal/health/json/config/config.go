@@ -55,10 +55,13 @@ type Request struct {
 	PathTemplate string   `json:"path_template"`
 }
 
+// Size is the number of the most recent checks that are kept in memory.
+// If more than FailThreshold of these checks have failed, the system is considered unhealthy.
 type CheckWindow struct {
 	Size          int `json:"size"`
 	FailThreshold int `json:"fail_threshold"`
 }
+
 type Response struct {
 	MaxFailures int        `json:"max_failures"`
 	Locations   []Location `json:"locations"`
