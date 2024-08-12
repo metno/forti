@@ -45,9 +45,11 @@ func main() {
 }
 
 func serveHTTP(conf *config.CheckConfiguration, upstreamGRPC string) error {
-	checker := health.NewChecker(conf)
-	http.HandleFunc("/healthz", checker.ServeSimple)
-	http.HandleFunc("/healthz/full", checker.ServeJSON)
+	h := health.New(conf)
+	h.Start()
+
+	http.HandleFunc("/healthz", h.ServeSimple)
+	http.HandleFunc("/healthz/full", h.ServeJSON)
 
 	if upstreamGRPC != "" {
 		statusFetcher, err := status.NewFetcher(upstreamGRPC)
@@ -63,9 +65,10 @@ func serveHTTP(conf *config.CheckConfiguration, upstreamGRPC string) error {
 }
 
 func checkOnce(conf *config.CheckConfiguration) {
-	checker := health.NewChecker(conf)
+	h := health.New(conf)
+	h.Check()
+	lastCheck, isHealthy := h.Health()
 
-	lastCheck, isHealthy := checker.Check()
 	enc := json.NewEncoder(os.Stdout)
 	enc.SetIndent("", "  ")
 	if err := enc.Encode(lastCheck); err != nil {

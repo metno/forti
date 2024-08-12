@@ -44,12 +44,13 @@ func TestForecastServiceUnavailable(t *testing.T) {
 			MaxFailures: 0,
 		},
 	}
-	checker := NewChecker(&conf)
+	h := New(&conf)
+	h.Check()
 
 	req := httptest.NewRequest("GET", serverURL.RequestURI(), nil)
 	w := httptest.NewRecorder()
 
-	checker.ServeSimple(w, req)
+	h.ServeSimple(w, req)
 
 	resp := w.Result()
 	if resp.StatusCode != http.StatusServiceUnavailable {
@@ -91,15 +92,15 @@ func TestCheckWithFailureWindow(t *testing.T) {
 			MaxFailures: 0,
 		},
 	}
-	checker := NewChecker(&conf)
+	h := New(&conf)
 
-	checker.setResult(runChecks(&conf))
-	if !checker.isHealthy {
+	h.setHealth(runChecks(&conf))
+	if !h.isHealthy {
 		t.Errorf("Reported failure, but expected ok")
 	}
 
-	checker.setResult(runChecks(&conf))
-	if checker.isHealthy {
+	h.setHealth(runChecks(&conf))
+	if h.isHealthy {
 		t.Errorf("Reported ok, but expected failure.")
 	}
 }
