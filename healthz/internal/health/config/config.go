@@ -34,19 +34,19 @@ func Read(configFile string) (*CheckConfiguration, error) {
 // setDefaultWindow sets default check window if size is zero or negative.
 // default window settings will accept 1 failure in 10 checks.
 func setDefaultCheckWindow(conf *CheckConfiguration) {
-	if conf.CheckWindow.Size < 1 {
-		conf.CheckWindow.Size = 10
-		conf.CheckWindow.FailThreshold = 1
+	if conf.ProbeHistory.Size < 1 {
+		conf.ProbeHistory.Size = 10
+		conf.ProbeHistory.MaxFailedProbes = 1
 	}
 }
 
 // CheckConfiguration contains a spec for how to execute sanity checks on
 // various locationforecast servers- and locations.
 type CheckConfiguration struct {
-	Headers     map[string]string `json:"headers"`
-	CheckWindow CheckWindow       `json:"check_window"`
-	Request     Request           `json:"request"`
-	Response    Response          `json:"response"`
+	Headers      map[string]string `json:"headers"`
+	ProbeHistory ProbeHistory      `json:"check_window"`
+	Request      Request           `json:"request"`
+	Probe        Probe             `json:"probe"`
 }
 
 type Request struct {
@@ -55,16 +55,15 @@ type Request struct {
 	PathTemplate string   `json:"path_template"`
 }
 
-// Size is the number of the most recent checks that are kept in memory.
-// If more than FailThreshold of these checks have failed, the system is considered unhealthy.
-type CheckWindow struct {
-	Size          int `json:"size"`
-	FailThreshold int `json:"fail_threshold"`
+// ProbeHistory
+type ProbeHistory struct {
+	Size            int `json:"size"`              // Size is the number of the most recent checks that are kept in memory.
+	MaxFailedProbes int `json:"max_failed_probes"` // If more than MaxFailedProbes of these checks have failed, the system is considered unhealthy.
 }
 
-type Response struct {
-	MaxFailures int        `json:"max_failures"`
-	Locations   []Location `json:"locations"`
+type Probe struct {
+	MaxFailedLocations int        `json:"max_failures"`
+	Locations          []Location `json:"locations"`
 }
 
 type NamedRequest struct {
@@ -86,7 +85,7 @@ func (cc *CheckConfiguration) Problems() []error {
 	if match, _ := regexp.MatchString(`\{\{\ *.Longitude *\}\}`, cc.Request.PathTemplate); !match {
 		ret = append(ret, errors.New("missing {{.Longitude}} in path template"))
 	}
-	if cc.Response.MaxFailures >= len(cc.Response.Locations) {
+	if cc.Probe.MaxFailedLocations >= len(cc.Probe.Locations) {
 		ret = append(ret, errors.New("max failures cannot be larger than length of check locations"))
 	}
 	return ret
@@ -103,7 +102,7 @@ func (cc *CheckConfiguration) GetRequests() []NamedRequest {
 		if err != nil {
 			panic(err)
 		}
-		for _, loc := range cc.Response.Locations {
+		for _, loc := range cc.Probe.Locations {
 			ret = append(ret, loc.getRequest(tmpl))
 		}
 	}

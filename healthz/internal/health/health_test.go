@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"testing"
 
-	"gitlab.met.no/forti/f2/healthz/internal/health/json/config"
+	"gitlab.met.no/forti/f2/healthz/internal/health/config"
 )
 
 func TestForecastServiceUnavailable(t *testing.T) {
@@ -24,11 +24,11 @@ func TestForecastServiceUnavailable(t *testing.T) {
 			},
 			PathTemplate: "/api/forecast/v2/complete?lat={{.Latitude}}&lon={{.Longitude}}",
 		},
-		CheckWindow: config.CheckWindow{
-			Size:          1,
-			FailThreshold: 0,
+		ProbeHistory: config.ProbeHistory{
+			Size:            1,
+			MaxFailedProbes: 0,
 		},
-		Response: config.Response{
+		Probe: config.Probe{
 			Locations: []config.Location{
 				{
 					Name:      "AlwaysFail",
@@ -41,11 +41,11 @@ func TestForecastServiceUnavailable(t *testing.T) {
 					Longitude: 10,
 				},
 			},
-			MaxFailures: 0,
+			MaxFailedLocations: 0,
 		},
 	}
 	h := New(&conf)
-	h.Check()
+	h.Probe()
 
 	req := httptest.NewRequest("GET", serverURL.RequestURI(), nil)
 	w := httptest.NewRecorder()
@@ -72,11 +72,11 @@ func TestCheckWithFailureWindow(t *testing.T) {
 			},
 			PathTemplate: "/api/forecast/v2/complete?lat={{.Latitude}}&lon={{.Longitude}}",
 		},
-		CheckWindow: config.CheckWindow{
-			Size:          3,
-			FailThreshold: 1,
+		ProbeHistory: config.ProbeHistory{
+			Size:            3,
+			MaxFailedProbes: 1,
 		},
-		Response: config.Response{
+		Probe: config.Probe{
 			Locations: []config.Location{
 				{
 					Name:      "AlwaysFail",
@@ -89,17 +89,17 @@ func TestCheckWithFailureWindow(t *testing.T) {
 					Longitude: 10,
 				},
 			},
-			MaxFailures: 0,
+			MaxFailedLocations: 0,
 		},
 	}
 	h := New(&conf)
 
-	h.setHealth(runChecks(&conf))
+	h.setHealth(runProbe(&conf))
 	if !h.isHealthy {
 		t.Errorf("Reported failure, but expected ok")
 	}
 
-	h.setHealth(runChecks(&conf))
+	h.setHealth(runProbe(&conf))
 	if h.isHealthy {
 		t.Errorf("Reported ok, but expected failure.")
 	}

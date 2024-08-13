@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"gitlab.met.no/forti/f2/healthz/internal/health"
-	"gitlab.met.no/forti/f2/healthz/internal/health/json/config"
+	"gitlab.met.no/forti/f2/healthz/internal/health/config"
 	"gitlab.met.no/forti/f2/healthz/internal/status"
 )
 
@@ -66,7 +66,7 @@ func serveHTTP(conf *config.CheckConfiguration, upstreamGRPC string) error {
 
 func checkOnce(conf *config.CheckConfiguration) {
 	h := health.New(conf)
-	h.Check()
+	h.Probe()
 	lastCheck, isHealthy := h.Health()
 
 	enc := json.NewEncoder(os.Stdout)

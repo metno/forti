@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	config "gitlab.met.no/forti/f2/healthz/internal/health/json/config"
+	config "gitlab.met.no/forti/f2/healthz/internal/health/config"
 	"gitlab.met.no/forti/f2/jsonfrontend/pkg/jsonformat"
 )
 
