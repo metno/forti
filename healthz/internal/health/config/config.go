@@ -14,8 +14,8 @@ import (
 
 // Read attempts to reads the given configuration file, and returns a
 // matching CheckConfiguration.
-func Read(configFile string) (*CheckConfiguration, error) {
-	var conf CheckConfiguration
+func Read(configFile string) (*ProbeConfiguration, error) {
+	var conf ProbeConfiguration
 	f, err := os.Open(configFile)
 	if err != nil {
 		return nil, fmt.Errorf("unable to read configuration file: %s", err)
@@ -33,48 +33,42 @@ func Read(configFile string) (*CheckConfiguration, error) {
 
 // setDefaultWindow sets default check window if size is zero or negative.
 // default window settings will accept 1 failure in 10 checks.
-func setDefaultCheckWindow(conf *CheckConfiguration) {
+func setDefaultCheckWindow(conf *ProbeConfiguration) {
 	if conf.ProbeHistory.Size < 1 {
 		conf.ProbeHistory.Size = 10
 		conf.ProbeHistory.MaxFailedProbes = 1
 	}
 }
 
-// CheckConfiguration contains a spec for how to execute sanity checks on
+// ProbeConfiguration contains a spec for how to execute sanity checks on
 // various locationforecast servers- and locations.
-type CheckConfiguration struct {
+type ProbeConfiguration struct {
 	Headers      map[string]string `json:"headers"`
-	ProbeHistory ProbeHistory      `json:"check_window"`
+	ProbeHistory ProbeHistory      `json:"probe_history"`
 	Request      Request           `json:"request"`
 	Probe        Probe             `json:"probe"`
 }
 
+// Request is a specification for how to construct a Forti request.
 type Request struct {
 	Protocol     string   `json:"protocol"`
 	Servers      []string `json:"servers"`
 	PathTemplate string   `json:"path_template"`
 }
 
-// ProbeHistory
 type ProbeHistory struct {
-	Size            int `json:"size"`              // Size is the number of the most recent checks that are kept in memory.
-	MaxFailedProbes int `json:"max_failed_probes"` // If more than MaxFailedProbes of these checks have failed, the system is considered unhealthy.
+	Size            int `json:"size"`              // Size is the number of the most recent probes that are kept in memory.
+	MaxFailedProbes int `json:"max_failed_probes"` // If more than MaxFailedProbes have failed, the system is considered unhealthy.
 }
 
 type Probe struct {
-	MaxFailedLocations int        `json:"max_failures"`
-	Locations          []Location `json:"locations"`
-}
-
-type NamedRequest struct {
-	Name      string
-	URL       *url.URL
-	Blueprint Blueprint
+	MaxFailedLocations int        `json:"max_failed_locations"` // MaxFailedLocations is the number of locations that can fail before the probe is considered failed.
+	Locations          []Location `json:"locations"`            // Locations are the check specifications for a list of locations.
 }
 
 // Problems returns a list of errors in the configuration, but only errors
 // that are so severe that checks cannot be based on this config.
-func (cc *CheckConfiguration) Problems() []error {
+func (cc *ProbeConfiguration) Problems() []error {
 	var ret []error
 	if match, _ := regexp.MatchString(`^https?$`, cc.Request.Protocol); !match {
 		ret = append(ret, fmt.Errorf("invalid protocol: %s", cc.Request.Protocol))
@@ -93,7 +87,7 @@ func (cc *CheckConfiguration) Problems() []error {
 
 // GetRequests returns a list of all possible permutations of server address
 // and lat/lon.
-func (cc *CheckConfiguration) GetRequests() []NamedRequest {
+func (cc *ProbeConfiguration) GetRequests() []NamedRequest {
 	var ret []NamedRequest
 
 	for _, server := range cc.Request.Servers {
@@ -116,6 +110,12 @@ type Location struct {
 	Latitude  float32   `json:"lat"`
 	Longitude float32   `json:"lon"`
 	Blueprint Blueprint `json:"blueprint"`
+}
+
+type NamedRequest struct {
+	Name      string
+	URL       *url.URL
+	Blueprint Blueprint
 }
 
 func (l Location) getRequest(t *template.Template) NamedRequest {

@@ -16,7 +16,7 @@ func TestForecastServiceUnavailable(t *testing.T) {
 		t.Errorf("failed to get mock server: %s", err)
 	}
 
-	conf := config.CheckConfiguration{
+	conf := config.ProbeConfiguration{
 		Request: config.Request{
 			Protocol: "http",
 			Servers: []string{
@@ -64,7 +64,7 @@ func TestCheckWithFailureWindow(t *testing.T) {
 		t.Errorf("failed to get mock server: %s", err)
 	}
 
-	conf := config.CheckConfiguration{
+	conf := config.ProbeConfiguration{
 		Request: config.Request{
 			Protocol: "http",
 			Servers: []string{

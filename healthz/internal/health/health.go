@@ -11,7 +11,7 @@ import (
 )
 
 type Health struct {
-	conf *config.CheckConfiguration
+	conf *config.ProbeConfiguration
 
 	mutex sync.RWMutex
 
@@ -21,7 +21,7 @@ type Health struct {
 }
 
 // New creates a new health instance with the given configuration, with overall health initialized to false.
-func New(conf *config.CheckConfiguration) *Health {
+func New(conf *config.ProbeConfiguration) *Health {
 	h := &Health{
 		conf: conf,
 	}
@@ -29,7 +29,7 @@ func New(conf *config.CheckConfiguration) *Health {
 	return h
 }
 
-// Start will make health start running regular health checks in the background every minute.
+// Start will make health start running regular health probes in the background every minute.
 func (h *Health) Start() {
 	go func() {
 		for {
@@ -39,7 +39,7 @@ func (h *Health) Start() {
 	}()
 }
 
-// Health returns the current health, described by the results of the last check and an isHealthy boolean.
+// Health returns the current health, described by the results of the last probe and an isHealthy boolean.
 func (h *Health) Health() (ProbeResult, bool) {
 	h.mutex.RLock()
 	defer h.mutex.RUnlock()
@@ -52,9 +52,9 @@ func (h *Health) Probe() {
 	h.setHealth(runProbe(h.conf))
 }
 
-// setHealth will decide on the overall health of the system based on the last check and a window of previous checks.
-// If last check failed and more than conf.Window.Threshold of the last conf.Window.Size checks
-// has failed the result will be not OK.
+// setHealth will decide on the overall health of the system based on the last probe and a history of the previous probes.
+// If last probe failed and more than conf.probeHistory.MaxFailedProbes of the last conf.probeHistory.Size probes
+// has failed, the system will be deemed not healthy.
 func (h *Health) setHealth(lastProbe ProbeResult) {
 	h.mutex.Lock()
 	defer h.mutex.Unlock()

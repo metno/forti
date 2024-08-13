@@ -14,7 +14,7 @@ import (
 
 func main() {
 	runServer := flag.Bool("run-server", false, "Run a server on port 8080, continously serving status.")
-	configFile := flag.String("config", "/etc/forti/checks.json", "Read check configuration from the given file.")
+	configFile := flag.String("config", "/etc/forti/probes.json", "Read probe configuration from the given file.")
 	upstreamGRPC := flag.String("upstream-grpc-host", "", "Check status against the given grpc server")
 	onlyCheckConfig := flag.Bool("only-check-config", false, "Do not run checks. Only verify configuration, then exit")
 
@@ -44,7 +44,7 @@ func main() {
 	}
 }
 
-func serveHTTP(conf *config.CheckConfiguration, upstreamGRPC string) error {
+func serveHTTP(conf *config.ProbeConfiguration, upstreamGRPC string) error {
 	h := health.New(conf)
 	h.Start()
 
@@ -64,7 +64,7 @@ func serveHTTP(conf *config.CheckConfiguration, upstreamGRPC string) error {
 	return http.ListenAndServe(address, nil)
 }
 
-func checkOnce(conf *config.CheckConfiguration) {
+func checkOnce(conf *config.ProbeConfiguration) {
 	h := health.New(conf)
 	h.Probe()
 	lastCheck, isHealthy := h.Health()

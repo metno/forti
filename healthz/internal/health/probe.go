@@ -23,7 +23,7 @@ type ProbeResult struct {
 	Locations map[string]check.LocationResult `json:"locations,omitempty"`
 }
 
-func runProbe(conf *config.CheckConfiguration) ProbeResult {
+func runProbe(conf *config.ProbeConfiguration) ProbeResult {
 	log.Println("Perform probe...")
 
 	result := NewProbeResult()
