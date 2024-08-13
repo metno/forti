@@ -19,12 +19,12 @@ const nowcastConfig = `{
 	    ],                                                                                                                                                                                                                                                                 
 	    "path_template": "/api/nowcast/v2/complete?lat={{.Latitude}}&lon={{.Longitude}}"                                                                                                                                                                           
 	},
-	"check_window": {
+	"probe_history": {
 		"size": 7,
-		"fail_threshold": 3
+		"max_failed_probes": 3
 	},
-	"response": {
-		"max_failures": 1,
+	"probe": {
+		"max_failed_locations": 1,
 		"locations": [
 			{
 				"name": "norway nowcast",
@@ -63,7 +63,7 @@ const nowcastConfig = `{
 }`
 
 func TestDecodeNowcastConfig(t *testing.T) {
-	var config CheckConfiguration
+	var config ProbeConfiguration
 
 	err := json.Unmarshal([]byte(nowcastConfig), &config)
 	if err != nil {
@@ -71,13 +71,13 @@ func TestDecodeNowcastConfig(t *testing.T) {
 		return
 	}
 
-	precipitationRateMinCount := config.Response.Locations[0].Blueprint.Data["instant"].Details["precipitation_rate"].MinimumCount
+	precipitationRateMinCount := config.Probe.Locations[0].Blueprint.Data["instant"].Details["precipitation_rate"].MinimumCount
 	if precipitationRateMinCount != 17 {
 		t.Errorf("Expected precipitation_rate min count== 17; Got %d", precipitationRateMinCount)
 		return
 	}
 
-	maxAge := config.Response.Locations[0].Blueprint.MaxAge.Duration
+	maxAge := config.Probe.Locations[0].Blueprint.MaxAge.Duration
 	if maxAge != time.Duration(time.Minute*20) {
 		t.Errorf("Expected MaxAge.Duration to be equal to time.Duration(time.Minute * 20); Got this instead: %v", maxAge)
 	}
