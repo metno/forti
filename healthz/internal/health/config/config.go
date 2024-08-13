@@ -13,7 +13,7 @@ import (
 )
 
 // Read attempts to reads the given configuration file, and returns a
-// matching CheckConfiguration.
+// matching ProbeConfiguration.
 func Read(configFile string) (*ProbeConfiguration, error) {
 	var conf ProbeConfiguration
 	f, err := os.Open(configFile)
@@ -26,14 +26,14 @@ func Read(configFile string) (*ProbeConfiguration, error) {
 	if err := dec.Decode(&conf); err != nil {
 		return nil, fmt.Errorf("unable to read checks config: %s", err)
 	}
-	setDefaultCheckWindow(&conf)
+	setDefaultProbeHistory(&conf)
 
 	return &conf, nil
 }
 
-// setDefaultWindow sets default check window if size is zero or negative.
-// default window settings will accept 1 failure in 10 checks.
-func setDefaultCheckWindow(conf *ProbeConfiguration) {
+// setDefaultProbeHistory sets default probe history if size is zero or negative.
+// default probe history will accept 1 failure in 10 probes.
+func setDefaultProbeHistory(conf *ProbeConfiguration) {
 	if conf.ProbeHistory.Size < 1 {
 		conf.ProbeHistory.Size = 10
 		conf.ProbeHistory.MaxFailedProbes = 1
