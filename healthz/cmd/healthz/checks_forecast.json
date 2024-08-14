@@ -11,8 +11,12 @@
        ],                                                                                                                                                                                                                                                                 
        "path_template": "/api/forecast/v2/complete?lat={{.Latitude}}&lon={{.Longitude}}"                                                                                                                                                                           
     },
-    "response": {
-       "max_failures": 0,
+    "probe_history": {
+        "size": 1,
+        "max_failed_probes": 0
+    },
+    "probe": {
+       "max_failed_locations": 0,
        "locations": [
            {
                "name": "arctic",

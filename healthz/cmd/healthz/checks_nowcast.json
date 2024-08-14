@@ -11,8 +11,8 @@
        ],                                                                                                                                                                                                                                                                 
        "path_template": "/api/nowcast/v2/complete?lat={{.Latitude}}&lon={{.Longitude}}"                                                                                                                                                                           
     },
-    "response": {
-       "max_failures": 6,
+    "probe": {
+       "max_failed_locations": 6,
        "locations": [
            {
                "name": "oslo nowcast",

@@ -11,12 +11,12 @@ import (
 	"sort"
 	"time"
 
-	config "gitlab.met.no/forti/f2/healthz/internal/health/json/config"
+	config "gitlab.met.no/forti/f2/healthz/internal/health/config"
 	"gitlab.met.no/forti/f2/jsonfrontend/pkg/jsonformat"
 )
 
-// URL runs the set of tests specified by blueprint against the given URL.
-func URL(location *url.URL, expected config.Blueprint) LocationResult {
+// Location runs the set of tests specified by blueprint against the given Location.
+func Location(location *url.URL, expected config.Blueprint) LocationResult {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 

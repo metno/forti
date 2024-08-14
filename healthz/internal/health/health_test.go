@@ -7,20 +7,16 @@ import (
 	"net/url"
 	"testing"
 
-	"gitlab.met.no/forti/f2/healthz/internal/health/json/config"
+	"gitlab.met.no/forti/f2/healthz/internal/health/config"
 )
 
 func TestForecastServiceUnavailable(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusServiceUnavailable)
-		fmt.Fprint(w, "always fail")
-	}))
-	serverURL, err := url.Parse(server.URL)
+	serverURL, err := MockServerURL()
 	if err != nil {
-		t.Errorf("could not setup test http server; Failed with %v", err)
+		t.Errorf("failed to get mock server: %s", err)
 	}
 
-	conf := config.CheckConfiguration{
+	conf := config.ProbeConfiguration{
 		Request: config.Request{
 			Protocol: "http",
 			Servers: []string{
@@ -28,7 +24,11 @@ func TestForecastServiceUnavailable(t *testing.T) {
 			},
 			PathTemplate: "/api/forecast/v2/complete?lat={{.Latitude}}&lon={{.Longitude}}",
 		},
-		Response: config.Response{
+		ProbeHistory: config.ProbeHistory{
+			Size:            1,
+			MaxFailedProbes: 0,
+		},
+		Probe: config.Probe{
 			Locations: []config.Location{
 				{
 					Name:      "AlwaysFail",
@@ -41,18 +41,79 @@ func TestForecastServiceUnavailable(t *testing.T) {
 					Longitude: 10,
 				},
 			},
-			MaxFailures: 0,
+			MaxFailedLocations: 0,
 		},
 	}
-	checker := NewChecker(&conf)
+	h := New(&conf)
+	h.Probe()
 
-	req := httptest.NewRequest("GET", server.URL, nil)
+	req := httptest.NewRequest("GET", serverURL.RequestURI(), nil)
 	w := httptest.NewRecorder()
 
-	checker.ServeSimple(w, req)
+	h.ServeSimple(w, req)
 
 	resp := w.Result()
 	if resp.StatusCode != http.StatusServiceUnavailable {
 		t.Errorf("Expected status code 503; Got statuscode: %v", resp.StatusCode)
 	}
+}
+
+func TestCheckWithFailureWindow(t *testing.T) {
+	serverURL, err := MockServerURL()
+	if err != nil {
+		t.Errorf("failed to get mock server: %s", err)
+	}
+
+	conf := config.ProbeConfiguration{
+		Request: config.Request{
+			Protocol: "http",
+			Servers: []string{
+				serverURL.Host,
+			},
+			PathTemplate: "/api/forecast/v2/complete?lat={{.Latitude}}&lon={{.Longitude}}",
+		},
+		ProbeHistory: config.ProbeHistory{
+			Size:            3,
+			MaxFailedProbes: 1,
+		},
+		Probe: config.Probe{
+			Locations: []config.Location{
+				{
+					Name:      "AlwaysFail",
+					Latitude:  60,
+					Longitude: 10,
+				},
+				{
+					Name:      "AlwaysFail2",
+					Latitude:  50,
+					Longitude: 10,
+				},
+			},
+			MaxFailedLocations: 0,
+		},
+	}
+	h := New(&conf)
+
+	h.setHealth(runProbe(&conf))
+	if !h.isHealthy {
+		t.Errorf("Reported failure, but expected ok")
+	}
+
+	h.setHealth(runProbe(&conf))
+	if h.isHealthy {
+		t.Errorf("Reported ok, but expected failure.")
+	}
+}
+
+func MockServerURL() (*url.URL, error) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusServiceUnavailable)
+		fmt.Fprint(w, "always fail")
+	}))
+	serverURL, err := url.Parse(server.URL)
+	if err != nil {
+		return nil, fmt.Errorf("could not setup test http server; Failed with %v", err)
+	}
+
+	return serverURL, nil
 }

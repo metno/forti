@@ -13,9 +13,9 @@ import (
 )
 
 // Read attempts to reads the given configuration file, and returns a
-// matching CheckConfiguration.
-func Read(configFile string) (*CheckConfiguration, error) {
-	var conf CheckConfiguration
+// matching ProbeConfiguration.
+func Read(configFile string) (*ProbeConfiguration, error) {
+	var conf ProbeConfiguration
 	f, err := os.Open(configFile)
 	if err != nil {
 		return nil, fmt.Errorf("unable to read configuration file: %s", err)
@@ -26,38 +26,49 @@ func Read(configFile string) (*CheckConfiguration, error) {
 	if err := dec.Decode(&conf); err != nil {
 		return nil, fmt.Errorf("unable to read checks config: %s", err)
 	}
+	setDefaultProbeHistory(&conf)
 
 	return &conf, nil
 }
 
-// CheckConfiguration contains a spec for how to execute sanity checks on
-// various locationforecast servers- and locations.
-type CheckConfiguration struct {
-	Headers  map[string]string `json:"headers"`
-	Request  Request           `json:"request"`
-	Response Response          `json:"response"`
+// setDefaultProbeHistory sets default probe history if size is zero or negative.
+// default probe history will accept 1 failure in 10 probes.
+func setDefaultProbeHistory(conf *ProbeConfiguration) {
+	if conf.ProbeHistory.Size < 1 {
+		conf.ProbeHistory.Size = 10
+		conf.ProbeHistory.MaxFailedProbes = 1
+	}
 }
 
+// ProbeConfiguration contains a spec for how to execute sanity checks on
+// various locationforecast servers- and locations.
+type ProbeConfiguration struct {
+	Headers      map[string]string `json:"headers"`
+	ProbeHistory ProbeHistory      `json:"probe_history"`
+	Request      Request           `json:"request"`
+	Probe        Probe             `json:"probe"`
+}
+
+// Request is a specification for how to construct a Forti request.
 type Request struct {
 	Protocol     string   `json:"protocol"`
 	Servers      []string `json:"servers"`
 	PathTemplate string   `json:"path_template"`
 }
 
-type Response struct {
-	MaxFailures int        `json:"max_failures"`
-	Locations   []Location `json:"locations"`
+type ProbeHistory struct {
+	Size            int `json:"size"`              // Size is the number of the most recent probes that are kept in memory.
+	MaxFailedProbes int `json:"max_failed_probes"` // If more than MaxFailedProbes have failed, the system is considered unhealthy.
 }
 
-type NamedRequest struct {
-	Name      string
-	URL       *url.URL
-	Blueprint Blueprint
+type Probe struct {
+	MaxFailedLocations int        `json:"max_failed_locations"` // MaxFailedLocations is the number of locations that can fail before the probe is considered failed.
+	Locations          []Location `json:"locations"`            // Locations are the check specifications for a list of locations.
 }
 
 // Problems returns a list of errors in the configuration, but only errors
 // that are so severe that checks cannot be based on this config.
-func (cc *CheckConfiguration) Problems() []error {
+func (cc *ProbeConfiguration) Problems() []error {
 	var ret []error
 	if match, _ := regexp.MatchString(`^https?$`, cc.Request.Protocol); !match {
 		ret = append(ret, fmt.Errorf("invalid protocol: %s", cc.Request.Protocol))
@@ -68,7 +79,7 @@ func (cc *CheckConfiguration) Problems() []error {
 	if match, _ := regexp.MatchString(`\{\{\ *.Longitude *\}\}`, cc.Request.PathTemplate); !match {
 		ret = append(ret, errors.New("missing {{.Longitude}} in path template"))
 	}
-	if cc.Response.MaxFailures >= len(cc.Response.Locations) {
+	if cc.Probe.MaxFailedLocations >= len(cc.Probe.Locations) {
 		ret = append(ret, errors.New("max failures cannot be larger than length of check locations"))
 	}
 	return ret
@@ -76,7 +87,7 @@ func (cc *CheckConfiguration) Problems() []error {
 
 // GetRequests returns a list of all possible permutations of server address
 // and lat/lon.
-func (cc *CheckConfiguration) GetRequests() []NamedRequest {
+func (cc *ProbeConfiguration) GetRequests() []NamedRequest {
 	var ret []NamedRequest
 
 	for _, server := range cc.Request.Servers {
@@ -85,7 +96,7 @@ func (cc *CheckConfiguration) GetRequests() []NamedRequest {
 		if err != nil {
 			panic(err)
 		}
-		for _, loc := range cc.Response.Locations {
+		for _, loc := range cc.Probe.Locations {
 			ret = append(ret, loc.getRequest(tmpl))
 		}
 	}
@@ -99,6 +110,12 @@ type Location struct {
 	Latitude  float32   `json:"lat"`
 	Longitude float32   `json:"lon"`
 	Blueprint Blueprint `json:"blueprint"`
+}
+
+type NamedRequest struct {
+	Name      string
+	URL       *url.URL
+	Blueprint Blueprint
 }
 
 func (l Location) getRequest(t *template.Template) NamedRequest {

@@ -3,111 +3,103 @@ package health
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"sync"
 	"time"
 
-	"gitlab.met.no/forti/f2/healthz/internal/health/json/check"
-	"gitlab.met.no/forti/f2/healthz/internal/health/json/config"
+	"gitlab.met.no/forti/f2/healthz/internal/health/config"
 )
 
-type Checker struct {
-	conf *config.CheckConfiguration
+type Health struct {
+	conf *config.ProbeConfiguration
 
 	mutex sync.RWMutex
 
-	lastRun time.Time
-	nextRun time.Time
-
-	lastResult   check.Result
-	lastResultOK bool
+	probeHistory []ProbeResult
+	lastProbe    ProbeResult
+	isHealthy    bool
 }
 
-func NewChecker(conf *config.CheckConfiguration) *Checker {
-	return &Checker{
+// New creates a new health instance with the given configuration, with overall health initialized to false.
+func New(conf *config.ProbeConfiguration) *Health {
+	h := &Health{
 		conf: conf,
 	}
+
+	return h
 }
 
-func (c *Checker) ServeSimple(w http.ResponseWriter, r *http.Request) {
-	result := c.Check()
-	if !result.OK {
+// Start will make health start running regular health probes in the background every minute.
+func (h *Health) Start() {
+	go func() {
+		for {
+			h.Probe()
+			time.Sleep(time.Minute)
+		}
+	}()
+}
+
+// Health returns the current health, described by the results of the last probe and an isHealthy boolean.
+func (h *Health) Health() (ProbeResult, bool) {
+	h.mutex.RLock()
+	defer h.mutex.RUnlock()
+
+	return h.lastProbe, h.isHealthy
+}
+
+// Probe will run a health check immediately.
+func (h *Health) Probe() {
+	h.setHealth(runProbe(h.conf))
+}
+
+// setHealth will decide on the overall health of the system based on the last probe and a history of the previous probes.
+// If last probe failed and more than conf.probeHistory.MaxFailedProbes of the last conf.probeHistory.Size probes
+// has failed, the system will be deemed not healthy.
+func (h *Health) setHealth(lastProbe ProbeResult) {
+	h.mutex.Lock()
+	defer h.mutex.Unlock()
+
+	h.probeHistory = append(h.probeHistory, lastProbe)
+	if len(h.probeHistory) > h.conf.ProbeHistory.Size {
+		h.probeHistory = h.probeHistory[1:]
+	}
+
+	var failed int
+	for _, v := range h.probeHistory {
+		if !v.OK {
+			failed++
+		}
+	}
+
+	if failed > h.conf.ProbeHistory.MaxFailedProbes &&
+		!lastProbe.OK {
+		h.isHealthy = false
+	} else {
+		h.isHealthy = true
+	}
+	h.lastProbe = lastProbe
+}
+
+// ServeSimple will give a plain text description of the last check and returns a 503 if the system is not healthy.
+func (h *Health) ServeSimple(w http.ResponseWriter, r *http.Request) {
+	lastCheck, isHealthy := h.Health()
+	if !isHealthy {
 		w.WriteHeader(http.StatusServiceUnavailable)
 	}
 
 	w.Header().Add("Content-Type", "text/plain;charset=UTF-8")
-	fmt.Fprintln(w, result)
+	fmt.Fprintln(w, lastCheck)
 }
 
-func (c *Checker) ServeJSON(w http.ResponseWriter, r *http.Request) {
-	result := c.Check()
-	if !result.OK {
+// ServeJSON will give a JSON description of the last check and returns a 503 if the system is not healthy.
+func (h *Health) ServeJSON(w http.ResponseWriter, r *http.Request) {
+	lastCheck, isHealthy := h.Health()
+	if !isHealthy {
 		w.WriteHeader(http.StatusServiceUnavailable)
 	}
 
 	w.Header().Add("Content-Type", "application/json;charset=UTF-8")
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
-	enc.Encode(result)
-}
-
-func (c *Checker) Check() check.Result {
-	now := time.Now()
-
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
-	shouldRefresh := now.After(c.nextRun)
-
-	if shouldRefresh {
-		c.mutex.RUnlock()
-		c.refresh()
-		c.mutex.RLock()
-	}
-	return c.lastResult
-}
-
-func (c *Checker) refresh() {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-
-	now := time.Now()
-
-	// Recheck if this is needed
-	if now.Before(c.nextRun) {
-		return
-	}
-
-	c.lastRun = now
-	c.nextRun = now.Add(time.Minute)
-
-	log.Println("Running checks...")
-	result := runChecks(c.conf)
-
-	c.lastResultOK = result.OK
-	c.lastResult = result
-}
-
-func runChecks(conf *config.CheckConfiguration) check.Result {
-	result := check.NewResult()
-
-	var failedRequests int
-	for _, request := range conf.GetRequests() {
-		log.Printf("Check %s on url %s ...\n", request.Name, request.URL)
-		locationResult := check.URL(request.URL, request.Blueprint)
-		log.Printf("---> Result: %v\n", locationResult)
-
-		if !locationResult.OK {
-			failedRequests++
-			result.Locations[request.Name] = locationResult
-		}
-	}
-	if failedRequests > conf.Response.MaxFailures {
-		result.OK = false
-	}
-
-	log.Printf("Total result of all checks: %v\n", result)
-
-	return result
+	enc.Encode(lastCheck)
 }
