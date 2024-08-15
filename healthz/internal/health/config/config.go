@@ -27,6 +27,7 @@ func Read(configFile string) (*ProbeConfiguration, error) {
 		return nil, fmt.Errorf("unable to read checks config: %s", err)
 	}
 	setDefaultProbeHistory(&conf)
+	setDefaultRequestTimeout(&conf)
 
 	return &conf, nil
 }
@@ -37,6 +38,12 @@ func setDefaultProbeHistory(conf *ProbeConfiguration) {
 	if conf.ProbeHistory.Size < 1 {
 		conf.ProbeHistory.Size = 10
 		conf.ProbeHistory.MaxFailedProbes = 1
+	}
+}
+
+func setDefaultRequestTimeout(conf *ProbeConfiguration) {
+	if conf.Probe.RequestTimeout.Duration < 1 {
+		conf.Probe.RequestTimeout.Duration = 5 * time.Second
 	}
 }
 
@@ -62,6 +69,7 @@ type ProbeHistory struct {
 }
 
 type Probe struct {
+	RequestTimeout     Duration   `json:"request_timeout"`      // RequestTimeout is the maximum time to wait for a request to complete.
 	MaxFailedLocations int        `json:"max_failed_locations"` // MaxFailedLocations is the number of locations that can fail before the probe is considered failed.
 	Locations          []Location `json:"locations"`            // Locations are the check specifications for a list of locations.
 }

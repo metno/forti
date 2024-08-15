@@ -15,9 +15,10 @@ type Health struct {
 
 	mutex sync.RWMutex
 
-	probeHistory []ProbeResult
-	lastProbe    ProbeResult
-	isHealthy    bool
+	probeHistory     []ProbeResult
+	lastProbe        ProbeResult
+	isDataHealthy    bool
+	isServiceHealthy bool
 }
 
 // New creates a new health instance with the given configuration, with overall health initialized to false.
@@ -44,7 +45,21 @@ func (h *Health) Health() (ProbeResult, bool) {
 	h.mutex.RLock()
 	defer h.mutex.RUnlock()
 
-	return h.lastProbe, h.isHealthy
+	return h.lastProbe, h.isDataHealthy
+}
+
+func (h *Health) Service() (TypeProbeResult, bool) {
+	h.mutex.RLock()
+	defer h.mutex.RUnlock()
+
+	return h.lastProbe.Service, h.isServiceHealthy
+}
+
+func (h *Health) Data() (TypeProbeResult, bool) {
+	h.mutex.RLock()
+	defer h.mutex.RUnlock()
+
+	return h.lastProbe.Service, h.isDataHealthy
 }
 
 // Probe will run a health check immediately.
@@ -66,17 +81,32 @@ func (h *Health) setHealth(lastProbe ProbeResult) {
 
 	var failed int
 	for _, v := range h.probeHistory {
-		if !v.OK {
+		if !v.Data.OK {
 			failed++
 		}
 	}
 
-	if failed > h.conf.ProbeHistory.MaxFailedProbes &&
-		!lastProbe.OK {
-		h.isHealthy = false
-	} else {
-		h.isHealthy = true
+	var failedService int
+	for _, v := range h.probeHistory {
+		if !v.Service.OK {
+			failedService++
+		}
 	}
+
+	if failed > h.conf.ProbeHistory.MaxFailedProbes &&
+		!lastProbe.Data.OK {
+		h.isDataHealthy = false
+	} else {
+		h.isDataHealthy = true
+	}
+
+	if failedService > h.conf.ProbeHistory.MaxFailedProbes &&
+		!lastProbe.Service.OK {
+		h.isServiceHealthy = false
+	} else {
+		h.isServiceHealthy = true
+	}
+
 	h.lastProbe = lastProbe
 }
 
@@ -102,4 +132,42 @@ func (h *Health) ServeJSON(w http.ResponseWriter, r *http.Request) {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
 	enc.Encode(lastCheck)
+}
+
+// ServeTypeSimple will give a plain text description of the last check and returns a 503 if the system is not healthy.
+func (h *Health) ServeTypeSimple(w http.ResponseWriter, r *http.Request) {
+	var lastProbe TypeProbeResult
+	var isHealthy bool
+	if r.PathValue("type") == "service" {
+		lastProbe, isHealthy = h.Service()
+	} else {
+		lastProbe, isHealthy = h.Data()
+	}
+
+	if !isHealthy {
+		w.WriteHeader(http.StatusServiceUnavailable)
+	}
+
+	w.Header().Add("Content-Type", "text/plain;charset=UTF-8")
+	fmt.Fprintln(w, lastProbe)
+}
+
+// ServeTypeJSON will give a JSON description of the last check and returns a 503 if the system is not healthy.
+func (h *Health) ServeTypeJSON(w http.ResponseWriter, r *http.Request) {
+	var lastProbe TypeProbeResult
+	var isHealthy bool
+	if r.PathValue("type") == "service" {
+		lastProbe, isHealthy = h.Service()
+	} else {
+		lastProbe, isHealthy = h.Data()
+	}
+
+	if !isHealthy {
+		w.WriteHeader(http.StatusServiceUnavailable)
+	}
+
+	w.Header().Add("Content-Type", "application/json;charset=UTF-8")
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "  ")
+	enc.Encode(lastProbe)
 }

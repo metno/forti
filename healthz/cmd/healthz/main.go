@@ -51,6 +51,9 @@ func serveHTTP(conf *config.ProbeConfiguration, upstreamGRPC string) error {
 	http.HandleFunc("/healthz", h.ServeSimple)
 	http.HandleFunc("/healthz/full", h.ServeJSON)
 
+	http.HandleFunc("/healthz/{type}", h.ServeTypeSimple)
+	http.HandleFunc("/healthz/{type}/full", h.ServeTypeJSON)
+
 	if upstreamGRPC != "" {
 		statusFetcher, err := status.NewFetcher(upstreamGRPC)
 		if err != nil {

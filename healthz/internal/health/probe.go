@@ -11,16 +11,22 @@ import (
 
 // NewProbeResult creates a new probe with default values.
 func NewProbeResult() ProbeResult {
-	return ProbeResult{
-		OK:        true,
-		Locations: make(map[string]check.LocationResult),
-	}
+	probeResult := ProbeResult{}
+	probeResult.Data.OK = true
+	probeResult.Service.OK = true
+
+	return probeResult
 }
 
 // ProbeResult is the summed-up result of a set of checks against a number of locations.
 type ProbeResult struct {
-	OK        bool                            `json:"ok"`
-	Locations map[string]check.LocationResult `json:"locations,omitempty"`
+	Data    TypeProbeResult `json:"data"`
+	Service TypeProbeResult `json:"service"`
+}
+
+type TypeProbeResult struct {
+	OK        bool                                `json:"ok"`
+	Locations map[string]check.TypeLocationResult `json:"locations,omitempty"`
 }
 
 func runProbe(conf *config.ProbeConfiguration) ProbeResult {
@@ -34,13 +40,15 @@ func runProbe(conf *config.ProbeConfiguration) ProbeResult {
 		locationResult := check.Location(request.URL, request.Blueprint)
 		log.Printf("---> Result: %v\n", locationResult)
 
-		if !locationResult.OK {
+		if !locationResult.Data.OK || !locationResult.Service.OK {
 			failedRequests++
-			result.Locations[request.Name] = locationResult
 		}
+		result.Data.Locations[request.Name] = locationResult.Data
+		result.Service.Locations[request.Name] = locationResult.Service
 	}
+
 	if failedRequests > conf.Probe.MaxFailedLocations {
-		result.OK = false
+		result.Data.OK = false
 	}
 
 	log.Printf("Total result of probe: %v\n", result)
@@ -49,21 +57,38 @@ func runProbe(conf *config.ProbeConfiguration) ProbeResult {
 }
 
 func (r ProbeResult) String() string {
-	if r.OK {
+	if r.Data.OK && r.Service.OK {
 		return "OK"
 	}
 
 	messages := make(map[string]int)
-	for _, result := range r.Locations {
-		for _, problem := range result.Problems {
-			messages[problem]++
-		}
-	}
-	var uniqueMessages []string
-	for msg, count := range messages {
-		uniqueMessages = append(uniqueMessages, fmt.Sprintf("%s:%d", msg, count))
-	}
 
-	return fmt.Sprintf("Not OK,  probe failed for %d locations, caused by these failed checks: %v\n",
-		len(r.Locations), strings.Join(uniqueMessages, ", "))
+	if !r.Service.OK {
+		for _, result := range r.Service.Locations {
+			for _, problem := range result.Problems {
+				messages[problem]++
+			}
+		}
+
+		uniqueProblems := []string{}
+		for p := range messages {
+			uniqueProblems = append(uniqueProblems, p)
+		}
+		return fmt.Sprintf("Not OK, probe with service problems for %d locations, caused by these failed checks: %v\n",
+			len(r.Service.Locations), strings.Join(uniqueProblems, ", "))
+
+	} else {
+		for _, result := range r.Data.Locations {
+			for _, problem := range result.Problems {
+				messages[problem]++
+			}
+		}
+		uniqueProblems := []string{}
+		for p := range messages {
+			uniqueProblems = append(uniqueProblems, p)
+		}
+
+		return fmt.Sprintf("Not OK, probe with data problems for %d locations, caused by these failed checks: %v\n",
+			len(r.Data.Locations), strings.Join(uniqueProblems, ", "))
+	}
 }
