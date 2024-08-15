@@ -42,8 +42,8 @@ func setDefaultProbeHistory(conf *ProbeConfiguration) {
 }
 
 func setDefaultRequestTimeout(conf *ProbeConfiguration) {
-	if conf.Probe.RequestTimeout.Duration < 1 {
-		conf.Probe.RequestTimeout.Duration = 5 * time.Second
+	if conf.Request.Timeout.Duration == 0 {
+		conf.Request.Timeout.Duration = 3 * time.Second
 	}
 }
 
@@ -61,6 +61,7 @@ type Request struct {
 	Protocol     string   `json:"protocol"`
 	Servers      []string `json:"servers"`
 	PathTemplate string   `json:"path_template"`
+	Timeout      Duration `json:"timeout"`
 }
 
 type ProbeHistory struct {
@@ -69,7 +70,6 @@ type ProbeHistory struct {
 }
 
 type Probe struct {
-	RequestTimeout     Duration   `json:"request_timeout"`      // RequestTimeout is the maximum time to wait for a request to complete.
 	MaxFailedLocations int        `json:"max_failed_locations"` // MaxFailedLocations is the number of locations that can fail before the data part of the probe is considered failed.
 	Locations          []Location `json:"locations"`            // Locations are the check specifications for a list of locations.
 }

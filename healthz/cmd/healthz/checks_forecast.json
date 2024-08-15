@@ -9,7 +9,8 @@
        "servers": [                                                                                                                                                                                                                                                       
            "staging.forti.met.no"                                                                                                                                                                                                                                         
        ],                                                                                                                                                                                                                                                                 
-       "path_template": "/api/forecast/v2/complete?lat={{.Latitude}}&lon={{.Longitude}}"                                                                                                                                                                           
+       "path_template": "/api/forecast/v2/complete?lat={{.Latitude}}&lon={{.Longitude}}",
+       "timeout": "2s"
     },
     "probe_history": {
         "size": 1,

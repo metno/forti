@@ -11,8 +11,8 @@ import (
 
 // ProbeResult is the summed-up result of a set of checks against a number of locations.
 type ProbeResult struct {
-	Data    TypeProbeResult `json:"data"`
 	Service TypeProbeResult `json:"service"`
+	Data    TypeProbeResult `json:"data"`
 }
 
 type TypeProbeResult struct {
@@ -23,15 +23,15 @@ type TypeProbeResult struct {
 // NewProbeResult creates a new probe result with the given service and data results.
 // maxfailedLocations is the maximum number of locations that can fail for the data part of the probe to be considered OK.
 // service part will be considered not OK if any location fails.
-func NewProbeResult(serviceResults, dataResults map[string][]string, maxfailedLocations int) ProbeResult {
+func NewProbeResult(serviceProblems, dataProblems map[string][]string, maxfailedLocations int) ProbeResult {
 	return ProbeResult{
 		Service: TypeProbeResult{
-			OK:        len(serviceResults) == 0,
-			Locations: serviceResults,
+			OK:        len(serviceProblems) == 0,
+			Locations: serviceProblems,
 		},
 		Data: TypeProbeResult{
-			OK:        len(dataResults) >= maxfailedLocations,
-			Locations: dataResults,
+			OK:        len(dataProblems) <= maxfailedLocations,
+			Locations: dataProblems,
 		},
 	}
 }
@@ -39,24 +39,24 @@ func NewProbeResult(serviceResults, dataResults map[string][]string, maxfailedLo
 func runProbe(conf *config.ProbeConfiguration) ProbeResult {
 	log.Println("Perform probe...")
 
-	serviceResults := map[string][]string{}
-	dataResults := map[string][]string{}
+	serviceProblems := map[string][]string{}
+	dataProblems := map[string][]string{}
 
 	for _, request := range conf.GetRequests() {
 		log.Printf("Run checks on location %s through url %s\n", request.Name, request.URL)
-		serviceProblems, dataProblems := check.Location(conf.Probe.RequestTimeout.Duration, request.URL, request.Blueprint)
+		service, data := check.Location(conf.Request.Timeout.Duration, request.URL, request.Blueprint)
 
-		if len(serviceProblems) > 0 {
-			serviceResults[request.Name] = serviceProblems
-			log.Printf("---> Service problems: %v\n", serviceProblems)
+		if len(service) > 0 {
+			serviceProblems[request.Name] = service
+			log.Printf("---> Service problems: %v\n", service)
 		}
-		if len(dataProblems) > 0 {
-			dataResults[request.Name] = dataProblems
-			log.Printf("---> Data problems: %v\n", dataProblems)
+		if len(data) > 0 {
+			dataProblems[request.Name] = data
+			log.Printf("---> Data problems: %v\n", data)
 		}
 	}
 
-	probe := NewProbeResult(serviceResults, dataResults, conf.Probe.MaxFailedLocations)
+	probe := NewProbeResult(serviceProblems, dataProblems, conf.Probe.MaxFailedLocations)
 	log.Printf("Total result of probe: %v\n", probe)
 
 	return probe
