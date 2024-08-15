@@ -95,12 +95,12 @@ func TestCheckWithFailureWindow(t *testing.T) {
 	h := New(&conf)
 
 	h.setHealth(runProbe(&conf))
-	if !h.isDataHealthy {
+	if !h.isServiceHealthy {
 		t.Errorf("Reported failure, but expected ok")
 	}
 
 	h.setHealth(runProbe(&conf))
-	if h.isDataHealthy {
+	if h.isServiceHealthy {
 		t.Errorf("Reported ok, but expected failure.")
 	}
 }

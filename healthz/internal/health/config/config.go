@@ -70,7 +70,7 @@ type ProbeHistory struct {
 
 type Probe struct {
 	RequestTimeout     Duration   `json:"request_timeout"`      // RequestTimeout is the maximum time to wait for a request to complete.
-	MaxFailedLocations int        `json:"max_failed_locations"` // MaxFailedLocations is the number of locations that can fail before the probe is considered failed.
+	MaxFailedLocations int        `json:"max_failed_locations"` // MaxFailedLocations is the number of locations that can fail before the data part of the probe is considered failed.
 	Locations          []Location `json:"locations"`            // Locations are the check specifications for a list of locations.
 }
 

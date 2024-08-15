@@ -45,7 +45,7 @@ func (h *Health) Health() (ProbeResult, bool) {
 	h.mutex.RLock()
 	defer h.mutex.RUnlock()
 
-	return h.lastProbe, h.isDataHealthy
+	return h.lastProbe, (h.isDataHealthy && h.isServiceHealthy)
 }
 
 func (h *Health) Service() (TypeProbeResult, bool) {
@@ -59,7 +59,7 @@ func (h *Health) Data() (TypeProbeResult, bool) {
 	h.mutex.RLock()
 	defer h.mutex.RUnlock()
 
-	return h.lastProbe.Service, h.isDataHealthy
+	return h.lastProbe.Data, h.isDataHealthy
 }
 
 // Probe will run a health check immediately.
@@ -69,7 +69,8 @@ func (h *Health) Probe() {
 
 // setHealth will decide on the overall health of the system based on the last probe and a history of the previous probes.
 // If last probe failed and more than conf.probeHistory.MaxFailedProbes of the last conf.probeHistory.Size probes
-// has failed, the system will be deemed not healthy.
+// has failed, the service part of the system will be deemed not healthy.
+// If the data part of the last probe is not OK, the data part of the system will be deemed not healthy.
 func (h *Health) setHealth(lastProbe ProbeResult) {
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
@@ -79,27 +80,12 @@ func (h *Health) setHealth(lastProbe ProbeResult) {
 		h.probeHistory = h.probeHistory[1:]
 	}
 
-	var failed int
-	for _, v := range h.probeHistory {
-		if !v.Data.OK {
-			failed++
-		}
-	}
-
 	var failedService int
 	for _, v := range h.probeHistory {
 		if !v.Service.OK {
 			failedService++
 		}
 	}
-
-	if failed > h.conf.ProbeHistory.MaxFailedProbes &&
-		!lastProbe.Data.OK {
-		h.isDataHealthy = false
-	} else {
-		h.isDataHealthy = true
-	}
-
 	if failedService > h.conf.ProbeHistory.MaxFailedProbes &&
 		!lastProbe.Service.OK {
 		h.isServiceHealthy = false
@@ -107,6 +93,7 @@ func (h *Health) setHealth(lastProbe ProbeResult) {
 		h.isServiceHealthy = true
 	}
 
+	h.isDataHealthy = lastProbe.Data.OK
 	h.lastProbe = lastProbe
 }
 

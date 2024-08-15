@@ -9,15 +9,6 @@ import (
 	"gitlab.met.no/forti/f2/healthz/internal/health/config"
 )
 
-// NewProbeResult creates a new probe with default values.
-func NewProbeResult() ProbeResult {
-	probeResult := ProbeResult{}
-	probeResult.Data.OK = true
-	probeResult.Service.OK = true
-
-	return probeResult
-}
-
 // ProbeResult is the summed-up result of a set of checks against a number of locations.
 type ProbeResult struct {
 	Data    TypeProbeResult `json:"data"`
@@ -25,35 +16,50 @@ type ProbeResult struct {
 }
 
 type TypeProbeResult struct {
-	OK        bool                                `json:"ok"`
-	Locations map[string]check.TypeLocationResult `json:"locations,omitempty"`
+	OK        bool                `json:"ok"`
+	Locations map[string][]string `json:"locations,omitempty"`
+}
+
+// NewProbeResult creates a new probe result with the given service and data results.
+// maxfailedLocations is the maximum number of locations that can fail for the data part of the probe to be considered OK.
+// service part will be considered not OK if any location fails.
+func NewProbeResult(serviceResults, dataResults map[string][]string, maxfailedLocations int) ProbeResult {
+	return ProbeResult{
+		Service: TypeProbeResult{
+			OK:        len(serviceResults) == 0,
+			Locations: serviceResults,
+		},
+		Data: TypeProbeResult{
+			OK:        len(dataResults) >= maxfailedLocations,
+			Locations: dataResults,
+		},
+	}
 }
 
 func runProbe(conf *config.ProbeConfiguration) ProbeResult {
 	log.Println("Perform probe...")
 
-	result := NewProbeResult()
+	serviceResults := map[string][]string{}
+	dataResults := map[string][]string{}
 
-	var failedRequests int
 	for _, request := range conf.GetRequests() {
-		log.Printf("Run checks on location %s through url %s:\n", request.Name, request.URL)
-		locationResult := check.Location(request.URL, request.Blueprint)
-		log.Printf("---> Result: %v\n", locationResult)
+		log.Printf("Run checks on location %s through url %s\n", request.Name, request.URL)
+		serviceProblems, dataProblems := check.Location(conf.Probe.RequestTimeout.Duration, request.URL, request.Blueprint)
 
-		if !locationResult.Data.OK || !locationResult.Service.OK {
-			failedRequests++
+		if len(serviceProblems) > 0 {
+			serviceResults[request.Name] = serviceProblems
+			log.Printf("---> Service problems: %v\n", serviceProblems)
 		}
-		result.Data.Locations[request.Name] = locationResult.Data
-		result.Service.Locations[request.Name] = locationResult.Service
+		if len(dataProblems) > 0 {
+			dataResults[request.Name] = dataProblems
+			log.Printf("---> Data problems: %v\n", dataProblems)
+		}
 	}
 
-	if failedRequests > conf.Probe.MaxFailedLocations {
-		result.Data.OK = false
-	}
+	probe := NewProbeResult(serviceResults, dataResults, conf.Probe.MaxFailedLocations)
+	log.Printf("Total result of probe: %v\n", probe)
 
-	log.Printf("Total result of probe: %v\n", result)
-
-	return result
+	return probe
 }
 
 func (r ProbeResult) String() string {
@@ -61,34 +67,33 @@ func (r ProbeResult) String() string {
 		return "OK"
 	}
 
-	messages := make(map[string]int)
-
+	msg := ""
 	if !r.Service.OK {
-		for _, result := range r.Service.Locations {
-			for _, problem := range result.Problems {
-				messages[problem]++
-			}
-		}
-
-		uniqueProblems := []string{}
-		for p := range messages {
-			uniqueProblems = append(uniqueProblems, p)
-		}
-		return fmt.Sprintf("Not OK, probe with service problems for %d locations, caused by these failed checks: %v\n",
-			len(r.Service.Locations), strings.Join(uniqueProblems, ", "))
-
-	} else {
-		for _, result := range r.Data.Locations {
-			for _, problem := range result.Problems {
-				messages[problem]++
-			}
-		}
-		uniqueProblems := []string{}
-		for p := range messages {
-			uniqueProblems = append(uniqueProblems, p)
-		}
-
-		return fmt.Sprintf("Not OK, probe with data problems for %d locations, caused by these failed checks: %v\n",
-			len(r.Data.Locations), strings.Join(uniqueProblems, ", "))
+		msg += fmt.Sprintf("Service: %s\n", r.Service.String())
 	}
+	if !r.Data.OK {
+		msg += fmt.Sprintf("Data: %s\n", r.Data.String())
+	}
+	return msg
+}
+
+func (tp TypeProbeResult) String() string {
+	if tp.OK {
+		return "OK"
+	}
+
+	messages := make(map[string]int)
+	for _, result := range tp.Locations {
+		for _, problem := range result {
+			messages[problem]++
+		}
+	}
+
+	uniqueProblems := []string{}
+	for p := range messages {
+		uniqueProblems = append(uniqueProblems, p)
+	}
+
+	return fmt.Sprintf("Not OK, probe with problems for %d locations, caused by these failed checks: %v\n",
+		len(tp.Locations), strings.Join(uniqueProblems, ", "))
 }
