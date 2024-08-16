@@ -7,14 +7,14 @@
     "request": {                                                                                                                                                                                                                                                           
        "protocol": "https",                                                                                                                                                                                                                                               
        "servers": [                                                                                                                                                                                                                                                       
-           "staging.forti.met.no"                                                                                                                                                                                                                                         
-       ],                                                                                                                                                                                                                                                                 
+           "staging.forti.met.no"
+       ],
        "path_template": "/api/forecast/v2/complete?lat={{.Latitude}}&lon={{.Longitude}}",
        "timeout": "2s"
     },
     "probe_history": {
-        "size": 1,
-        "max_failed_probes": 0
+        "size": 10,
+        "max_failed_probes": 1
     },
     "probe": {
        "max_failed_locations": 0,

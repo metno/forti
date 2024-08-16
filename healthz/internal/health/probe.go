@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"gitlab.met.no/forti/f2/healthz/internal/health/check"
 	"gitlab.met.no/forti/f2/healthz/internal/health/config"
@@ -16,22 +17,27 @@ type ProbeResult struct {
 }
 
 type TypeProbeResult struct {
-	OK        bool                `json:"ok"`
-	Locations map[string][]string `json:"locations,omitempty"`
+	OK          bool                `json:"ok"`
+	PerformedAt time.Time           `json:"performed_at,omitempty"`
+	Locations   map[string][]string `json:"locations,omitempty"`
 }
 
 // NewProbeResult creates a new probe result with the given service and data results.
 // maxfailedLocations is the maximum number of locations that can fail for the data part of the probe to be considered OK.
 // service part will be considered not OK if any location fails.
 func NewProbeResult(serviceProblems, dataProblems map[string][]string, maxfailedLocations int) ProbeResult {
+	now := time.Now()
+
 	return ProbeResult{
 		Service: TypeProbeResult{
-			OK:        len(serviceProblems) == 0,
-			Locations: serviceProblems,
+			PerformedAt: now,
+			OK:          len(serviceProblems) == 0,
+			Locations:   serviceProblems,
 		},
 		Data: TypeProbeResult{
-			OK:        len(dataProblems) <= maxfailedLocations,
-			Locations: dataProblems,
+			PerformedAt: now,
+			OK:          len(dataProblems) <= maxfailedLocations,
+			Locations:   dataProblems,
 		},
 	}
 }
