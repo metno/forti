@@ -11,13 +11,9 @@ import (
 )
 
 type Health struct {
-	conf *config.ProbeConfiguration
-
-	mutex sync.RWMutex
-
-	probeHistory     []ProbeResult
-	isDataHealthy    bool
-	isServiceHealthy bool
+	conf         *config.ProbeConfiguration
+	mutex        sync.RWMutex
+	probeHistory []ProbeResult
 }
 
 // New creates a new health instance with the given configuration, with overall health initialized to false.
@@ -41,14 +37,14 @@ func (h *Health) Start() {
 
 // Probe will run a health check immediately.
 func (h *Health) Probe() {
-	h.setHealth(runProbe(h.conf))
+	h.updateProbeHistory(runProbe(h.conf))
 }
 
 // setHealth will decide on the overall health of the system based on the last probe and a history of the previous probes.
 // If more than conf.probeHistory.MaxFailedProbes of the last conf.probeHistory.Size probes
 // has failed, the service part of the system will be deemed not healthy.
 // If the data part of the last probe is not OK, the data part of the system will be deemed not healthy.
-func (h *Health) setHealth(lastProbe ProbeResult) {
+func (h *Health) updateProbeHistory(lastProbe ProbeResult) {
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
 
@@ -56,24 +52,6 @@ func (h *Health) setHealth(lastProbe ProbeResult) {
 	if len(h.probeHistory) > h.conf.ProbeHistory.Size {
 		h.probeHistory = h.probeHistory[1:]
 	}
-
-	var failedService int
-	for _, v := range h.probeHistory {
-		if !v.Service.OK {
-			failedService++
-		}
-	}
-
-	h.isServiceHealthy = failedService <= h.conf.ProbeHistory.MaxFailedProbes
-	h.isDataHealthy = lastProbe.Data.OK
-}
-
-// Health returns the current health, described by the results of the last probe and an isHealthy boolean.
-func (h *Health) Health() (ProbeResult, bool) {
-	h.mutex.RLock()
-	defer h.mutex.RUnlock()
-
-	return h.probeHistory[len(h.probeHistory)-1], (h.isDataHealthy && h.isServiceHealthy)
 }
 
 type HealthzResponse struct {
@@ -90,10 +68,18 @@ func (hr HealthzResponse) String() string {
 	msg := "Not OK, due to the probes:\n"
 	for _, p := range hr.Probes {
 		msg += fmt.Sprintf("---->Performed at %s: ", p.PerformedAt.Format(time.RFC3339))
-		msg += fmt.Sprint(p)
+		msg += fmt.Sprintf("%s\n", p)
 	}
 
 	return msg
+}
+
+// Health returns the current health, described by the results of the last probe and an isHealthy boolean.
+func (h *Health) Health() (ProbeResult, bool) {
+	h.mutex.RLock()
+	defer h.mutex.RUnlock()
+
+	return h.probeHistory[len(h.probeHistory)-1], (h.isDataHealthy() && h.isServiceHealthy())
 }
 
 func (h *Health) Service() HealthzResponse {
@@ -107,7 +93,7 @@ func (h *Health) Service() HealthzResponse {
 
 	return HealthzResponse{
 		Type:      "service",
-		IsHealthy: h.isServiceHealthy,
+		IsHealthy: h.isServiceHealthy(),
 		Probes:    serviceProbes,
 	}
 }
@@ -123,9 +109,24 @@ func (h *Health) Data() HealthzResponse {
 
 	return HealthzResponse{
 		Type:      "data",
-		IsHealthy: h.isDataHealthy,
+		IsHealthy: h.isDataHealthy(),
 		Probes:    dataProbes,
 	}
+}
+
+func (h *Health) isDataHealthy() bool {
+	return h.probeHistory[len(h.probeHistory)-1].Data.OK
+}
+
+func (h *Health) isServiceHealthy() bool {
+	var failedService int
+	for _, v := range h.probeHistory {
+		if !v.Service.OK {
+			failedService++
+		}
+	}
+
+	return failedService <= h.conf.ProbeHistory.MaxFailedProbes
 }
 
 // ServeSimple will give a plain text description of the last check and returns a 503 if the system is not healthy.
@@ -135,7 +136,7 @@ func (h *Health) ServeSimple(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusServiceUnavailable)
 	}
 
-	w.Header().Add("Content-Type", "text/plain;charset=UTF-8")
+	w.Header().Add("Content-Type", "text/plain; charset=UTF-8")
 	fmt.Fprintln(w, lastCheck)
 }
 
@@ -143,7 +144,7 @@ func (h *Health) ServeSimple(w http.ResponseWriter, r *http.Request) {
 func (h *Health) ServeJSON(w http.ResponseWriter, r *http.Request) {
 	lastCheck, isHealthy := h.Health()
 
-	w.Header().Add("Content-Type", "application/json;charset=UTF-8")
+	w.Header().Add("Content-Type", "application/json; charset=UTF-8")
 	if !isHealthy {
 		w.WriteHeader(http.StatusServiceUnavailable)
 	}
@@ -164,7 +165,7 @@ func (h *Health) ServeTypeSimple(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid type", http.StatusBadRequest)
 	}
 
-	w.Header().Add("Content-Type", "text/plain;charset=UTF-8")
+	w.Header().Add("Content-Type", "text/plain; charset=UTF-8")
 	if !healthzResponse.IsHealthy {
 		w.WriteHeader(http.StatusServiceUnavailable)
 	}
@@ -183,7 +184,7 @@ func (h *Health) ServeTypeJSON(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid type", http.StatusBadRequest)
 	}
 
-	w.Header().Add("Content-Type", "application/json;charset=UTF-8")
+	w.Header().Add("Content-Type", "application/json; charset=UTF-8")
 	if !healthzResponse.IsHealthy {
 		w.WriteHeader(http.StatusServiceUnavailable)
 	}

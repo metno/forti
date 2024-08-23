@@ -17,10 +17,7 @@ import (
 
 // Location runs the set of tests specified by blueprint against the given Location.
 // Returns a slice of problems found with the service, and a slice of problems found with the data.
-func Location(timeout time.Duration, location *url.URL, expected config.Blueprint) ([]string, []string) {
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
-	defer cancel()
-
+func Location(ctx context.Context, location *url.URL, expected config.Blueprint) ([]string, []string) {
 	req, err := getRequest(ctx, location)
 	if err != nil {
 		return []string{fmt.Sprintf("unable to initialize request for %s: %s", location.String(), err)}, nil

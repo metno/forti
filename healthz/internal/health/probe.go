@@ -1,6 +1,7 @@
 package health
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
@@ -50,7 +51,10 @@ func runProbe(conf *config.ProbeConfiguration) ProbeResult {
 
 	for _, request := range conf.GetRequests() {
 		log.Printf("Run checks on location %s through url %s\n", request.Name, request.URL)
-		service, data := check.Location(conf.Request.Timeout.Duration, request.URL, request.Blueprint)
+
+		ctx, cancel := context.WithTimeout(context.Background(), conf.Request.Timeout.Duration)
+		service, data := check.Location(ctx, request.URL, request.Blueprint)
+		cancel()
 
 		if len(service) > 0 {
 			serviceProblems[request.Name] = service
@@ -100,6 +104,6 @@ func (tp TypeProbeResult) String() string {
 		uniqueProblems = append(uniqueProblems, p)
 	}
 
-	return fmt.Sprintf("Not OK, probe with problems for %d locations, caused by these failed checks: %v\n",
+	return fmt.Sprintf("Not OK, probe with problems for %d locations, caused by these failed checks: %v",
 		len(tp.Locations), strings.Join(uniqueProblems, ", "))
 }
