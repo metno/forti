@@ -170,7 +170,8 @@ func (h *Health) ServeTypeSimple(w http.ResponseWriter, r *http.Request) {
 	} else if r.PathValue("type") == "data" {
 		healthzResponse = h.Data()
 	} else {
-		http.Error(w, "Invalid type", http.StatusBadRequest)
+		http.Error(w, "Invalid type", http.StatusNotFound)
+		return
 	}
 
 	w.Header().Add("Content-Type", "text/plain; charset=UTF-8")
@@ -190,7 +191,8 @@ func (h *Health) ServeTypeJSON(w http.ResponseWriter, r *http.Request) {
 	} else if r.PathValue("type") == "data" {
 		healthzResponse = h.Data()
 	} else {
-		http.Error(w, "Invalid type", http.StatusBadRequest)
+		http.Error(w, "Invalid type", http.StatusNotFound)
+		return
 	}
 
 	w.Header().Add("Content-Type", "application/json; charset=UTF-8")
