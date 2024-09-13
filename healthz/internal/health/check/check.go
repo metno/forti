@@ -16,44 +16,31 @@ import (
 )
 
 // Location runs the set of tests specified by blueprint against the given Location.
-func Location(location *url.URL, expected config.Blueprint) LocationResult {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
+// Returns a slice of problems found with the service, and a slice of problems found with the data.
+func Location(ctx context.Context, location *url.URL, expected config.Blueprint) ([]string, []string) {
 	req, err := getRequest(ctx, location)
 	if err != nil {
-		return LocationResult{
-			OK:       false,
-			Problems: []string{fmt.Sprintf("unable to initialize request for %s: %s", location.String(), err)},
-		}
+		return []string{fmt.Sprintf("unable to initialize request for %s: %s", location.String(), err)}, nil
 	}
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return LocationResult{
-			OK:       false,
-			Problems: []string{fmt.Sprintf("forecast request for %s failed: %s", location.String(), err)},
-		}
+		return []string{fmt.Sprintf("forecast request for %s failed: %s", location.String(), err)}, nil
 	}
+
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return LocationResult{
-			OK:       false,
-			Problems: []string{fmt.Sprintf("failed response, could not decode, status code: %d", resp.StatusCode)},
-		}
+		return []string{fmt.Sprintf("failed response, could not decode, status code: %d", resp.StatusCode)}, nil
 	}
 
 	var document jsonformat.GeoJSON
 	err = json.NewDecoder(resp.Body).Decode(&document)
 	if err != nil {
-		return LocationResult{
-			OK:       false,
-			Problems: []string{err.Error()},
-		}
+		return []string{err.Error()}, nil
 	}
 
-	return runChecks(document.Properties, expected)
+	return nil, runDataChecks(document.Properties, expected)
 }
 
 func getRequest(ctx context.Context, location *url.URL) (*http.Request, error) {
@@ -74,12 +61,9 @@ func getRequest(ctx context.Context, location *url.URL) (*http.Request, error) {
 	return req, nil
 }
 
-func runChecks(doc *jsonformat.Forecast, expected config.Blueprint) LocationResult {
+func runDataChecks(doc *jsonformat.Forecast, expected config.Blueprint) []string {
 	if doc == nil {
-		return LocationResult{
-			OK:       false,
-			Problems: []string{"document contains no forecast data"},
-		}
+		return []string{"document contains no forecast data"}
 	}
 
 	var problemsList []string
@@ -101,10 +85,7 @@ func runChecks(doc *jsonformat.Forecast, expected config.Blueprint) LocationResu
 
 	sort.Strings(problemsList)
 
-	return LocationResult{
-		OK:       len(problemsList) == 0,
-		Problems: problemsList,
-	}
+	return problemsList
 }
 
 func checkUpdatedAge(doc *jsonformat.Forecast, maxAge config.Duration) (problems []string) {

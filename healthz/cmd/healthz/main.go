@@ -51,6 +51,9 @@ func serveHTTP(conf *config.ProbeConfiguration, upstreamGRPC string) error {
 	http.HandleFunc("/healthz", h.ServeSimple)
 	http.HandleFunc("/healthz/full", h.ServeJSON)
 
+	http.HandleFunc("/healthz/{type}", h.ServeTypeSimple)
+	http.HandleFunc("/healthz/{type}/full", h.ServeTypeJSON)
+
 	if upstreamGRPC != "" {
 		statusFetcher, err := status.NewFetcher(upstreamGRPC)
 		if err != nil {
@@ -67,11 +70,11 @@ func serveHTTP(conf *config.ProbeConfiguration, upstreamGRPC string) error {
 func checkOnce(conf *config.ProbeConfiguration) {
 	h := health.New(conf)
 	h.Probe()
-	lastCheck, isHealthy := h.Health()
+	lastProbe, isHealthy := h.Health()
 
 	enc := json.NewEncoder(os.Stdout)
 	enc.SetIndent("", "  ")
-	if err := enc.Encode(lastCheck); err != nil {
+	if err := enc.Encode(lastProbe); err != nil {
 		panic(err)
 	}
 	if !isHealthy {

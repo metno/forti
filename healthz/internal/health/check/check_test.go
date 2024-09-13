@@ -72,16 +72,16 @@ func TestJSONCheck(t *testing.T) {
 
 	blueprint := testingBlueprint(2, -90, 90)
 
-	result := runChecks(forecast.Properties, blueprint)
+	results := runDataChecks(forecast.Properties, blueprint)
 
-	if result.OK {
+	if len(results) == 0 {
 		t.Error("expected errors when checking forecast")
 	}
 
 	expectedErrors := 7
-	if len(result.Problems) != expectedErrors {
-		errString := fmt.Sprintf("Expected %d errors in JSON, got: %d. These are the errors: \n", expectedErrors, len(result.Problems))
-		for _, e := range result.Problems {
+	if len(results) != expectedErrors {
+		errString := fmt.Sprintf("Expected %d errors in JSON, got: %d. These are the errors: \n", expectedErrors, len(results))
+		for _, e := range results {
 			errString += fmt.Sprintln(e)
 		}
 		t.Errorf(errString)
@@ -90,8 +90,8 @@ func TestJSONCheck(t *testing.T) {
 
 func TestEmptyJSON(t *testing.T) {
 	var forecast jsonformat.GeoJSON
-	results := runChecks(forecast.Properties, testingBlueprint(2, -90, 90))
-	if results.OK {
+	results := runDataChecks(forecast.Properties, testingBlueprint(2, -90, 90))
+	if len(results) == 0 {
 		t.Error("expected empty json to fail")
 	}
 }
