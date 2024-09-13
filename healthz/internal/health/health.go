@@ -115,7 +115,14 @@ func (h *Health) Data() HealthzResponse {
 }
 
 func (h *Health) isDataHealthy() bool {
-	return h.probeHistory[len(h.probeHistory)-1].Data.OK
+	var failedData int
+	for _, v := range h.probeHistory {
+		if !v.Data.OK {
+			failedData++
+		}
+	}
+
+	return failedData <= h.conf.ProbeHistory.MaxFailedProbes
 }
 
 func (h *Health) isServiceHealthy() bool {
