@@ -70,11 +70,11 @@ func serveHTTP(conf *config.ProbeConfiguration, upstreamGRPC string) error {
 func checkOnce(conf *config.ProbeConfiguration) {
 	h := health.New(conf)
 	h.Probe()
-	lastCheck, isHealthy := h.Health()
+	lastProbe, isHealthy := h.Health()
 
 	enc := json.NewEncoder(os.Stdout)
 	enc.SetIndent("", "  ")
-	if err := enc.Encode(lastCheck); err != nil {
+	if err := enc.Encode(lastProbe); err != nil {
 		panic(err)
 	}
 	if !isHealthy {

@@ -136,20 +136,20 @@ func (h *Health) isServiceHealthy() bool {
 	return failedService <= h.conf.ProbeHistory.MaxFailedProbes
 }
 
-// ServeSimple will give a plain text description of the last check and returns a 503 if the system is not healthy.
+// ServeSimple will give a plain text description of the last probe and returns a 503 if either data or service is not healthy.
 func (h *Health) ServeSimple(w http.ResponseWriter, r *http.Request) {
-	lastCheck, isHealthy := h.Health()
+	lastProbe, isHealthy := h.Health()
 	if !isHealthy {
 		w.WriteHeader(http.StatusServiceUnavailable)
 	}
 
 	w.Header().Add("Content-Type", "text/plain; charset=UTF-8")
-	fmt.Fprintln(w, lastCheck)
+	fmt.Fprintln(w, lastProbe)
 }
 
-// ServeJSON will give a JSON description of the last check and returns a 503 if the system is not healthy.
+// ServeJSON will give a JSON description of the last probe and returns a 503 if either data or service is not healthy.
 func (h *Health) ServeJSON(w http.ResponseWriter, r *http.Request) {
-	lastCheck, isHealthy := h.Health()
+	lastProbe, isHealthy := h.Health()
 
 	w.Header().Add("Content-Type", "application/json; charset=UTF-8")
 	if !isHealthy {
@@ -158,10 +158,11 @@ func (h *Health) ServeJSON(w http.ResponseWriter, r *http.Request) {
 
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
-	enc.Encode(lastCheck)
+	enc.Encode(lastProbe)
 }
 
-// ServeTypeSimple will give a plain text description of the last check and returns a 503 if the system is not healthy.
+// ServeTypeSimple will give a plain text description of either type data or service for all probes in the probe history,
+// and returns a 503 if the type is not healthy.
 func (h *Health) ServeTypeSimple(w http.ResponseWriter, r *http.Request) {
 	var healthzResponse HealthzResponse
 	if r.PathValue("type") == "service" {
@@ -180,7 +181,8 @@ func (h *Health) ServeTypeSimple(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, healthzResponse)
 }
 
-// ServeTypeJSON will give a JSON description of the last check and returns a 503 if the system is not healthy.
+// ServeTypeJSON will give a json description of either type data or service for all probes in the probe history,
+// and returns a 503 if the type is not healthy.
 func (h *Health) ServeTypeJSON(w http.ResponseWriter, r *http.Request) {
 	var healthzResponse HealthzResponse
 	if r.PathValue("type") == "service" {
