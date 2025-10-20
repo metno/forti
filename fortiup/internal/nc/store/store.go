@@ -21,18 +21,12 @@ func Store(ctx context.Context, u *upload.Uploader, meta *fortiblob.DatasetMeta,
 		return err
 	}
 
-	storeResult := make(chan error)
 	for grid, files := range gridids {
-		go func(grid string, files []string) {
-			log.Println("store grid ", grid)
-			storeResult <- storeGrid(ctx, u, meta.Area, meta.Version, grid, files)
-			log.Println("stored ", grid)
-		}(grid, files)
-	}
-	for range gridids {
-		if err := <-storeResult; err != nil {
+		log.Println("store grid ", grid)
+		if err := storeGrid(ctx, u, meta.Area, meta.Version, grid, files); err != nil {
 			return err
 		}
+		log.Println("stored ", grid)
 	}
 
 	if err := u.SetDatasetMeta(ctx, meta); err != nil {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"log"
+	"runtime"
 	"time"
 
 	"gitlab.met.no/forti/f2/fortiup/internal/nc/store"
@@ -61,6 +62,14 @@ func main() {
 			SRS: *srs,
 		}
 	}
+
+	// TODO:
+	// This application is currently targeted at ubuntu 24.04, which has a bug in its netcdf library (1.9.2) - see https://code.mpimet.mpg.de/boards/1/topics/14326
+	// The bug should cause an avalanche of scary-looking log messages, although with seemingly no ill effect.
+	// It seems the bug is fixed in libnetcdf 1.9.3.
+	// Once this is available on the targetted platform, try to remove this locking, and reintroduct multi-threading in the store.Store function.
+	runtime.LockOSThread()
+	defer runtime.UnlockOSThread()
 
 	if err := store.Store(ctx, u, &meta, files); err != nil {
 		log.Fatalln(err)
