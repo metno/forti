@@ -67,7 +67,7 @@ func main() {
 	// This application is currently targeted at ubuntu 24.04, which has a bug in its netcdf library (4.9.2) - see https://code.mpimet.mpg.de/boards/1/topics/14326
 	// The bug should cause an avalanche of scary-looking log messages, although with seemingly no ill effect.
 	// It seems the bug is fixed in libnetcdf 4.9.3.
-	// Once this is available on the targetted platform, try to remove this locking, and reintroduct multi-threading in the store.Store function.
+	// Once this is available on the targetted platform, try to remove this locking, and reintroduce multi-threading in the store.Store function.
 	runtime.LockOSThread()
 	defer runtime.UnlockOSThread()
 
