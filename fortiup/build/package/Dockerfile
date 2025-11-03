@@ -1,5 +1,5 @@
-FROM ubuntu:22.04
-ARG GOLANG_VERSION=1.22.0
+FROM ubuntu:24.04
+ARG GOLANG_VERSION=1.25.1
 ARG TARGETARCH
 
 RUN apt-get update && apt-get -y install git curl
@@ -39,13 +39,13 @@ COPY fortiup/cmd /src/fortiup/cmd
 WORKDIR /src/fortiup/cmd/fortiup
 RUN go build
 
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 ARG TARGETARCH
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y libnetcdf19
+RUN apt-get update && apt-get install -y libnetcdf19t64
 
 COPY --from=0 /src/fortiup/cmd/fortiup/fortiup /usr/local/bin/
 
