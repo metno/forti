@@ -4,7 +4,7 @@ stages:
   - vulncheck
 
 services:
-  - name: docker:24-dind
+  - name: docker:28-dind
     alias: docker
 
 build docker: 
