@@ -44,7 +44,9 @@ publish artifacts:
 vulncheck:
   tags:
     - teampunkt
-  image: golang:1
   stage: vulncheck
   script:
-    - go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+    - export IMAGE_NAME=$(echo "forti-vulncheck-$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 16)")
+    - docker build -t "$IMAGE_NAME" -f .devcontainer/Dockerfile .
+    - docker run --rm --volume $PWD:/src:ro --workdir /src/ "$IMAGE_NAME" govulncheck ./...
+    - docker image rm "$IMAGE_NAME"
