@@ -1,6 +1,7 @@
 stages:
   - build
   - publish artifacts
+  - vulncheck
 
 services:
   - name: docker:24-dind
@@ -39,3 +40,10 @@ publish artifacts:
     - docker pull "$IMAGE"
     - docker run --rm --entrypoint cat "$IMAGE" "/usr/local/bin/$NAME" > $CI_COMMIT_REF_SLUG
     - chmod +x $CI_COMMIT_REF_SLUG
+
+vulncheck:
+  tags:
+    - teampunkt
+  stage: vulncheck
+  script:
+    - go run golang.org/x/vuln/cmd/govulncheck@latest ./...
