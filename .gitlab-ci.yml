@@ -42,12 +42,21 @@ publish artifacts:
     - chmod +x $CI_COMMIT_REF_SLUG
 
 
+devcontainer image:
+  tags:
+    - teampunkt
+  stage: build
+  when: manual
+  script:
+    - docker login -u $azure_registry_username -p $azure_registry_password fortiregistry.azurecr.io
+    - docker build -t fortiregistry.azurecr.io/devcontainer:latest -f ".devcontainer/Dockerfile" .
+    - docker push fortiregistry.azurecr.io/devcontainer:latest
+
+
 vulncheck:
   tags:
     - teampunkt
   stage: vulncheck
+  image: fortiregistry.azurecr.io/devcontainer:latest
   script:
-    - export IMAGE_NAME=$(echo "forti-vulncheck-$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 16)")
-    - docker build -t "$IMAGE_NAME" -f .devcontainer/Dockerfile . # We use the devcontainer Dockerfile since it has all dependencies installed
-    - docker run --rm "$IMAGE_NAME" ls -l /src/
-    - docker image rm "$IMAGE_NAME"
+    - govulncheck ./...
