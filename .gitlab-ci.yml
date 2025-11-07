@@ -52,5 +52,5 @@ vulncheck:
     - ls 
     - ls $CI_PROJECT_DIR
     - pwd
-    - docker run --rm --volume "$CI_PROJECT_DIR:/src:ro" --workdir /src/ "$IMAGE_NAME" ls -l
+    - docker run --rm --volume "$CI_PROJECT_DIR:/src/:ro" --workdir /src/ "$IMAGE_NAME" ls -l
     - docker image rm "$IMAGE_NAME"
