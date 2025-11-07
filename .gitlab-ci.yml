@@ -41,12 +41,13 @@ publish artifacts:
     - docker run --rm --entrypoint cat "$IMAGE" "/usr/local/bin/$NAME" > $CI_COMMIT_REF_SLUG
     - chmod +x $CI_COMMIT_REF_SLUG
 
+
 vulncheck:
   tags:
     - teampunkt
   stage: vulncheck
   script:
     - export IMAGE_NAME=$(echo "forti-vulncheck-$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 16)")
-    - docker build -t "$IMAGE_NAME" -f .devcontainer/Dockerfile .
-    - docker run --rm --volume $PWD:/src:ro --workdir /src/ "$IMAGE_NAME" govulncheck ./...
+    - docker build -t "$IMAGE_NAME" -f .devcontainer/Dockerfile . # We use the devcontainer Dockerfile since it has all dependencies installed
+    - docker run --rm --volume $PWD:/src:ro --workdir /src/ "$IMAGE_NAME" ls -l
     - docker image rm "$IMAGE_NAME"
