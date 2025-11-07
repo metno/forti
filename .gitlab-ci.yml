@@ -49,5 +49,5 @@ vulncheck:
   script:
     - export IMAGE_NAME=$(echo "forti-vulncheck-$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 16)")
     - docker build -t "$IMAGE_NAME" -f .devcontainer/Dockerfile . # We use the devcontainer Dockerfile since it has all dependencies installed
-    - docker run --rm --volume $PWD:/src:ro --workdir /src/ "$IMAGE_NAME" ls -l
+    - docker run --rm --volume $PWD:/src:ro --workdir /src/ "$IMAGE_NAME" pwd
     - docker image rm "$IMAGE_NAME"
