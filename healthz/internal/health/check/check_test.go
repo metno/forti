@@ -84,7 +84,7 @@ func TestJSONCheck(t *testing.T) {
 		for _, e := range results {
 			errString += fmt.Sprintln(e)
 		}
-		t.Errorf(errString)
+		t.Error(errString)
 	}
 }
 
