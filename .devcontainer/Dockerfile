@@ -36,7 +36,8 @@ RUN apt-get update && apt-get install -y \
     
 COPY rawdataforecaster/build/package/golang_checksums.txt /tmp/golang_checksums.txt
 
-ARG GOLANG_VERSION=1.22.0
+# NOTE: When updating this, make sure to also set golang version in go.mod to the same version
+ARG GOLANG_VERSION=1.25.4
 ARG TARGETARCH
 
 RUN \
