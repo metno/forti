@@ -48,15 +48,15 @@ devcontainer image:
   stage: build
   when: manual
   script:
-    - docker login -u $azure_registry_username -p $azure_registry_password fortiregistry.azurecr.io
-    - docker build -t fortiregistry.azurecr.io/devcontainer:latest -f ".devcontainer/Dockerfile" .
-    - docker push fortiregistry.azurecr.io/devcontainer:latest
+    - docker build -t gitlab.met.no/team-punkt/forti/f2-devcontainer:latest -f ".devcontainer/Dockerfile" .
+    - docker push gitlab.met.no/team-punkt/forti/f2-devcontainer:latest
 
 
 vulncheck:
   tags:
     - teampunkt
   stage: vulncheck
-  image: fortiregistry.azurecr.io/devcontainer:latest
+  image: 
+    name: gitlab.met.no/team-punkt/forti/f2-devcontainer:latest
   script:
     - govulncheck ./...
