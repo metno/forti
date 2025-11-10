@@ -1,6 +1,6 @@
 FROM ubuntu:22.04
 
-ARG GOLANG_VERSION=1.22.0
+ARG GOLANG_VERSION=1.25.4
 ARG TARGETARCH
 
 RUN apt-get update && apt-get -y install git curl
