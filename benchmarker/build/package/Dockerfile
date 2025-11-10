@@ -14,7 +14,7 @@ WORKDIR /src/benchmarker/cmd/benchmarker
 RUN go build
 
 
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 COPY --from=0 /src/benchmarker/cmd/benchmarker/benchmarker /usr/local/bin

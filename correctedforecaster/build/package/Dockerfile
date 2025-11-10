@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 ARG GOLANG_VERSION=1.25.4
 ARG TARGETARCH
@@ -40,13 +40,13 @@ WORKDIR /src/correctedforecaster/cmd/correctedforecaster
 RUN go build
 
 
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 ARG TARGETARCH
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y libgdal30 curl
+RUN apt-get update && apt-get install -y libgdal34t64 curl
 
 COPY correctedforecaster/build/package/grpc_health_probe_checksums.txt /tmp/grpc_health_probe_checksums.txt
 RUN curl -L -o /bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v0.4.19/grpc_health_probe-linux-${TARGETARCH} && \

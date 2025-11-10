@@ -17,7 +17,7 @@ WORKDIR /src/moxfrontend/cmd/moxfrontend
 RUN go build
 
 
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
