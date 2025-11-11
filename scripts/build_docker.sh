@@ -8,6 +8,9 @@ set -euo pipefail
 MODULES=$(find . -name Dockerfile | cut -d/ -f2)
 
 for module in $MODULES; do 
+	if [[ $module == .* ]]; then
+		continue
+	fi
 	echo "Building $module"
 	docker build -t f2_$module -f $module/build/package/Dockerfile  .
 done

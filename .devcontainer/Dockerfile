@@ -47,5 +47,8 @@ RUN \
     tar -C /usr/local -xzf go${GOLANG_VERSION}.linux-${TARGETARCH}.tar.gz && \
     rm go${GOLANG_VERSION}.linux-${TARGETARCH}.tar.gz
 
+RUN /usr/local/go/bin/go install golang.org/x/vuln/cmd/govulncheck@latest
+
 RUN ln -s /usr/local/go/bin/go /usr/local/bin/go && \
-    ln -s /usr/local/go/bin/gofmt /usr/local/bin/gofmt
+    ln -s /usr/local/go/bin/gofmt /usr/local/bin/gofmt && \
+    ln -s /root/go/bin/govulncheck /usr/local/bin/govulncheck

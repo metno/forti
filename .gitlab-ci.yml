@@ -1,9 +1,10 @@
 stages:
   - build
   - publish artifacts
+  - vulncheck
 
 services:
-  - name: docker:24-dind
+  - name: docker:28-dind
     alias: docker
 
 build docker: 
@@ -39,3 +40,26 @@ publish artifacts:
     - docker pull "$IMAGE"
     - docker run --rm --entrypoint cat "$IMAGE" "/usr/local/bin/$NAME" > $CI_COMMIT_REF_SLUG
     - chmod +x $CI_COMMIT_REF_SLUG
+
+
+# Since there are many C dependencies in f2, we build and push this image for use both as a devcontainer, and for vulncheck
+devcontainer image:
+  tags:
+    - teampunkt
+  stage: build
+  when: manual
+  script:
+    - docker login -u $azure_registry_username -p $azure_registry_password fortiregistry.azurecr.io
+    - docker build -t fortiregistry.azurecr.io/devcontainer:latest -f ".devcontainer/Dockerfile" .
+    - docker push fortiregistry.azurecr.io/devcontainer:latest
+
+
+vulncheck:
+  tags:
+    - teampunkt
+  stage: vulncheck
+  image: 
+    # This requires ci/cd variable DOCKER_AUTH_CONFIG to be set. See https://docs.gitlab.com/ci/docker/using_docker_images/#access-an-image-from-a-private-container-registry
+    name: fortiregistry.azurecr.io/devcontainer:latest
+  script:
+    - govulncheck ./...
