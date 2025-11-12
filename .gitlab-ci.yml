@@ -73,7 +73,7 @@ trivy scan of Dockerfiles:
     name: aquasec/trivy
     entrypoint: [""]
   script:
-  - for dockerfile in */build/package/Dockerfile; do \
-        echo "Scanning $dockerfile"; \
-        trivy fs --scanners vuln,secret,license,misconfig "$dockerfile"; \
+  - for dockerfile in */build/package/Dockerfile; do
+        echo "Scanning $dockerfile";
+        trivy fs --scanners vuln,secret,license,misconfig "$dockerfile";
       done
