@@ -17,7 +17,7 @@ WORKDIR /src/healthz/cmd/healthz
 
 RUN go build
 
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 RUN apt-get update && apt-get install -y ca-certificates
 

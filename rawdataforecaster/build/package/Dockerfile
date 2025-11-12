@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 ARG GOLANG_VERSION=1.25.4
 ARG TARGETARCH
@@ -66,15 +66,15 @@ WORKDIR /src/rawdataforecaster/cmd/rawdataforecaster
 RUN go build
 
 
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 ARG TARGETARCH
 
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y \
-    libgflags2.2 libgoogle-glog0v5 libssl3 \
-    libgeos-c1v5 libproj22 \
+    libgflags2.2 libgoogle-glog0v6t64 libssl3 \
+    libgeos-c1v5 libproj25 \
     curl
 
 COPY rawdataforecaster/build/package/grpc_health_probe_checksums.txt /tmp/grpc_health_probe_checksums.txt
