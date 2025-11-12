@@ -75,5 +75,5 @@ trivy scan of Dockerfiles:
   script:
   - for dockerfile in */build/package/Dockerfile; do
         echo "Scanning $dockerfile";
-        trivy fs --severity MEDIUM,HIGH,CRITICAL --scanners vuln,secret,license,misconfig "$dockerfile";
+        trivy fs --exit-code 1 --severity MEDIUM,HIGH,CRITICAL --scanners vuln,secret,license,misconfig "$dockerfile";
       done
