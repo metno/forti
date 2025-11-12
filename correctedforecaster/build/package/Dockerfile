@@ -4,7 +4,7 @@ ARG GOLANG_VERSION=1.25.4
 ARG TARGETARCH
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git curl
+    git curl ca-certificates
 
 COPY rawdataforecaster/build/package/golang_checksums.txt /tmp/golang_checksums.txt
 

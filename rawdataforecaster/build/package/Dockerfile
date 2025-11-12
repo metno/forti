@@ -3,7 +3,8 @@ FROM ubuntu:24.04
 ARG GOLANG_VERSION=1.25.4
 ARG TARGETARCH
 
-RUN apt-get update && apt-get -y install git curl
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git curl ca-certificates
 
 COPY rawdataforecaster/build/package/golang_checksums.txt /tmp/golang_checksums.txt
 
@@ -19,11 +20,13 @@ ENV PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
     gcc g++ pkg-config \
     cmake libgflags-dev libgoogle-glog-dev libgtest-dev libssl-dev \
     libgeos-dev libproj-dev
 
+    
 
 WORKDIR /src
 
@@ -47,6 +50,10 @@ RUN git clone https://github.com/google/s2geometry.git && \
 
 RUN ldconfig
 
+COPY rawdataforecaster/build/package/grpc_health_probe_checksums.txt /tmp/grpc_health_probe_checksums.txt
+RUN curl -L -o /bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v0.4.19/grpc_health_probe-linux-${TARGETARCH} && \
+    sha256sum /bin/grpc_health_probe | grep -q $(grep "grpc_health_probe-linux-${TARGETARCH}" /tmp/grpc_health_probe_checksums.txt | awk '{print $1}') && \
+    chmod +x /bin/grpc_health_probe
 
 COPY go.mod /src/go.mod
 COPY go.sum /src/go.sum
@@ -72,22 +79,20 @@ ARG TARGETARCH
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libgflags2.2 libgoogle-glog0v6t64 libssl3 \
     libgeos-c1v5 libproj25 \
     curl
-
-COPY rawdataforecaster/build/package/grpc_health_probe_checksums.txt /tmp/grpc_health_probe_checksums.txt
-RUN curl -L -o /bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v0.4.19/grpc_health_probe-linux-${TARGETARCH} && \
-    sha256sum /bin/grpc_health_probe | grep -q $(grep "grpc_health_probe-linux-${TARGETARCH}" /tmp/grpc_health_probe_checksums.txt | awk '{print $1}') && \
-    chmod +x /bin/grpc_health_probe
 
 EXPOSE 8080
 
 COPY --from=0 /usr/local/lib/libs2.so /usr/local/lib/
 RUN ldconfig
 
+COPY --from=0 /bin/grpc_health_probe /bin/grpc_health_probe
 
 COPY --from=0 /src/rawdataforecaster/cmd/rawdataforecaster/rawdataforecaster /usr/local/bin
+
+USER nobody
 
 ENTRYPOINT [ "/usr/local/bin/rawdataforecaster" ]

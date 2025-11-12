@@ -19,4 +19,6 @@ FROM ubuntu:24.04
 ENV DEBIAN_FRONTEND=noninteractive
 COPY --from=0 /src/benchmarker/cmd/benchmarker/benchmarker /usr/local/bin
 
+USER nobody
+
 ENTRYPOINT [ "/usr/local/bin/benchmarker" ]
