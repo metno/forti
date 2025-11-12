@@ -3,7 +3,8 @@ FROM ubuntu:24.04
 ARG GOLANG_VERSION=1.25.4
 ARG TARGETARCH
 
-RUN apt-get update && apt-get -y install git curl
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git curl
 
 COPY rawdataforecaster/build/package/golang_checksums.txt /tmp/golang_checksums.txt
 
@@ -19,7 +20,13 @@ ENV PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y \
+COPY correctedforecaster/build/package/grpc_health_probe_checksums.txt /tmp/grpc_health_probe_checksums.txt
+RUN curl -L -o /bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v0.4.19/grpc_health_probe-linux-${TARGETARCH} && \
+    sha256sum /bin/grpc_health_probe | grep -q $(grep "grpc_health_probe-linux-${TARGETARCH}" /tmp/grpc_health_probe_checksums.txt | awk '{print $1}') && \
+    chmod +x /bin/grpc_health_probe
+
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc g++ pkg-config \
     libgdal-dev
 
@@ -46,14 +53,13 @@ ARG TARGETARCH
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y libgdal34t64 curl
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgdal34t64 curl
 
-COPY correctedforecaster/build/package/grpc_health_probe_checksums.txt /tmp/grpc_health_probe_checksums.txt
-RUN curl -L -o /bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v0.4.19/grpc_health_probe-linux-${TARGETARCH} && \
-    sha256sum /bin/grpc_health_probe | grep -q $(grep "grpc_health_probe-linux-${TARGETARCH}" /tmp/grpc_health_probe_checksums.txt | awk '{print $1}') && \
-    chmod +x /bin/grpc_health_probe
-
+COPY --from=0 /bin/grpc_health_probe /bin/grpc_health_probe
 
 COPY --from=0 /src/correctedforecaster/cmd/correctedforecaster/correctedforecaster /usr/local/bin
+
+USER nobody
 
 ENTRYPOINT [ "/usr/local/bin/correctedforecaster" ]
