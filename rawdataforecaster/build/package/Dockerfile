@@ -26,34 +26,31 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     cmake libgflags-dev libgoogle-glog-dev libgtest-dev libssl-dev \
     libgeos-dev libproj-dev
 
-    
+COPY rawdataforecaster/build/package/grpc_health_probe_checksums.txt /tmp/grpc_health_probe_checksums.txt
+RUN curl -L -o /bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v0.4.19/grpc_health_probe-linux-${TARGETARCH} && \
+    sha256sum /bin/grpc_health_probe | grep -q $(grep "grpc_health_probe-linux-${TARGETARCH}" /tmp/grpc_health_probe_checksums.txt | awk '{print $1}') && \
+    chmod +x /bin/grpc_health_probe    
 
 WORKDIR /src
 
-RUN git clone https://github.com/abseil/abseil-cpp.git && \
-    cd abseil-cpp && \
-    git checkout c2435f8342c2d0ed8101cb43adfd605fdc52dca2 && \
-    mkdir build && \
-    cd build/ && \
-    cmake -DCMAKE_CXX_STANDARD=17 -DCMAKE_POSITION_INDEPENDENT_CODE=ON .. && \
+RUN git clone https://github.com/abseil/abseil-cpp.git
+WORKDIR /src/abseil-cpp
+RUN git checkout c2435f8342c2d0ed8101cb43adfd605fdc52dca2
+WORKDIR /src/abseil-cpp/build
+RUN cmake -DCMAKE_CXX_STANDARD=17 -DCMAKE_POSITION_INDEPENDENT_CODE=ON .. && \
     make && \
     make install
 
-RUN git clone https://github.com/google/s2geometry.git && \
-    cd s2geometry && \
-    git checkout 7773d518b1f29caa1c2045eb66ec519e025be108 && \
-    mkdir build && \
-    cd build/ && \
-    cmake  -DCMAKE_CXX_STANDARD=17 .. && \
+WORKDIR /src
+RUN git clone https://github.com/google/s2geometry.git
+WORKDIR /src/s2geometry
+RUN git checkout 7773d518b1f29caa1c2045eb66ec519e025be108
+WORKDIR /src/s2geometry/build
+RUN cmake  -DCMAKE_CXX_STANDARD=17 .. && \
     make && \
     make install
 
 RUN ldconfig
-
-COPY rawdataforecaster/build/package/grpc_health_probe_checksums.txt /tmp/grpc_health_probe_checksums.txt
-RUN curl -L -o /bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v0.4.19/grpc_health_probe-linux-${TARGETARCH} && \
-    sha256sum /bin/grpc_health_probe | grep -q $(grep "grpc_health_probe-linux-${TARGETARCH}" /tmp/grpc_health_probe_checksums.txt | awk '{print $1}') && \
-    chmod +x /bin/grpc_health_probe
 
 COPY go.mod /src/go.mod
 COPY go.sum /src/go.sum
