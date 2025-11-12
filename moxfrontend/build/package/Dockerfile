@@ -25,4 +25,6 @@ EXPOSE 8080
 
 COPY --from=0 /src/moxfrontend/cmd/moxfrontend/moxfrontend /usr/local/bin
 
+USER nobody
+
 ENTRYPOINT [ "/usr/local/bin/moxfrontend" ]

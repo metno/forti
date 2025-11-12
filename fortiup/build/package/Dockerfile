@@ -2,7 +2,8 @@ FROM ubuntu:24.04
 ARG GOLANG_VERSION=1.25.4
 ARG TARGETARCH
 
-RUN apt-get update && apt-get -y install git curl
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git curl ca-certificates
 
 COPY rawdataforecaster/build/package/golang_checksums.txt /tmp/golang_checksums.txt
 
@@ -18,7 +19,8 @@ ENV PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get -y --no-install-recommends install \
+    build-essential \
     gcc g++ pkg-config \
     libnetcdf-dev
 
@@ -45,9 +47,12 @@ ARG TARGETARCH
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y libnetcdf19t64
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libnetcdf19t64
 
 COPY --from=0 /src/fortiup/cmd/fortiup/fortiup /usr/local/bin/
 
 # Make sure that it runs
 RUN ldd /usr/local/bin/fortiup
+
+USER nobody

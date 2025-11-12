@@ -19,7 +19,8 @@ RUN go build
 
 FROM ubuntu:24.04
 
-RUN apt-get update && apt-get install -y ca-certificates
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates
 
 RUN useradd -ms /bin/bash forti
 USER forti
@@ -27,6 +28,8 @@ USER forti
 COPY --from=0 /src/healthz/cmd/healthz/healthz /usr/local/bin/
 
 EXPOSE 8080
+
+USER nobody
 
 ENTRYPOINT [ "/usr/local/bin/healthz", "-run-server"]
 

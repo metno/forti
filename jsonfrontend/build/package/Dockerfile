@@ -27,4 +27,6 @@ EXPOSE 8080
 COPY jsonfrontend/cmd/jsonfrontend/jsonformat.json /
 COPY --from=0 /src/jsonfrontend/cmd/jsonfrontend/jsonfrontend /usr/local/bin
 
+USER nobody
+
 ENTRYPOINT [ "/usr/local/bin/jsonfrontend" ]
