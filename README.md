@@ -1,5 +1,7 @@
 # Forti
+
 ## What is it?
+
 Forti is a REST webservice that delivers weather and ocean forecast timeseries data for a specified lat/long coordinate. 
 
 The data sources to the service are irregular grids of data, produced by batch jobs. These batch jobs use a wide range of input datasets, and run a set of post-processing algorithms to both improve the forecast quality and to add additional forecast parameters.
@@ -9,29 +11,36 @@ The application is built with Go, although with some small parts in C++.
 The code for the batch jobs that produce the datasets are not included in this repository.
 
 ## Usage
+
 The application is meant to be run as containers. Each component has an associated Dockerfile.
 
 ## Development
+
 ### Test
 
 ### Build
-Container images are built only when adding tags to a commit. Each component of the application get its own tag on the form:
-`componentname/version`. Each component is versioned separately.
 
-Tag each relevant component as the final step before merging a change into master.
+For all components, except fortiup, a docker image is built and pushed on every commit.
+They will all get the same tag, corresponding to `$CI_PIPELINE_ID`, which identifies a single run of a gitlab ci pipeline.
 
-E.g:
-- xmlfrontend/0.3.1
-- rawdataforecaster/0.3.0
-- jsonfrontend/0.3.0
-- correctedforecaster/0.3.0
-- rawdataforecaster/0.1.6
-- healthz/0.1.0
+For example, you may end up with the following images in the registry.
+
+- fortiregistry.azurecr.io/xmlfrontend:337359
+- fortiregistry.azurecr.io/rawdataforecaster:337359
+- fortiregistry.azurecr.io/jsonfrontend:337359
+- fortiregistry.azurecr.io/correctedforecaster:337359
+- fortiregistry.azurecr.io/rawdataforecaster:337359
+- fortiregistry.azurecr.io/healthz:337359
+
+In this case the docker tag, 337359, corresponds to the gitlab's pipeline id when building the project.
+The pipeline id may be found by looking at the correct build in the [pipelines](https://gitlab.met.no/team-punkt/forti/f2/-/pipelines) page.
 
 ## Run locally
+
 [How to run f2 locally](run_locally.md)
 
 ## Architecture
+
 The application is made up of several binaries working together.
 
 - jsonfrontend and xmlfrontend: serves the REST interface.
@@ -43,6 +52,7 @@ The application is made up of several binaries working together.
 - PPI: Compute, job scheduling and storage system for producing the forecast datasets. Storage system contains most of source data needed to produce the datasets.
 
 ### C4 container diagram
+
 ```mermaid
 graph TD;
    YR["YR<br>[Software-system]"];
@@ -71,4 +81,3 @@ graph TD;
       PostProcessing-->|Run job|Fortiupload;
    end
 ```
-
