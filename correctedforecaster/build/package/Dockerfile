@@ -54,7 +54,7 @@ ARG TARGETARCH
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgdal34t64 curl
+    libgdal34t64 curl ca-certificates
 
 COPY --from=0 /bin/grpc_health_probe /bin/grpc_health_probe
 
