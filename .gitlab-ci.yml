@@ -8,7 +8,7 @@ stages:
     - teampunkt
   stage: build
   variables:
-    IMAGE: fortiregistry.azurecr.io/$CI_JOB_NAME:$CI_JOB_ID
+    IMAGE: fortiregistry.azurecr.io/$CI_JOB_NAME:$CI_PIPELINE_ID
   script:
     - docker login -u $azure_registry_username -p $azure_registry_password fortiregistry.azurecr.io
     - docker build -t $IMAGE -f $CI_JOB_NAME/build/package/Dockerfile .
