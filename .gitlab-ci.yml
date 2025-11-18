@@ -1,31 +1,40 @@
 stages:
   - build
-  - publish artifacts
   - vulncheck
 
-services:
-  - name: docker:28-dind
-    alias: docker
 
-build docker: 
+.docker-build: 
   tags:
     - teampunkt
   stage: build
-  rules:
-    - if: '$CI_COMMIT_TAG'
+  variables:
+    IMAGE: fortiregistry.azurecr.io/$CI_JOB_NAME:$CI_PIPELINE_ID
   script:
-    - export NAME=$(echo $CI_COMMIT_TAG | sed 's-/.*--')
-    - export VERSION=$(echo $CI_COMMIT_TAG | sed 's-.*/--')
-    - export IMAGE="fortiregistry.azurecr.io/$NAME:$VERSION"
     - docker login -u $azure_registry_username -p $azure_registry_password fortiregistry.azurecr.io
-    - docker build -t "$IMAGE" -f "$NAME/build/package/Dockerfile" .
-    - docker push "$IMAGE"
+    - docker build -t $IMAGE -f $CI_JOB_NAME/build/package/Dockerfile .
+    - docker push $IMAGE
 
 
-publish artifacts:
-  tags:
-    - teampunkt
-  stage: publish artifacts
+correctedforecaster:
+  extends: .docker-build
+
+healthz:
+  extends: .docker-build
+
+jsonfrontend:
+  extends: .docker-build
+
+moxfrontend:
+  extends: .docker-build
+
+rawdataforecaster:
+  extends: .docker-build
+
+xmlfrontend:
+  extends: .docker-build
+
+fortiup:
+  extends: .docker-build
   rules:
     - if: "$CI_COMMIT_TAG =~ /^fortiup.*/"
   artifacts:
@@ -33,13 +42,11 @@ publish artifacts:
     paths:
       - "$CI_COMMIT_REF_SLUG"
   script:
-    - export NAME=$(echo $CI_COMMIT_TAG | sed 's-/.*--')
-    - export VERSION=$(echo $CI_COMMIT_TAG | sed 's-.*/--')
-    - export IMAGE="fortiregistry.azurecr.io/$NAME:$VERSION"
-    - docker login -u $azure_registry_username -p $azure_registry_password fortiregistry.azurecr.io
-    - docker pull "$IMAGE"
-    - docker run --rm --entrypoint cat "$IMAGE" "/usr/local/bin/$NAME" > $CI_COMMIT_REF_SLUG
+    - docker build -t $IMAGE -f $CI_JOB_NAME/build/package/Dockerfile .
+    - docker run --rm --entrypoint cat $IMAGE "/usr/local/bin/fortiup" > $CI_COMMIT_REF_SLUG
     - chmod +x $CI_COMMIT_REF_SLUG
+
+
 
 
 # Since there are many C dependencies in f2, we build and push this image for use both as a devcontainer, and for vulncheck

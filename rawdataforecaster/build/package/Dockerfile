@@ -79,7 +79,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgflags2.2 libgoogle-glog0v6t64 libssl3 \
     libgeos-c1v5 libproj25 \
-    curl
+    curl ca-certificates
 
 EXPOSE 8080
 
