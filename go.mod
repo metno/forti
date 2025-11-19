@@ -3,7 +3,6 @@ module gitlab.met.no/forti/f2
 go 1.25.4
 
 require (
-	github.com/golang/protobuf v1.5.4
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/prometheus/client_golang v1.23.2
 	gocloud.dev v0.43.0
