@@ -58,7 +58,7 @@ flowchart LR
  subgraph Met["Met"]
         api_met_no["api.met.no (EKS)<br>[Software-system]"]
         ppi["ecflow ppi jobs (INT)<br>[Software-system]"]
-        grafana@{ label: "Team Punkt's grafana server (INT)<br>[Software-system]" }
+        grafana["Team Punkt's grafana server (INT)<br>[Software-system]"]
   end
  subgraph Core["Core"]
         Frontends["<b>Frontends</b> (INT)<br>[Container: Go web servers]<br>Several systems. Serve point forecast timeseries over REST in geojson, xml or other formats.<br>Each instance differs in output format only."]
