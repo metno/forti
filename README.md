@@ -94,5 +94,4 @@ flowchart LR
     ppi -- Calls<br>(level 2) --> fortiup
     grafana -- https<br>(level 2) --> Ingress
     api_met_no -- rest<br>(level 2) --> Ingress
-    grafana@{ shape: rect}
 ```
