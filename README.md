@@ -79,19 +79,19 @@ flowchart LR
         Azure
         fortiup["fortiup (INT)<br>[Container: Go command-line program]<br>Upload Forti netcdf dataset from filesystem."]
   end
-    Correctedforecaster -- Download topography<br>(level 2) --> Azureblob
-    Ingress -- http<br>(level 2) --> Frontends
-    Ingress -- https<br>(level 2) --> Healthz
-    Ingress -- http<br>(level 2)  --> Prometheus
-    Frontends -- grpc req/reply<br>(level 2) --> Correctedforecaster
-    Correctedforecaster -- grpc req/reply<br>(level 2) --> Rawdataforecaster
-    Healthz -- rest<br>(level 2) --> Ingress
-    Prometheus -- http<br>(level 2) --> Frontends & Correctedforecaster & Rawdataforecaster
-    Rawdataforecaster -- Read forecast data<br>(level 2) --> Azureblob
-    fortiup -- Upload forecast data<br>(level 2) --> Azureblob
-    yr["YR (EKP)<br>[Software-system]"] -- rest<br>(level 0) --> Ingress
-    pingdom["Pingdom (EXT)<br>[Software-system]"] -- https<br>(level 0) --> Ingress
-    ppi -- Calls<br>(level 2) --> fortiup
-    grafana -- https<br>(level 2) --> Ingress
-    api_met_no -- rest<br>(level 2) --> Ingress
+    Correctedforecaster -->|"Download topography<br>(level 2) "| Azureblob
+    Ingress -->|"http<br>(level 2) "| Frontends
+    Ingress -->|"https<br>(level 2) "| Healthz
+    Ingress -->|"http<br>(level 2)  "| Prometheus
+    Frontends -->|"grpc req/reply<br>(level 2) "| Correctedforecaster
+    Correctedforecaster -->|"grpc req/reply<br>(level 2) "| Rawdataforecaster
+    Healthz -->|"rest<br>(level 2) "| Ingress
+    Prometheus -->|"http<br>(level 2) "| Frontends & Correctedforecaster & Rawdataforecaster
+    Rawdataforecaster -->|"Read forecast data<br>(level 2) "| Azureblob
+    fortiup -->|"Upload forecast data<br>(level 2) "| Azureblob
+    yr["YR (EKP)<br>[Software-system]"] -->|"rest<br>(level 0) "| Ingress
+    pingdom["Pingdom (EXT)<br>[Software-system]"] -->|"https<br>(level 0) "| Ingress
+    ppi -->|"Calls<br>(level 2) "| fortiup
+    grafana -->|"https<br>(level 2) "| Ingress
+    api_met_no -->|"rest<br>(level 2) "| Ingress
 ```
