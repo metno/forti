@@ -7,7 +7,9 @@ import (
 )
 
 // Server implements grpc's health check protocol: https://github.com/grpc/grpc/blob/v1.15.0/doc/health-checking.md
-type Server struct{}
+type Server struct {
+	grpc_health_v1.UnimplementedHealthServer // https://pkg.go.dev/google.golang.org/grpc@v1.77.0/health/grpc_health_v1#UnimplementedHealthServer
+}
 
 // NewServer creates a new server.
 func NewServer() *Server {
