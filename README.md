@@ -54,7 +54,7 @@ The application is made up of several binaries working together.
 ### C4 container diagram
 
 ```mermaid
-flowchart LR
+flowchart TD
  subgraph Met["Met"]
         api_met_no["api.met.no (EKS)<br>[Software-system]"]
         ppi["ecflow ppi jobs (INT)<br>[Software-system]"]
