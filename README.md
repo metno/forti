@@ -54,30 +54,49 @@ The application is made up of several binaries working together.
 ### C4 container diagram
 
 ```mermaid
-graph TD;
-   YR["YR<br>[Software-system]"];
-   api_met_no["api.met.no<br>[Software-system]"];
-
-   YR-->|REST|JSONFrontend;
-   api_met_no-->|REST|JSONFrontend;
-   HealthDashboard-->|REST|Healthz;
-   subgraph Forti
-      JSONFrontend["JSONFrontend<br>[Container: Go web server]<br>Serve point forecast timeseries over REST in geojson."];
-      Correctedforecaster["Correctedforecaster<br>[Container: Go GRPC server]<br>Request forecast data, adjust and serve."];
-      Rawdataforecaster["Rawdataforecaster<br>[Container: Go GRPC server]<br>Serve forecast timeseries from memory cache or blob storage."];
-      Azureblob["Azure Blob Storage<br>[Software-system]"];
-      JSONFrontend-->|GRPC req/reply|Correctedforecaster;
-      Correctedforecaster-->|GRPC req/reply|Rawdataforecaster;
-      Rawdataforecaster-->|Read data|Azureblob;
-      Healthz["Healthz<br>[Container: Go web server]<br>Periodically run integration tests and deliver status over REST."];
-      Healthz-->|REST|JSONFrontend;
-   end
-   subgraph MET-infrastructure
-      Ecflow["Ecflow<br>[Software-system]"];
-      PostProcessing["Post-processing<br>[Software-system]<br>Post-process input data and produce Forti datasets."];
-      Fortiupload["Forti-upload<br>[Container: Ecflow PPI job]<br>Upload Forti netcdf dataset from filesystem."];
-      Fortiupload-->|Write data|Azureblob;
-      Ecflow-->|Schedule jobs|PostProcessing;
-      PostProcessing-->|Run job|Fortiupload;
-   end
+---
+config:
+  layout: dagre
+---
+flowchart LR
+ subgraph Met["Met"]
+        api_met_no["api.met.no (EKS)<br>[Software-system]"]
+        ppi["ecflow ppi jobs (INT)<br>[Software-system]"]
+        grafana@{ label: "Team Punkt's grafana server (INT)<br>[Software-system]" }
+  end
+ subgraph Core["Core"]
+        Frontends["<b>Frontends</b> (INT)<br>[Container: Go web servers]<br>Several systems. Serve point forecast timeseries over REST in geojson, xml or other formats.<br>Each instance differs in output format only."]
+        Correctedforecaster["<b>Correctedforecaster</b> (INT)<br>[Container: Go GRPC server]<br>Request forecast data, adjust and serve."]
+        Rawdataforecaster["<b>Rawdataforecaster</b> (INT)<br>[Container: Go GRPC server]<br>Serve forecast timeseries from memory cache or blob storage."]
+  end
+ subgraph Kubernetes["Kubernetes"]
+        Ingress["Ingress controller (EKS)"]
+        Core
+        Healthz["Healthz (INT)<br>[Container: Go web server]<br>Periodically run integration tests and deliver status over REST."]
+        Prometheus["Prometheus (INT)<br>[Software system]<br>Provides insights into performance and other statistics about each forti component. Prometheus web server is password-protected"]
+  end
+ subgraph Azure["Azure"]
+        Azureblob["Azure Blob Storage (SAS)<br>[Software-system]"]
+        Kubernetes
+  end
+ subgraph Forti["Forti"]
+        Azure
+        fortiup["fortiup (INT)<br>[Container: Go command-line program]<br>Upload Forti netcdf dataset from filesystem."]
+  end
+    Correctedforecaster -- Download topography<br>(level 2) --> Azureblob
+    Ingress -- http<br>(level 2) --> Frontends
+    Ingress -- https<br>(level 2) --> Healthz
+    Ingress -- http<br>(level 2)  --> Prometheus
+    Frontends -- grpc req/reply<br>(level 2) --> Correctedforecaster
+    Correctedforecaster -- grpc req/reply<br>(level 2) --> Rawdataforecaster
+    Healthz -- rest<br>(level 2) --> Ingress
+    Prometheus -- http<br>(level 2) --> Frontends & Correctedforecaster & Rawdataforecaster
+    Rawdataforecaster -- Read forecast data<br>(level 2) --> Azureblob
+    fortiup -- Upload forecast data<br>(level 2) --> Azureblob
+    yr["YR (EKP)<br>[Software-system]"] -- rest<br>(level 0) --> Ingress
+    pingdom["Pingdom (EXT)<br>[Software-system]"] -- https<br>(level 0) --> Ingress
+    ppi -- Calls<br>(level 2) --> fortiup
+    grafana -- https<br>(level 2) --> Ingress
+    api_met_no -- rest<br>(level 2) --> Ingress
+    grafana@{ shape: rect}
 ```
