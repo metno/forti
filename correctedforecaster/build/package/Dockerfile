@@ -20,12 +20,6 @@ ENV PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-COPY correctedforecaster/build/package/grpc_health_probe_checksums.txt /tmp/grpc_health_probe_checksums.txt
-RUN curl -L -o /bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v0.4.19/grpc_health_probe-linux-${TARGETARCH} && \
-    sha256sum /bin/grpc_health_probe | grep -q $(grep "grpc_health_probe-linux-${TARGETARCH}" /tmp/grpc_health_probe_checksums.txt | awk '{print $1}') && \
-    chmod +x /bin/grpc_health_probe
-
-
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc g++ pkg-config \
     libgdal-dev
@@ -54,9 +48,7 @@ ARG TARGETARCH
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgdal34t64 curl ca-certificates
-
-COPY --from=0 /bin/grpc_health_probe /bin/grpc_health_probe
+    libgdal34t64 ca-certificates
 
 COPY --from=0 /src/correctedforecaster/cmd/correctedforecaster/correctedforecaster /usr/local/bin
 
