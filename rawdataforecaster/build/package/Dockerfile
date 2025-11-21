@@ -26,11 +26,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     cmake libgflags-dev libgoogle-glog-dev libgtest-dev libssl-dev \
     libgeos-dev libproj-dev
 
-COPY rawdataforecaster/build/package/grpc_health_probe_checksums.txt /tmp/grpc_health_probe_checksums.txt
-RUN curl -L -o /bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v0.4.19/grpc_health_probe-linux-${TARGETARCH} && \
-    sha256sum /bin/grpc_health_probe | grep -q $(grep "grpc_health_probe-linux-${TARGETARCH}" /tmp/grpc_health_probe_checksums.txt | awk '{print $1}') && \
-    chmod +x /bin/grpc_health_probe    
-
 WORKDIR /src
 
 RUN git clone https://github.com/abseil/abseil-cpp.git
@@ -79,14 +74,12 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgflags2.2 libgoogle-glog0v6t64 libssl3 \
     libgeos-c1v5 libproj25 \
-    curl ca-certificates
+    ca-certificates
 
 EXPOSE 8080
 
 COPY --from=0 /usr/local/lib/libs2.so /usr/local/lib/
 RUN ldconfig
-
-COPY --from=0 /bin/grpc_health_probe /bin/grpc_health_probe
 
 COPY --from=0 /src/rawdataforecaster/cmd/rawdataforecaster/rawdataforecaster /usr/local/bin
 
