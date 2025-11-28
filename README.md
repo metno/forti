@@ -53,49 +53,55 @@ The application is made up of several binaries working together.
 
 ### C4 container diagram
 
-```mermaid
-flowchart TD
- subgraph Met["Met"]
-        api_met_no["api.met.no (EKS)<br>[Software-system]"]
-        ppi["ecflow ppi jobs (INT)<br>[Software-system]"]
-        grafana["Team Punkt's grafana server (INT)<br>[Software-system]"]
-  end
- subgraph Core["Core"]
-        Frontends["<b>Frontends</b> (INT)<br>[Container: Go web servers]<br>Several systems. Serve point forecast timeseries over REST in geojson, xml or other formats.<br>Each instance differs in output format only."]
-        Correctedforecaster["<b>Correctedforecaster</b> (INT)<br>[Container: Go GRPC server]<br>Request forecast data, adjust and serve."]
-        Rawdataforecaster["<b>Rawdataforecaster</b> (INT)<br>[Container: Go GRPC server]<br>Serve forecast timeseries from memory cache or blob storage."]
-  end
- subgraph Kubernetes["Kubernetes"]
-        Ingress["Ingress controller (EKS)"]
-        Core
-        Healthz["Healthz (INT)<br>[Container: Go web server]<br>Periodically run integration tests and deliver status over REST."]
-        Prometheus["Prometheus (INT)<br>[Software system]<br>Provides insights into performance and other statistics about each forti component. Prometheus web server is password-protected"]
-  end
- subgraph Azure["Azure"]
-        Azureblob["Azure Blob Storage (SAS)<br>[Software-system]"]
-        Kubernetes
-  end
- subgraph Forti["Forti"]
-        Azure
-        fortiup["fortiup (INT)<br>[Container: Go command-line program]<br>Upload Forti netcdf dataset from filesystem."]
-  end
+```plantUML
+@startuml
+!include  <C4/C4_Context.puml>
+!include  <C4/C4_Container.puml>
+!include <office/Users/user.puml>
 
-yr["YR (EKP)<br>[Software-system]"]
-pingdom["Pingdom (EXT)<br>[Software-system]"]
+Person_Ext(yr, "yr.no (EKP)", "yr.no including apps and web page")
+System_Ext(pingdom, "Pingdom (EXT)", "Health checks")
 
-    Correctedforecaster -->|"Download topography<br>(level 2) "| Azureblob
-    Ingress -->|"http<br>(level 2) "| Frontends
-    Ingress -->|"https<br>(level 2) "| Healthz
-    Ingress -->|"http<br>(level 2)  "| Prometheus
-    Frontends -->|"grpc req/reply<br>(level 2) "| Correctedforecaster
-    Correctedforecaster -->|"grpc req/reply<br>(level 2) "| Rawdataforecaster
-    Healthz -->|"rest<br>(level 2) "| Ingress
-    Prometheus -->|"http<br>(level 2) "| Frontends & Correctedforecaster & Rawdataforecaster
-    Rawdataforecaster -->|"Read forecast data<br>(level 2) "| Azureblob
-    fortiup -->|"Upload forecast data<br>(level 2) "| Azureblob
-    yr -->|"rest<br>(level 0) "| Ingress
-    pingdom -->|"https<br>(level 0) "| Ingress
-    ppi -->|"Calls<br>(level 2) "| fortiup
-    grafana -->|"https<br>(level 2) "| Ingress
-    api_met_no -->|"rest<br>(level 2) "| Ingress
-```
+System_Boundary(metno, "Met") {
+  System_Ext(api_met_no, "api.met.no (EKS)")
+  System_Ext(ecflow, "ecflow ppi jobs (INT)")
+  System_Ext(grafana, "Grafana (INT)", "Team Punkt's grafana server")
+}
+
+System_Boundary(forti, "Forti") {
+  Container(fortiup, "fortiup (INT)", "Go command-line program", "Upload Forti netcdf dataset from filesystem.")
+  System_Boundary(azure, "Azure") {
+    System(azureblob, "Azure Blob Storage (SAS)")
+    System_Boundary(k8s, "Kubernetes") {
+      System(ingress, "Ingress controller (EKS)")
+      Container(healthz, "Healthz (INT)", "Go web server", "Periodically run integration tests and deliver status over REST.")
+      System(prometheus, "Prometheus (INT)", "Provides insights into performance and other statistics about each forti component. Prometheus web server is password-protected.")
+      System_Boundary(core, "Core") {
+        Container(frontends, "Frontends (INT)", "Go web servers", "Several systems. Serve point forecast timeseries over REST in geojson, xml or other formats.<br>Each instance differs in output format only.")
+        Container(correctedforecaster, "Correctedforecaster (INT)", "Go GRPC server", "Request forecast data, adjust and serve.")
+        Container(rawdataforecaster, "Rawdataforecaster (INT)", "Go GRPC server", "Serve forecast timeseries from memory cache or blob storage.")
+        Rel(frontends, correctedforecaster, "grpc req/reply (level 2)")
+        Rel(correctedforecaster, rawdataforecaster, "grpc req/reply (level 2)")
+      }
+      Rel(ingress, frontends, "http (level 2)")
+      Rel(ingress, healthz, "http (level 2)")
+      Rel(ingress, prometheus, "http (level 2)")
+      Rel(healthz, ingress, "rest (level 2)")
+      Rel(correctedforecaster, azureblob, "Download topography (level 2)")
+      Rel_R(prometheus, frontends, "http (level 2)")
+      Rel_R(prometheus, correctedforecaster, "http (level 2)")
+      Rel_R(prometheus, rawdataforecaster, "http (level 2)")
+    }
+    Rel_R(rawdataforecaster, azureblob, "Read forecast data (level 2)")
+  }
+  Rel(fortiup, azureblob, "Upload forecast data(level 2)")
+}
+
+Rel_D(grafana, ingress, "https (level 0)")
+Rel_D(ecflow, fortiup, "calls program")
+
+Rel_D(yr, ingress, "rest (level 0)")
+Rel_D(api_met_no, ingress, "rest (level 0)")
+Rel_D(pingdom, ingress, "https (level 0)")
+
+@enduml```
