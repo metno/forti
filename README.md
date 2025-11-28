@@ -53,7 +53,7 @@ The application is made up of several binaries working together.
 
 ### C4 container diagram
 
-```plantUML
+```plantuml
 @startuml
 !include  <C4/C4_Context.puml>
 !include  <C4/C4_Container.puml>
