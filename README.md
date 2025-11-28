@@ -80,28 +80,28 @@ System_Boundary(forti, "Forti") {
         Container(frontends, "Frontends (INT)", "Go web servers", "Several systems. Serve point forecast timeseries over REST in geojson, xml or other formats.<br>Each instance differs in output format only.")
         Container(correctedforecaster, "Correctedforecaster (INT)", "Go GRPC server", "Request forecast data, adjust and serve.")
         Container(rawdataforecaster, "Rawdataforecaster (INT)", "Go GRPC server", "Serve forecast timeseries from memory cache or blob storage.")
-        Rel(frontends, correctedforecaster, "grpc req/reply (level 2)")
-        Rel(correctedforecaster, rawdataforecaster, "grpc req/reply (level 2)")
+        Rel(frontends, correctedforecaster, "grpc req/reply (lvl 2)")
+        Rel(correctedforecaster, rawdataforecaster, "grpc req/reply (lvl 2)")
       }
-      Rel(ingress, frontends, "http (level 2)")
-      Rel(ingress, healthz, "http (level 2)")
-      Rel(ingress, prometheus, "http (level 2)")
-      Rel(healthz, ingress, "rest (level 2)")
-      Rel(correctedforecaster, azureblob, "Download topography (level 2)")
-      Rel_R(prometheus, frontends, "http (level 2)")
-      Rel_R(prometheus, correctedforecaster, "http (level 2)")
-      Rel_R(prometheus, rawdataforecaster, "http (level 2)")
+      Rel(ingress, frontends, "http (lvl 2)")
+      Rel(ingress, healthz, "http (lvl 2)")
+      Rel(ingress, prometheus, "http (lvl 2)")
+      Rel(healthz, ingress, "rest (lvl 2)")
+      Rel(correctedforecaster, azureblob, "Download topography (lvl 2)")
+      Rel_R(prometheus, frontends, "http (lvl 2)")
+      Rel_R(prometheus, correctedforecaster, "http (lvl 2)")
+      Rel_R(prometheus, rawdataforecaster, "http (lvl 2)")
     }
-    Rel_R(rawdataforecaster, azureblob, "Read forecast data (level 2)")
+    Rel_R(rawdataforecaster, azureblob, "Read forecast data (lvl 2)")
   }
-  Rel(fortiup, azureblob, "Upload forecast data(level 2)")
+  Rel(fortiup, azureblob, "Upload forecast data(lvl 2)")
 }
 
-Rel_D(grafana, ingress, "https (level 0)")
+Rel_D(grafana, ingress, "https (lvl 0)")
 Rel_D(ecflow, fortiup, "calls program")
 
-Rel_D(yr, ingress, "rest (level 0)")
-Rel_D(api_met_no, ingress, "rest (level 0)")
-Rel_D(pingdom, ingress, "https (level 0)")
+Rel_D(yr, ingress, "rest (lvl 0)")
+Rel_D(api_met_no, ingress, "rest (lvl 0)")
+Rel_D(pingdom, ingress, "https (lvl 0)")
 
 @enduml```
