@@ -1,4 +1,4 @@
-FROM golang:1.25
+FROM golang:1.26
 
 COPY go.mod /src/go.mod
 COPY go.sum /src/go.sum
@@ -32,4 +32,3 @@ EXPOSE 8080
 USER nobody
 
 ENTRYPOINT [ "/usr/local/bin/healthz", "-run-server"]
-

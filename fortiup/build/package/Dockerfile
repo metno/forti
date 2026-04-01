@@ -1,5 +1,5 @@
 FROM ubuntu:24.04
-ARG GOLANG_VERSION=1.25.4
+ARG GOLANG_VERSION=1.26.1
 ARG TARGETARCH
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -31,7 +31,7 @@ COPY go.sum /src/go.sum
 WORKDIR /src
 RUN go mod download
 
-COPY fortiup/internal /src/fortiup/internal 
+COPY fortiup/internal /src/fortiup/internal
 COPY fortiup/pkg /src/fortiup/pkg
 
 RUN go test ./...

@@ -1,2 +1,2 @@
-9fa5ffeda4170de60f67f3aa0f824e426421ba724c21e133c1e35d6159ca1bec  go1.25.4.linux-amd64.tar.gz
-a68e86d4b72c2c2fecf7dfed667680b6c2a071221bbdb6913cf83ce3f80d9ff0  go1.25.4.linux-arm64.tar.gz
+031f088e5d955bab8657ede27ad4e3bc5b7c1ba281f05f245bcc304f327c987a  go1.26.1.linux-amd64.tar.gz
+a290581cfe4fe28ddd737dde3095f3dbeb7f2e4065cab4eae44dfc53b760c2f7  go1.26.1.linux-arm64.tar.gz
