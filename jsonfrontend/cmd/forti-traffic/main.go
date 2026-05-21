@@ -155,8 +155,16 @@ func randomRequest(address string) (time.Duration, error) {
 
 	url := fmt.Sprintf("%s?lat=%.4f&lon=%.4f", address, latitude, longitude)
 
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Add("User-Agent", "forti-traffic")
+
+	client := &http.Client{Timeout: 10 * time.Second}
+
 	start := time.Now()
-	response, err := http.Get(url)
+	response, err := client.Do(req)
 	if err == nil {
 		response.Body.Close()
 	}
