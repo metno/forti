@@ -13,6 +13,7 @@ import (
 
 	"gitlab.met.no/forti/f2/internalprotocol"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func main() {
@@ -47,7 +48,7 @@ func main() {
 		}
 	}()
 
-	conn, err := grpc.Dial(*address, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(*address, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
