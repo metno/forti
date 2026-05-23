@@ -1,6 +1,6 @@
 module gitlab.met.no/forti/f2
 
-go 1.26.1
+go 1.26.3
 
 require (
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
