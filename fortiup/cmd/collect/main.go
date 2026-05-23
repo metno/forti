@@ -12,8 +12,8 @@ import (
 func main() {
 	area := flag.String("area", "", "group to collect")
 	version := flag.Int("version", 0, "version to collect")
-	in := flag.String("in", "file:///home/vegardb/local/forti/", "Read forecasts from the given bucket")
-	out := flag.String("out", "file:///home/vegardb/local/forti/collected", "Write forecasts to the given bucket")
+	in := flag.String("in", "file:///tmp/local/forti/", "Read forecasts from the given bucket")
+	out := flag.String("out", "file:///tmp/local/forti/collected", "Write forecasts to the given bucket")
 	timeout := flag.Int("timeout", 0, "Fail if not successful after the given time, in seconds")
 	flag.Parse()
 

@@ -2,12 +2,14 @@ package download
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
-	"path"
+	"path/filepath"
 	"sort"
+	"strings"
 
 	"gocloud.dev/blob"
 )
@@ -54,7 +56,7 @@ func ListDir(dir string) ([]string, error) {
 	var files []string
 	for _, f := range finfo {
 		if !f.IsDir() {
-			fname := path.Join(dir, f.Name())
+			fname := filepath.Join(dir, f.Name())
 			log.Println("serve " + fname)
 			files = append(files, fname)
 		}
@@ -65,7 +67,20 @@ func ListDir(dir string) ([]string, error) {
 }
 
 func download(ctx context.Context, bkt *blob.Bucket, obj *blob.ListObject, toDir string) (string, error) {
-	filename := path.Join(toDir, obj.Key)
+	filename := filepath.Join(toDir, obj.Key)
+
+	absDir, err := filepath.Abs(toDir)
+	if err != nil {
+		return "", fmt.Errorf("resolving target directory: %w", err)
+	}
+	absFile, err := filepath.Abs(filename)
+	if err != nil {
+		return "", fmt.Errorf("resolving target filename: %w", err)
+	}
+	if !strings.HasPrefix(absFile, absDir+string(os.PathSeparator)) {
+		return "", fmt.Errorf("blob key %q escapes target directory", obj.Key)
+	}
+
 	stat, err := os.Stat(filename)
 	if os.IsNotExist(err) || stat.Size() != obj.Size {
 		log.Println("download " + filename)
@@ -81,7 +96,7 @@ func download(ctx context.Context, bkt *blob.Bucket, obj *blob.ListObject, toDir
 		if _, err := io.Copy(f, r); err != nil {
 			return "", err
 		}
-		return filename, r.Close()
+		return filename, nil
 	}
 
 	log.Println(filename + " already exists")
