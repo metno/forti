@@ -69,6 +69,7 @@ func ListDir(dir string) ([]string, error) {
 func download(ctx context.Context, bkt *blob.Bucket, obj *blob.ListObject, toDir string) (string, error) {
 	filename := filepath.Join(toDir, obj.Key)
 
+	// Ensure that the filename is within the target directory, to prevent path traversal attacks.
 	absDir, err := filepath.Abs(toDir)
 	if err != nil {
 		return "", fmt.Errorf("resolving target directory: %w", err)
