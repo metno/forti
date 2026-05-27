@@ -11,6 +11,7 @@ import (
 
 	"gitlab.met.no/forti/f2/internalprotocol"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type Status struct {
@@ -28,7 +29,7 @@ type Fetcher struct {
 }
 
 func NewFetcher(upstream string) (*Fetcher, error) {
-	conn, err := grpc.Dial(upstream, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(upstream, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
 	if err != nil {
 		return nil, fmt.Errorf("could not connect to upstream: %w", err)
 	}

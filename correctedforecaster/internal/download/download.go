@@ -2,12 +2,14 @@ package download
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
-	"path"
+	"path/filepath"
 	"sort"
+	"strings"
 
 	"gocloud.dev/blob"
 )
@@ -54,7 +56,7 @@ func ListDir(dir string) ([]string, error) {
 	var files []string
 	for _, f := range finfo {
 		if !f.IsDir() {
-			fname := path.Join(dir, f.Name())
+			fname := filepath.Join(dir, f.Name())
 			log.Println("serve " + fname)
 			files = append(files, fname)
 		}
@@ -65,7 +67,12 @@ func ListDir(dir string) ([]string, error) {
 }
 
 func download(ctx context.Context, bkt *blob.Bucket, obj *blob.ListObject, toDir string) (string, error) {
-	filename := path.Join(toDir, obj.Key)
+	filename := filepath.Join(toDir, obj.Key)
+
+	if !fileWithinDir(filename, toDir) {
+		return "", fmt.Errorf("could not verify that file %s is within target directory %s", filename, toDir)
+	}
+
 	stat, err := os.Stat(filename)
 	if os.IsNotExist(err) || stat.Size() != obj.Size {
 		log.Println("download " + filename)
@@ -81,9 +88,23 @@ func download(ctx context.Context, bkt *blob.Bucket, obj *blob.ListObject, toDir
 		if _, err := io.Copy(f, r); err != nil {
 			return "", err
 		}
-		return filename, r.Close()
+		return filename, nil
 	}
 
 	log.Println(filename + " already exists")
 	return filename, err
+}
+
+// fileWithinDir checks that the given file is within the given directory, preventing path traversal attacks.
+func fileWithinDir(file, dir string) bool {
+	absDir, err := filepath.Abs(dir)
+	if err != nil {
+		return false
+	}
+	absFile, err := filepath.Abs(file)
+	if err != nil {
+		return false
+	}
+
+	return strings.HasPrefix(absFile, absDir+string(os.PathSeparator))
 }

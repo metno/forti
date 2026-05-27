@@ -11,8 +11,8 @@ import (
 )
 
 func main() {
-	in := flag.String("in", "file:///home/vegardb/local/forti/", "Read forecasts from the given bucket")
-	out := flag.String("out", "file:///home/vegardb/local/forti/collected", "Write forecasts to the given bucket")
+	in := flag.String("in", "file:///tmp/local/forti/", "Read forecasts from the given bucket")
+	out := flag.String("out", "file:///tmp/local/forti/collected", "Write forecasts to the given bucket")
 	flag.Parse()
 
 	source, err := modelprovider.NewBlobClient(*in)

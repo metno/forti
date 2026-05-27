@@ -18,6 +18,7 @@ import (
 	"gitlab.met.no/forti/f2/xmlfrontend/internal/server/encode"
 	"gitlab.met.no/forti/f2/xmlfrontend/pkg/xmlformat"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type Server struct {
@@ -26,7 +27,7 @@ type Server struct {
 }
 
 func New(upstream string) (*Server, error) {
-	conn, err := grpc.Dial(upstream, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(upstream, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
 	if err != nil {
 		return nil, fmt.Errorf("could not to upstream: %w", err)
 	}

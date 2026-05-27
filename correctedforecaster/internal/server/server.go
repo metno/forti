@@ -10,6 +10,7 @@ import (
 
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/health/grpc_health_v1"
 
 	"gitlab.met.no/forti/f2/correctedforecaster/internal/correction"
@@ -53,7 +54,7 @@ type Server struct {
 
 func New(upstream string, topographyFiles []string) (*Server, error) {
 	conn, err := grpc.Dial(upstream,
-		grpc.WithInsecure(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithBlock(),
 		grpc.WithUnaryInterceptor(grpc_prometheus.UnaryClientInterceptor),
 	)
