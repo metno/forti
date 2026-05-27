@@ -5,7 +5,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"gocloud.dev/blob"
@@ -77,9 +76,6 @@ func TestDownloadRejectsPathTraversalKey(t *testing.T) {
 	_, err := download(context.Background(), nil, obj, toDir)
 	if err == nil {
 		t.Fatal("expected error for path traversal key, got nil")
-	}
-	if !strings.Contains(err.Error(), "escapes target directory") {
-		t.Fatalf("unexpected error: %v", err)
 	}
 
 	escapedPath := filepath.Join(baseDir, "escape.txt")

@@ -69,17 +69,8 @@ func ListDir(dir string) ([]string, error) {
 func download(ctx context.Context, bkt *blob.Bucket, obj *blob.ListObject, toDir string) (string, error) {
 	filename := filepath.Join(toDir, obj.Key)
 
-	// Ensure that the filename is within the target directory, to prevent path traversal attacks.
-	absDir, err := filepath.Abs(toDir)
-	if err != nil {
-		return "", fmt.Errorf("resolving target directory: %w", err)
-	}
-	absFile, err := filepath.Abs(filename)
-	if err != nil {
-		return "", fmt.Errorf("resolving target filename: %w", err)
-	}
-	if !strings.HasPrefix(absFile, absDir+string(os.PathSeparator)) {
-		return "", fmt.Errorf("blob key %q escapes target directory", obj.Key)
+	if !fileWithinDir(filename, toDir) {
+		return "", fmt.Errorf("could not verify that file %s is within target directory %s", filename, toDir)
 	}
 
 	stat, err := os.Stat(filename)
@@ -102,4 +93,18 @@ func download(ctx context.Context, bkt *blob.Bucket, obj *blob.ListObject, toDir
 
 	log.Println(filename + " already exists")
 	return filename, err
+}
+
+// fileWithinDir checks that the given file is within the given directory, preventing path traversal attacks.
+func fileWithinDir(file, dir string) bool {
+	absDir, err := filepath.Abs(dir)
+	if err != nil {
+		return false
+	}
+	absFile, err := filepath.Abs(file)
+	if err != nil {
+		return false
+	}
+
+	return strings.HasPrefix(absFile, absDir+string(os.PathSeparator))
 }
