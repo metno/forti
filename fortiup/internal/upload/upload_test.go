@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"gitlab.met.no/forti/f2/fortiup/pkg/fortiblob"
+	"github.com/metno/forti/fortiup/pkg/fortiblob"
 	"gocloud.dev/blob"
 	_ "gocloud.dev/blob/memblob"
 )

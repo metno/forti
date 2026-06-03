@@ -11,9 +11,9 @@ import (
 	"strconv"
 	"time"
 
-	"gitlab.met.no/forti/f2/internalprotocol"
-	"gitlab.met.no/forti/f2/moxfrontend/internal/server/encode"
-	"gitlab.met.no/forti/f2/moxfrontend/pkg/mox"
+	"github.com/metno/forti/internalprotocol"
+	"github.com/metno/forti/moxfrontend/internal/server/encode"
+	"github.com/metno/forti/moxfrontend/pkg/mox"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )

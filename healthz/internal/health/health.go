@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.met.no/forti/f2/healthz/internal/health/config"
+	"github.com/metno/forti/healthz/internal/health/config"
 )
 
 type Health struct {

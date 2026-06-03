@@ -12,11 +12,11 @@ import (
 	"strconv"
 	"time"
 
-	"gitlab.met.no/forti/f2/internalprotocol"
-	"gitlab.met.no/forti/f2/parameters/radar"
-	"gitlab.met.no/forti/f2/xmlfrontend/internal/server/config"
-	"gitlab.met.no/forti/f2/xmlfrontend/internal/server/encode"
-	"gitlab.met.no/forti/f2/xmlfrontend/pkg/xmlformat"
+	"github.com/metno/forti/internalprotocol"
+	"github.com/metno/forti/parameters/radar"
+	"github.com/metno/forti/xmlfrontend/internal/server/config"
+	"github.com/metno/forti/xmlfrontend/internal/server/encode"
+	"github.com/metno/forti/xmlfrontend/pkg/xmlformat"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )

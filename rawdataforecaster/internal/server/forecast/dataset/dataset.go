@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"time"
 
-	"gitlab.met.no/forti/f2/fortiup/pkg/fortiblob"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/config"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index/grid"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index/lookup"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/values"
+	"github.com/metno/forti/fortiup/pkg/fortiblob"
+	"github.com/metno/forti/rawdataforecaster/internal/server/config"
+	"github.com/metno/forti/rawdataforecaster/internal/server/forecast/dataset/index"
+	"github.com/metno/forti/rawdataforecaster/internal/server/forecast/dataset/index/grid"
+	"github.com/metno/forti/rawdataforecaster/internal/server/forecast/dataset/index/lookup"
+	"github.com/metno/forti/rawdataforecaster/internal/server/forecast/dataset/values"
 )
 
 // Dataset contains a forecast for a single area.

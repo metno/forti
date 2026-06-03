@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 
-	"gitlab.met.no/forti/f2/xmlfrontend/internal/server"
-	"gitlab.met.no/forti/f2/xmlfrontend/internal/server/config"
+	"github.com/metno/forti/xmlfrontend/internal/server"
+	"github.com/metno/forti/xmlfrontend/internal/server/config"
 )
 
 func main() {

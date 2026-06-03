@@ -1,4 +1,4 @@
-module gitlab.met.no/forti/f2
+module github.com/metno/forti
 
 go 1.26.3
 

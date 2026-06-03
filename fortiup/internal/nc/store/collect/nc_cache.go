@@ -3,7 +3,7 @@ package collect
 import (
 	"fmt"
 
-	"gitlab.met.no/forti/f2/fortiup/internal/nc/store/netcdf"
+	"github.com/metno/forti/fortiup/internal/nc/store/netcdf"
 )
 
 type singleParamCache struct {

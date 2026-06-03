@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"gitlab.met.no/forti/f2/moxfrontend/internal/server"
+	"github.com/metno/forti/moxfrontend/internal/server"
 )
 
 func main() {

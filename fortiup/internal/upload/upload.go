@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 
-	"gitlab.met.no/forti/f2/fortiup/pkg/fortiblob"
+	"github.com/metno/forti/fortiup/pkg/fortiblob"
 	"gocloud.dev/blob"
 )
 

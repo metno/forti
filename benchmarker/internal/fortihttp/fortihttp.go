@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.met.no/forti/f2/benchmarker/internal/location"
+	"github.com/metno/forti/benchmarker/internal/location"
 )
 
 type FortiHTTP struct {

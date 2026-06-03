@@ -13,11 +13,11 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/health/grpc_health_v1"
 
-	"gitlab.met.no/forti/f2/correctedforecaster/internal/correction"
-	"gitlab.met.no/forti/f2/correctedforecaster/internal/health"
-	"gitlab.met.no/forti/f2/correctedforecaster/internal/lookup"
-	"gitlab.met.no/forti/f2/internalprotocol"
-	"gitlab.met.no/forti/f2/parameters/radar"
+	"github.com/metno/forti/correctedforecaster/internal/correction"
+	"github.com/metno/forti/correctedforecaster/internal/health"
+	"github.com/metno/forti/correctedforecaster/internal/lookup"
+	"github.com/metno/forti/internalprotocol"
+	"github.com/metno/forti/parameters/radar"
 )
 
 func Run(upstream string, port int, topographyFiles []string) error {

@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"net/http/pprof"
 
-	"gitlab.met.no/forti/f2/jsonfrontend/internal/server"
-	"gitlab.met.no/forti/f2/jsonfrontend/internal/server/config"
-	"gitlab.met.no/forti/f2/jsonfrontend/internal/server/metrics"
+	"github.com/metno/forti/jsonfrontend/internal/server"
+	"github.com/metno/forti/jsonfrontend/internal/server/config"
+	"github.com/metno/forti/jsonfrontend/internal/server/metrics"
 )
 
 func main() {

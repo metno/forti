@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"gitlab.met.no/forti/f2/fortiup/pkg/fortiblob"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/config"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index/lookup"
+	"github.com/metno/forti/fortiup/pkg/fortiblob"
+	"github.com/metno/forti/rawdataforecaster/internal/server/config"
+	"github.com/metno/forti/rawdataforecaster/internal/server/forecast/dataset"
+	"github.com/metno/forti/rawdataforecaster/internal/server/forecast/dataset/index/lookup"
 )
 
 // Forecast gives the latest weather forecast for a location.

@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"sync"
 
-	"gitlab.met.no/forti/f2/fortiup/pkg/fortiblob"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index/georeader"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index/lookup"
+	"github.com/metno/forti/fortiup/pkg/fortiblob"
+	"github.com/metno/forti/rawdataforecaster/internal/server/forecast/dataset/index/georeader"
+	"github.com/metno/forti/rawdataforecaster/internal/server/forecast/dataset/index/lookup"
 )
 
 // Nearester returns the closest index to a given latitude/longitude.

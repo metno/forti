@@ -7,9 +7,9 @@ import (
 	"runtime"
 	"time"
 
-	"gitlab.met.no/forti/f2/fortiup/internal/nc/store"
-	"gitlab.met.no/forti/f2/fortiup/internal/upload"
-	"gitlab.met.no/forti/f2/fortiup/pkg/fortiblob"
+	"github.com/metno/forti/fortiup/internal/nc/store"
+	"github.com/metno/forti/fortiup/internal/upload"
+	"github.com/metno/forti/fortiup/pkg/fortiblob"
 
 	"gocloud.dev/blob"
 	_ "gocloud.dev/blob/azureblob"

@@ -15,11 +15,11 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.met.no/forti/f2/internalprotocol"
-	"gitlab.met.no/forti/f2/jsonfrontend/internal/server/config"
-	"gitlab.met.no/forti/f2/jsonfrontend/internal/server/encode"
-	"gitlab.met.no/forti/f2/jsonfrontend/internal/server/metrics"
-	"gitlab.met.no/forti/f2/jsonfrontend/pkg/jsonformat"
+	"github.com/metno/forti/internalprotocol"
+	"github.com/metno/forti/jsonfrontend/internal/server/config"
+	"github.com/metno/forti/jsonfrontend/internal/server/encode"
+	"github.com/metno/forti/jsonfrontend/internal/server/metrics"
+	"github.com/metno/forti/jsonfrontend/pkg/jsonformat"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )

@@ -10,7 +10,7 @@ import (
 	"gocloud.dev/blob"
 	_ "gocloud.dev/blob/fileblob"
 
-	"gitlab.met.no/forti/f2/fortiup/pkg/fortiblob"
+	"github.com/metno/forti/fortiup/pkg/fortiblob"
 )
 
 func Test(t *testing.T) {

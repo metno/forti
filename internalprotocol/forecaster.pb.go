@@ -468,7 +468,7 @@ const file_forecaster_proto_rawDesc = "" +
 	"\x0fPointTooFarAway\x10\x022_\n" +
 	"\n" +
 	"Forecaster\x12Q\n" +
-	"\vGetForecast\x12$.internalprotocol.GetForecastRequest\x1a\x1a.internalprotocol.Forecast\"\x00B)Z'gitlab.met.no/forti/f2/internalprotocolb\x06proto3"
+	"\vGetForecast\x12$.internalprotocol.GetForecastRequest\x1a\x1a.internalprotocol.Forecast\"\x00B)Z'github.com/metno/forti/internalprotocolb\x06proto3"
 
 var (
 	file_forecaster_proto_rawDescOnce sync.Once

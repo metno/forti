@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"os"
 
-	"gitlab.met.no/forti/f2/healthz/internal/health"
-	"gitlab.met.no/forti/f2/healthz/internal/health/config"
-	"gitlab.met.no/forti/f2/healthz/internal/status"
+	"github.com/metno/forti/healthz/internal/health"
+	"github.com/metno/forti/healthz/internal/health/config"
+	"github.com/metno/forti/healthz/internal/status"
 )
 
 func main() {

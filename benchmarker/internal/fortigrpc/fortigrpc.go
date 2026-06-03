@@ -6,8 +6,8 @@ import (
 	"log"
 	"time"
 
-	"gitlab.met.no/forti/f2/benchmarker/internal/location"
-	"gitlab.met.no/forti/f2/internalprotocol"
+	"github.com/metno/forti/benchmarker/internal/location"
+	"github.com/metno/forti/internalprotocol"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )

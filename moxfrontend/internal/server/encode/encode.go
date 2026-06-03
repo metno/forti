@@ -6,8 +6,8 @@ import (
 	"sort"
 	"time"
 
-	"gitlab.met.no/forti/f2/internalprotocol"
-	"gitlab.met.no/forti/f2/moxfrontend/pkg/mox"
+	"github.com/metno/forti/internalprotocol"
+	"github.com/metno/forti/moxfrontend/pkg/mox"
 )
 
 func EncodeNoData() *mox.ForecastDocument {

@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"gitlab.met.no/forti/f2/internalprotocol"
-	"gitlab.met.no/forti/f2/jsonfrontend/internal/server/config"
-	"gitlab.met.no/forti/f2/jsonfrontend/pkg/jsonformat"
+	"github.com/metno/forti/internalprotocol"
+	"github.com/metno/forti/jsonfrontend/internal/server/config"
+	"github.com/metno/forti/jsonfrontend/pkg/jsonformat"
 
 	"google.golang.org/protobuf/types/known/timestamppb"
 )

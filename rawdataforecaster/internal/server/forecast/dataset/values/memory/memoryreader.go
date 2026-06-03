@@ -3,8 +3,8 @@ package memory
 import (
 	"errors"
 
-	"gitlab.met.no/forti/f2/fortiup/pkg/fortiblob"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/values"
+	"github.com/metno/forti/fortiup/pkg/fortiblob"
+	"github.com/metno/forti/rawdataforecaster/internal/server/forecast/dataset/values"
 )
 
 // MemoryReader serves forecast data.

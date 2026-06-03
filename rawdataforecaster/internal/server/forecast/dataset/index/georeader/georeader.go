@@ -11,8 +11,8 @@ import (
 	"fmt"
 	"io"
 
-	"gitlab.met.no/forti/f2/fortiup/pkg/fortiblob"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/index/lookup"
+	"github.com/metno/forti/fortiup/pkg/fortiblob"
+	"github.com/metno/forti/rawdataforecaster/internal/server/forecast/dataset/index/lookup"
 )
 
 // Reader connects to a model provider, and gets geo data from it

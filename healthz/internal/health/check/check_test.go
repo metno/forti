@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	config "gitlab.met.no/forti/f2/healthz/internal/health/config"
-	"gitlab.met.no/forti/f2/jsonfrontend/pkg/jsonformat"
+	config "github.com/metno/forti/healthz/internal/health/config"
+	"github.com/metno/forti/jsonfrontend/pkg/jsonformat"
 )
 
 func testingBlueprint(count int, temperatureMin, temperatureMax float32) config.Blueprint {

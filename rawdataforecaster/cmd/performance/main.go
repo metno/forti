@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.met.no/forti/f2/internalprotocol"
+	"github.com/metno/forti/internalprotocol"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )

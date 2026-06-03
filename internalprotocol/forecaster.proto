@@ -4,7 +4,7 @@ import "google/protobuf/timestamp.proto";
 
 package internalprotocol;
 
-option go_package = "gitlab.met.no/forti/f2/internalprotocol";
+option go_package = "github.com/metno/forti/internalprotocol";
 
 
 service Forecaster {

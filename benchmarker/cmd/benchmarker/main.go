@@ -11,8 +11,8 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.met.no/forti/f2/benchmarker/internal/fortigrpc"
-	"gitlab.met.no/forti/f2/benchmarker/internal/fortihttp"
+	"github.com/metno/forti/benchmarker/internal/fortigrpc"
+	"github.com/metno/forti/benchmarker/internal/fortihttp"
 )
 
 func main() {

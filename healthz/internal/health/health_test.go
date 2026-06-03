@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"testing"
 
-	"gitlab.met.no/forti/f2/healthz/internal/health/config"
+	"github.com/metno/forti/healthz/internal/health/config"
 )
 
 func TestForecastServiceUnavailable(t *testing.T) {

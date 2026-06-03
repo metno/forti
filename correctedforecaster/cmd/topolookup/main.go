@@ -10,9 +10,9 @@ import (
 	"net/url"
 	"strconv"
 
-	"gitlab.met.no/forti/f2/correctedforecaster/internal/download"
-	"gitlab.met.no/forti/f2/correctedforecaster/internal/lookup"
-	"gitlab.met.no/forti/f2/jsonfrontend/pkg/jsonformat"
+	"github.com/metno/forti/correctedforecaster/internal/download"
+	"github.com/metno/forti/correctedforecaster/internal/lookup"
+	"github.com/metno/forti/jsonfrontend/pkg/jsonformat"
 )
 
 func main() {

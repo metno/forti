@@ -11,8 +11,8 @@ import (
 	_ "gocloud.dev/blob/azureblob"
 	_ "gocloud.dev/blob/fileblob"
 
-	"gitlab.met.no/forti/f2/correctedforecaster/internal/download"
-	"gitlab.met.no/forti/f2/correctedforecaster/internal/server"
+	"github.com/metno/forti/correctedforecaster/internal/download"
+	"github.com/metno/forti/correctedforecaster/internal/server"
 )
 
 func main() {

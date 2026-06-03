@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"gitlab.met.no/forti/f2/internalprotocol"
-	"gitlab.met.no/forti/f2/parameters/weathersymbol"
+	"github.com/metno/forti/internalprotocol"
+	"github.com/metno/forti/parameters/weathersymbol"
 )
 
 func TestCorrectWithBetterTopography(t *testing.T) {

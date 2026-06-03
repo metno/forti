@@ -5,8 +5,8 @@ import (
 	"log"
 	"strconv"
 
-	"gitlab.met.no/forti/f2/xmlfrontend/internal/server/config"
-	"gitlab.met.no/forti/f2/xmlfrontend/pkg/xmlformat"
+	"github.com/metno/forti/xmlfrontend/internal/server/config"
+	"github.com/metno/forti/xmlfrontend/pkg/xmlformat"
 )
 
 func newDataElement(data *config.Parameter, value float32, allValues *map[string]float32) (xmlformat.DataElement, error) {

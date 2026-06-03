@@ -12,10 +12,10 @@ import (
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"gitlab.met.no/forti/f2/internalprotocol"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/health"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/config"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast"
+	"github.com/metno/forti/internalprotocol"
+	"github.com/metno/forti/rawdataforecaster/internal/health"
+	"github.com/metno/forti/rawdataforecaster/internal/server/config"
+	"github.com/metno/forti/rawdataforecaster/internal/server/forecast"
 )
 
 func Run(conf *config.Configuration, port int) error {

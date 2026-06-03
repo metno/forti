@@ -3,7 +3,7 @@ package dataset
 import (
 	"time"
 
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/forecast/dataset/values"
+	"github.com/metno/forti/rawdataforecaster/internal/server/forecast/dataset/values"
 )
 
 // LocationData is a struct for holding timeseries data and metadata for a single location from a specific dataset.

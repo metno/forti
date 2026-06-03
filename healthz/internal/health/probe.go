@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.met.no/forti/f2/healthz/internal/health/check"
-	"gitlab.met.no/forti/f2/healthz/internal/health/config"
+	"github.com/metno/forti/healthz/internal/health/check"
+	"github.com/metno/forti/healthz/internal/health/config"
 )
 
 // ProbeResult is the summed-up result of a set of checks against a number of locations.

@@ -4,11 +4,11 @@ import (
 	"sort"
 	"time"
 
-	"gitlab.met.no/forti/f2/internalprotocol"
-	"gitlab.met.no/forti/f2/jsonfrontend/internal/server/config"
-	"gitlab.met.no/forti/f2/jsonfrontend/pkg/jsonformat"
-	"gitlab.met.no/forti/f2/parameters/radar"
-	"gitlab.met.no/forti/f2/parameters/weathersymbol"
+	"github.com/metno/forti/internalprotocol"
+	"github.com/metno/forti/jsonfrontend/internal/server/config"
+	"github.com/metno/forti/jsonfrontend/pkg/jsonformat"
+	"github.com/metno/forti/parameters/radar"
+	"github.com/metno/forti/parameters/weathersymbol"
 )
 
 func Encode(forecast *internalprotocol.Forecast) (*jsonformat.GeoJSON, error) {

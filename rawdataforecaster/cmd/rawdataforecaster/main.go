@@ -13,8 +13,8 @@ import (
 	_ "gocloud.dev/blob/s3blob"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server"
-	"gitlab.met.no/forti/f2/rawdataforecaster/internal/server/config"
+	"github.com/metno/forti/rawdataforecaster/internal/server"
+	"github.com/metno/forti/rawdataforecaster/internal/server/config"
 )
 
 func main() {
