@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -euo pipefail
-
 # GNU date (Linux) and BSD date (macOS) compatible
 if date -d "1 day" +"%Y-%m-%dT00:00Z" >/dev/null 2>&1; then
     VALID_UNTIL=$(date -d "1 day" +"%Y-%m-%dT00:00Z")
