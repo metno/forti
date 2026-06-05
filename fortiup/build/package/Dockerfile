@@ -1,5 +1,5 @@
 FROM ubuntu:24.04
-ARG GOLANG_VERSION=1.26.1
+ARG GOLANG_VERSION=1.26.4
 ARG TARGETARCH
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
