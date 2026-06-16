@@ -57,47 +57,34 @@ The application is made up of several binaries working together.
 C4Container
   title C4 Container Diagram - Forti
 
-  Person_Ext(yr, "yr.no (EKP)", "yr.no including apps and web page")
-  System_Ext(pingdom, "Pingdom (EXT)", "Health checks")
+  Person_Ext(client, "API Client", "Consumes forecast data over REST")
 
-  Boundary(metno, "Met", "System") {
-    System_Ext(api_met_no, "api.met.no (EKS)")
-    System_Ext(ecflow, "ecflow ppi jobs (INT)")
-    System_Ext(grafana, "Grafana (INT)", "Team Punkt's grafana server")
-  }
-
-  Boundary(forti, "Forti", "System") {
-    Container(fortiup, "fortiup (INT)", "Go CLI", "Upload Forti netcdf dataset from filesystem.")
-    Boundary(azure, "Azure") {
-      System(azureblob, "Azure Blob Storage (SAS)")
-      Boundary(k8s, "Kubernetes") {
-        System(ingress, "Ingress controller (EKS)")
-        Container(healthz, "Healthz (INT)", "Go web server", "Periodically run integration tests and deliver status over REST.")
-        System(prometheus, "Prometheus (INT)", "Performance and statistics for each forti component. Password-protected.")
-        Boundary(core, "Core") {
-          Container(frontends, "Frontends (INT)", "Go web servers", "Serve point forecast timeseries over REST in geojson, xml or other formats. Each instance differs in output format only.")
-          Container(correctedforecaster, "Correctedforecaster (INT)", "Go GRPC server", "Request forecast data, adjust and serve.")
-          Container(rawdataforecaster, "Rawdataforecaster (INT)", "Go GRPC server", "Serve forecast timeseries from memory cache or blob storage.")
-        }
-      }
+  Boundary(forti, "Forti") {
+    System(ingress, "Ingress", "Routes incoming requests")
+    Container(dataloader, "Dataset Loader", "CLI", "Loads forecast datasets into the object store")
+    System(objectstore, "Object Store", "Stores forecast datasets")
+    Boundary(core, "Core") {
+      Container(frontends, "Frontends", "Go", "Serve point forecast timeseries over REST")
+      Container(correctedforecaster, "Correctedforecaster", "Go GRPC", "Post-process and serve forecast data")
+      Container(rawdataforecaster, "Rawdataforecaster", "Go GRPC", "Serve forecast from cache or object store")
+    }
+    Boundary(monitoring, "Monitoring") {
+      Container(healthz, "Healthz", "Go", "Runs integration tests and reports health over REST")
+      System(prometheus, "Prometheus", "Collects metrics from Forti components")
     }
   }
 
-  Rel(frontends, correctedforecaster, "grpc req/reply")
-  Rel(correctedforecaster, rawdataforecaster, "grpc req/reply")
-  Rel(ingress, frontends, "http")
-  Rel(ingress, healthz, "http")
-  Rel(ingress, prometheus, "http")
-  Rel(healthz, ingress, "rest")
-  Rel(correctedforecaster, azureblob, "Download topography")
-  Rel(prometheus, frontends, "http")
-  Rel(prometheus, correctedforecaster, "http")
-  Rel(prometheus, rawdataforecaster, "http")
-  Rel(rawdataforecaster, azureblob, "Read forecast data")
-  Rel(fortiup, azureblob, "Upload forecast data")
-  Rel(grafana, ingress, "https")
-  Rel(ecflow, fortiup, "calls program")
-  Rel(yr, ingress, "rest")
-  Rel(api_met_no, ingress, "rest")
-  Rel(pingdom, ingress, "https")
+  Rel(client, ingress, "REST")
+  Rel_Down(ingress, frontends, "http")
+  Rel_Right(ingress, healthz, "http")
+  Rel_Right(ingress, prometheus, "http")
+  Rel_Left(healthz, ingress, "rest")
+  Rel(frontends, correctedforecaster, "grpc")
+  Rel(correctedforecaster, rawdataforecaster, "grpc")
+  Rel(correctedforecaster, objectstore, "Download topography")
+  Rel(rawdataforecaster, objectstore, "Read forecast data")
+  Rel(dataloader, objectstore, "Upload forecast data")
+  Rel_Left(prometheus, frontends, "http")
+  Rel_Left(prometheus, correctedforecaster, "http")
+  Rel_Left(prometheus, rawdataforecaster, "http")
 ```
