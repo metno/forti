@@ -21,19 +21,21 @@ The application is meant to be run as containers. Each component has an associat
 ### Build
 
 For all components, except fortiup, a docker image is built and pushed on every commit.
-They will all get the same tag, corresponding to `$CI_PIPELINE_ID`, which identifies a single run of a gitlab ci pipeline.
+They will all get the same tag, corresponding to the GitHub Actions `run_id`, which identifies a single workflow run.
 
 For example, you may end up with the following images in the registry.
 
 - fortiregistry.azurecr.io/xmlfrontend:337359
+- fortiregistry.azurecr.io/moxfrontend:337359
 - fortiregistry.azurecr.io/rawdataforecaster:337359
 - fortiregistry.azurecr.io/jsonfrontend:337359
 - fortiregistry.azurecr.io/correctedforecaster:337359
-- fortiregistry.azurecr.io/rawdataforecaster:337359
 - fortiregistry.azurecr.io/healthz:337359
 
-In this case the docker tag, 337359, corresponds to the gitlab's pipeline id when building the project.
-The pipeline id may be found by looking at the correct build in the [pipelines](https://gitlab.met.no/team-punkt/forti/f2/-/pipelines) page.
+In this case the docker tag, 337359, corresponds to the GitHub Actions run ID when building the project.
+The run ID may be found by looking at the correct build on the [Actions](https://github.com/metno/forti/actions) page.
+
+For `fortiup`, a binary artifact is built and uploaded (rather than a docker image) when a tag matching `fortiup/*` is pushed.
 
 ## Run locally
 
