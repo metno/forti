@@ -63,7 +63,7 @@ export AZURE_STORAGE_SAS_TOKEN=$(az storage container generate-sas \
     --account-name "$AZURE_STORAGE_ACCOUNT" \
     --https-only \
     --permissions lr \
-    --expiry "$(date -d "1 day" +"%Y-%m-%dT00:00Z")" \
+    --expiry "$(date -d '1 day' +'%Y-%m-%dT00:00Z' 2>/dev/null || date -v+1d +'%Y-%m-%dT00:00Z')" \
     -otsv \
 )
 ```
@@ -91,7 +91,7 @@ cd jsonfrontend/cmd/jsonfrontend/
 go run main.go
 ``` 
 
-This will connect to the `correctedforecaster`. It is possible to bypass that one, and go straight to the `radataforecaster`. To do that, add an extra option when calling the program:
+This will connect to the `correctedforecaster`. It is possible to bypass that one, and go straight to the `rawdataforecaster`. To do that, add an extra option when calling the program:
 
 ```bash
 cd jsonfrontend/cmd/jsonfrontend/
