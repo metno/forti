@@ -58,33 +58,26 @@ C4Container
   title C4 Container Diagram - Forti
 
   Person_Ext(client, "API Client", "Consumes forecast data over REST")
+  Person_Ext(dataloader, "Dataset Loader", "Loads forecast datasets into the forti object store")
 
   Boundary(forti, "Forti") {
-    System(ingress, "Ingress", "Routes incoming requests")
-    Container(dataloader, "Dataset Loader", "CLI", "Loads forecast datasets into the object store")
-    System(objectstore, "Object Store", "Stores forecast datasets")
     Boundary(core, "Core") {
       Container(frontends, "Frontends", "Go", "Serve point forecast timeseries over REST")
       Container(correctedforecaster, "Correctedforecaster", "Go GRPC", "Post-process and serve forecast data")
       Container(rawdataforecaster, "Rawdataforecaster", "Go GRPC", "Serve forecast from cache or object store")
     }
-    Boundary(monitoring, "Monitoring") {
-      Container(healthz, "Healthz", "Go", "Runs integration tests and reports health over REST")
+    Boundary(support, "Support") {
+      System(objectstore, "Object Store", "Stores forecast datasets")
+      Container(healthz, "Healthz", "Go", "Runs integration tests and reports health")
       System(prometheus, "Prometheus", "Collects metrics from Forti components")
     }
   }
 
-  Rel(client, ingress, "REST")
-  Rel_Down(ingress, frontends, "http")
-  Rel_Right(ingress, healthz, "http")
-  Rel_Right(ingress, prometheus, "http")
-  Rel_Left(healthz, ingress, "rest")
+  Rel(client, frontends, "http")
   Rel(frontends, correctedforecaster, "grpc")
   Rel(correctedforecaster, rawdataforecaster, "grpc")
+
+  Rel(dataloader, objectstore, "Upload forecast data")
   Rel(correctedforecaster, objectstore, "Download topography")
   Rel(rawdataforecaster, objectstore, "Read forecast data")
-  Rel(dataloader, objectstore, "Upload forecast data")
-  Rel_Left(prometheus, frontends, "http")
-  Rel_Left(prometheus, correctedforecaster, "http")
-  Rel_Left(prometheus, rawdataforecaster, "http")
 ```
