@@ -1,0 +1,91 @@
+name: Build
+
+on:
+  push:
+    branches: ["**"]
+    tags: ["**"]
+  pull_request:
+
+jobs:
+  build:
+    name: Build ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - correctedforecaster
+          - healthz
+          - jsonfrontend
+          - moxfrontend
+          - rawdataforecaster
+          - xmlfrontend
+    env:
+      IMAGE: fortiregistry.azurecr.io/${{ matrix.service }}:${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to Azure Container Registry
+        run: docker login -u ${{ secrets.AZURE_REGISTRY_USERNAME }} -p ${{ secrets.AZURE_REGISTRY_PASSWORD }} fortiregistry.azurecr.io
+
+      - name: Build and push
+        run: |
+          docker build -t $IMAGE -f ${{ matrix.service }}/build/package/Dockerfile .
+          docker push $IMAGE
+
+  fortiup:
+    name: Build fortiup
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/fortiup')
+    steps:
+      - uses: actions/checkout@v4
+
+      # Produce a filesystem-safe slug from the tag name (e.g. fortiup/0.4.0 -> fortiup-0-4-0),
+      # mirroring GitLab's $CI_COMMIT_REF_SLUG behaviour.
+      - name: Create ref slug
+        id: slug
+        run: echo "slug=$(echo '${{ github.ref_name }}' | tr '/.' '-')" >> "$GITHUB_OUTPUT"
+
+      - name: Build image and extract binary
+        env:
+          IMAGE: fortiregistry.azurecr.io/fortiup:${{ github.run_id }}
+        run: |
+          docker build -t $IMAGE -f fortiup/build/package/Dockerfile .
+          docker run --rm --entrypoint cat $IMAGE /usr/local/bin/fortiup > ${{ steps.slug.outputs.slug }}
+          chmod +x ${{ steps.slug.outputs.slug }}
+
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.slug.outputs.slug }}
+          path: ${{ steps.slug.outputs.slug }}
+
+  vulncheck:
+    name: Vulnerability check
+    needs: [build]
+    runs-on: ubuntu-latest
+    container:
+      # Requires AZURE_REGISTRY_USERNAME and AZURE_REGISTRY_PASSWORD secrets to pull the image.
+      # Build/push the devcontainer image via the devcontainer.yml workflow when it changes.
+      image: fortiregistry.azurecr.io/devcontainer:latest
+      credentials:
+        username: ${{ secrets.AZURE_REGISTRY_USERNAME }}
+        password: ${{ secrets.AZURE_REGISTRY_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: govulncheck ./...
+
+  # trivy-scan:
+  #   name: Trivy Dockerfile scan
+  #   needs: [build]
+  #   runs-on: ubuntu-latest
+  #   container:
+  #     image: aquasec/trivy
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Scan all Dockerfiles
+  #       run: |
+  #         for dockerfile in */build/package/Dockerfile; do
+  #           echo "Scanning $dockerfile"
+  #           trivy fs --exit-code 1 --severity MEDIUM,HIGH,CRITICAL \
+  #             --scanners vuln,secret,license,misconfig "$dockerfile"
+  #         done
