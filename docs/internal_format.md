@@ -1,40 +1,82 @@
 # Forti's internal data format
 
-Forti uses an internal data format for storing data. This format is used both in the blob storage and by `rawdataforecaster`. It also dictates parts of the contents of the grpc protocol.
-Each area/version consists of one or several separate forecasts grouped by their grid resolution.
+This document is intended for developers who need to read or write Forti’s internal data format directly.
 
-## Data for each area/version
+Forti uses an internal data format for storing data. This format is used both in the blob storage and by `rawdataforecaster`. 
 
-Each area/version has one or several grids (strictly speaking, it is not a grid, but a collection of latitude/longitude coordinates within a particular area). Each grid is supposed to have the same geographic extent, but differs in what resolution the grid points in each grid has.
+## Overview
 
-The data for each grid resolution is described in a uniquely-named subfolder under `/<area>/<version>/` in the blob storage. The data for each resolution is described below.
+Data is split into areas and versions.
+An area refers to to a limited geographic area, typically the domain of a single forecast model. 
+Version numbers are used to identify which forecast for an area is the newest.
+Highest version number is newest.
 
-Each combination of `area` and `version` has accompanying metadata. These data are described in `DatasetMeta` in [the code](../upload/pkg/fortiblob/collector.go). On the blob store, these data are stored in a file called `complete.json`.
+A single rawdataforecaster instance can serve data from several areas, but only one area for a single request. 
+This is done by selecting the area with a grid point which is closest to the requested location.
+It will only ever serve the latest version for each area, as determined by that area's version number.
+
+The data in the single area is expressed as one or more lists of latitude/longitude values with accompanying data for several parameters.
+If there are more than one list of latitudes and longitudes, they are expected to cover the same area, but with different values for latitude and longitude.
+This allows some parameters to have a different resolution than others, even if the cover the same area.
+
+All data for each area/version is placed in a uniquely-named subfolder under `/<area>/<version>/` in the blob storage. 
+The structure of this is described below.
 
 
-## Format for each grid resolution
+## Object store layout
 
-The format consists of four pieces of data:
+Under a single area/version in the blob storage, the following layout is expected:
 
-* forecast values
-* metadata
-* latitudes
-* longitudes
+* complete.json
+* sub-folders, containing the following objects:
+  * meta.json
+  * data
+  * longitude
+  * latitude
 
-### Forecast values
+### complete.json
 
-The forecast values are the actual values for the forecast. The data is organized so that all values for each location is stored together, one location after the other. Each value in the data is merely a little-endian encoded `int16`, and the meaning of each one is defined in the metadata.
+This contains metadata about the area/version itself. 
+Its format is described in `DatasetMeta` in [the code](../fortiup/pkg/fortiblob/collector.go).
 
-On the blob store, these data are stored in a file called `data`.
+When uploading data to the object store, this is supposed to be the last file uploaded, as its existence will trigger an update on `rawdataforecaster`.
 
-### Metadata
+### Sub-folders
 
-The metadata describes the meaning of the forecast values. The data structure is described in `MetaCollection` in [the code](../upload/pkg/fortiblob/collector.go). There is also [an example](../upload/pkg/fortiblob/collector_test.go) available for how to interpret raw data.
+Different data for the same geographic area can have different resolutions.
+This will be expressed as different values for longitude and latitudes.
+For each of these resolutions, a subfolder is made.
 
-In the blob store, this is json-encoded in a file called `meta.json`.
+The name of this sub-folder is expected to be unique for each set of lat/lon lists.
+For example, the name can be equal to the md5 sum of the concatenated latitude and longitude lists.
 
-### Latitudes and longitudes
+Four files are expected to exist here:
 
-In the blob store, latitudes and longitudes exist in two separate files. These define the lat/lon of each forecast point in the data, and each latitude/longitude is binary encoded as a `float32` in the files.
+* meta.json
+* longitude
+* latitude
+* data
 
-The index of each lat/lon pair matches the index of the forecast in the `data` file. So, if you want to look up the data for latitude/longitude index `x`, that data starts in the data file at index `(x * meta.LocationCount)`. Of course, if you make a lookup into a file, you must multiply this by 2 to account for int16 taking up two bytes.
+#### meta.json
+
+This describes the meaning of the forecast values. 
+The data structure is described in `MetaCollection` in [the code](../fortiup/pkg/fortiblob/collector.go). An example of such data can be found in [the same folder](../fortiup/pkg/fortiblob/collector_test.go)
+
+#### longitude and latitude
+
+In the blob store, latitudes and longitudes exist in two separate files. 
+These define the lat/lon of each forecast point in the data, and each latitude/longitude is binary encoded as a `float32` in the files.
+The ordering of the values are not important, as long as the same ordering is used in the logintude, latitude and data files.
+
+#### data
+
+Data contains the actual values for the forecast. 
+It consists of a series of little-endian encoded `ìnt16` values, and their meaning is defined in meta.json.
+
+To look up data for a specific location, you need two things:
+* An index from the latitude and longitude arrays.
+* The length of the relevant data - this is the metadata's number_of_points value.
+
+Multiply the two values to get the starting index.
+You can then use the metadata to interpret the relavant values.
+[The example](../fortiup/pkg/fortiblob/collector_test.go) shows how to do the interpretation.
