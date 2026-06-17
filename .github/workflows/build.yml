@@ -20,7 +20,8 @@ jobs:
           - rawdataforecaster
           - xmlfrontend
     env:
-      IMAGE: fortiregistry.azurecr.io/${{ matrix.service }}:${{ github.run_id }}
+      ACR_IMAGE: fortiregistry.azurecr.io/${{ matrix.service }}:${{ github.run_id }}
+      GHCR_IMAGE: ghcr.io/${{ github.repository_owner }}/forti-${{ matrix.service }}:${{ github.run_id }}
     steps:
       - uses: actions/checkout@v4
       - name: Login to ACR
@@ -29,10 +30,17 @@ jobs:
           registry: fortiregistry.azurecr.io
           username: ${{ secrets.AZURE_REGISTRY_USERNAME }}
           password: ${{ secrets.AZURE_REGISTRY_PASSWORD }}
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push
         run: |
-          docker build -t $IMAGE -f ${{ matrix.service }}/build/package/Dockerfile .
-          docker push $IMAGE
+          docker build -t $ACR_IMAGE -t $GHCR_IMAGE -f ${{ matrix.service }}/build/package/Dockerfile .
+          docker push $ACR_IMAGE
+          docker push $GHCR_IMAGE
 
   fortiup:
     name: Build fortiup
@@ -46,13 +54,19 @@ jobs:
       - name: Create ref slug
         id: slug
         run: echo "slug=$(echo '${{ github.ref_name }}' | tr '/.' '-')" >> "$GITHUB_OUTPUT"
-
+      - name: Login to ACR
+        uses: docker/login-action@v4
+        with:
+          registry: fortiregistry.azurecr.io
+          username: ${{ secrets.AZURE_REGISTRY_USERNAME }}
+          password: ${{ secrets.AZURE_REGISTRY_PASSWORD }}
       - name: Build image and extract binary
         env:
-          IMAGE: fortiregistry.azurecr.io/fortiup:${{ github.run_id }}
+          ACR_IMAGE: fortiregistry.azurecr.io/fortiup:${{ github.run_id }}
         run: |
-          docker build -t $IMAGE -f fortiup/build/package/Dockerfile .
-          docker run --rm --entrypoint cat $IMAGE /usr/local/bin/fortiup > ${{ steps.slug.outputs.slug }}
+          docker build -t $ACR_IMAGE -f fortiup/build/package/Dockerfile .
+          docker push $ACR_IMAGE
+          docker run --rm --entrypoint cat $ACR_IMAGE /usr/local/bin/fortiup > ${{ steps.slug.outputs.slug }}
           chmod +x ${{ steps.slug.outputs.slug }}
 
       - name: Upload binary artifact
