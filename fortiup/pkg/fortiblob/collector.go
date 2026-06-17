@@ -31,7 +31,7 @@ type GeographicArea struct {
 	SRS string `json:"srs"`
 }
 
-// MetaCollection is defines the meaning of the forecast data values. It
+// MetaCollection defines the meaning of the forecast data values. It
 // refers to a set of indexable data consisting of int16 values, where index 0
 // contains the first piece of data for a particular location.
 type MetaCollection struct {
@@ -39,12 +39,12 @@ type MetaCollection struct {
 	// Parameters maps parameter names to metadata about that parameter.
 	Parameters map[string]ParameterMeta `json:"parameters"`
 
-	// LocationCount is the total number of forecast values for a single
+	// NumberOfPoints is the total number of forecast values for a single
 	// location. It is equal to the sum of the length of all times slices
 	// under Parameters, and is therefore redundant.
 	// We keep it as a separate value to avoid having to calculate it over
 	// and over again upon usage.
-	LocationCount int `json:"number_of_points"`
+	NumberOfPoints int `json:"number_of_points"`
 }
 
 // ParameterMeta contains metadata about a forecast for a single parameter
