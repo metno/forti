@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       ACR_IMAGE: fortiregistry.azurecr.io/devcontainer:latest
-      GHCR_IMAGE: ghcr.io/${{ github.repository_owner }}/devcontainer:latest
+      GHCR_IMAGE: ghcr.io/${{ github.repository_owner }}/forti-devcontainer:latest
     steps:
       - uses: actions/checkout@v4
       - name: Login to ACR
