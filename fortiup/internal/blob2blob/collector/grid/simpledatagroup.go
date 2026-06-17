@@ -58,7 +58,7 @@ func collectSimpleDataGroup(ctx context.Context, out io.Writer, source *modelpro
 
 	return &fortiblob.MetaCollection{
 		Parameters:    pMeta,
-		LocationCount: elements,
+		NumberOfPoints: elements,
 	}, nil
 }
 

@@ -21,8 +21,8 @@ func (r *MemoryReader) Close() error {
 
 // Read gets the forecast for the given index.
 func (r *MemoryReader) Read(idx int) (*values.LocationDataCollection, error) {
-	sliceFrom := idx * r.LocationCount
-	sliceTo := sliceFrom + r.LocationCount
+	sliceFrom := idx * r.NumberOfPoints
+	sliceTo := sliceFrom + r.NumberOfPoints
 
 	if sliceTo > len(r.mad.Values) {
 		return nil, errors.New("out of bounds")

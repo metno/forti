@@ -1,8 +1,8 @@
 package fortiblob
 
 import (
+	"encoding/json"
 	"fmt"
-	"time"
 )
 
 // ExampleMetaCollection shows how to use MetaCollection to interpret raw data.
@@ -10,36 +10,34 @@ func ExampleMetaCollection() {
 	sampleData := []int16{
 		142, 139, 92, 0, 1,
 	}
-	meta := MetaCollection{
-		Parameters: map[string]ParameterMeta{
-			"temperature": {
-				Units: "c",
-				Times: []time.Time{
-					time.Date(2021, 3, 3, 0, 0, 0, 0, time.UTC),
-					time.Date(2021, 3, 3, 1, 0, 0, 0, time.UTC),
-				},
-				SliceFrom:   0,
-				ScaleFactor: 0.1,
-			},
-			"altitude": {
-				Units: "m",
-				Times: []time.Time{
-					{},
-				},
-				SliceFrom:   2,
-				ScaleFactor: 1,
-			},
-			"precipitation": {
-				Units: "kg/m²",
-				Times: []time.Time{
-					time.Date(2021, 3, 3, 0, 0, 0, 0, time.UTC),
-					time.Date(2021, 3, 3, 1, 0, 0, 0, time.UTC),
-				},
-				SliceFrom:   3,
-				ScaleFactor: 0.1,
-			},
-		},
-		LocationCount: len(sampleData),
+	metaJSON := `{
+  "parameters": {
+    "temperature": {
+      "units": "c",
+      "times": ["2021-03-03T00:00:00Z", "2021-03-03T01:00:00Z"],
+      "slice_from": 0,
+      "scale_factor": 0.1
+    },
+    "altitude": {
+      "units": "m",
+      "times": ["0001-01-01T00:00:00Z"],
+      "slice_from": 2,
+      "scale_factor": 1
+    },
+    "precipitation": {
+      "units": "kg/m²",
+      "times": ["2021-03-03T00:00:00Z", "2021-03-03T01:00:00Z"],
+      "slice_from": 3,
+      "scale_factor": 0.1
+    }
+  },
+  "number_of_points": 5
+}
+`
+
+	var meta MetaCollection
+	if err := json.Unmarshal([]byte(metaJSON), &meta); err != nil {
+		panic(err)
 	}
 
 	for parameter, meta := range meta.Parameters {

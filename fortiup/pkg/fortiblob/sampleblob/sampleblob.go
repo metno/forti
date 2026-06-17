@@ -82,7 +82,7 @@ func (c *client) GetGridMeta(ctx context.Context, d *fortiblob.DatasetMeta, grid
 				ScaleFactor: 0.1,
 			},
 		},
-		LocationCount: 5,
+		NumberOfPoints: 5,
 	}, nil
 }
 

@@ -28,7 +28,7 @@ func Collect(ctx context.Context, variables []*netcdf.Variable, out io.Writer) (
 func getMetaCollection(ctx context.Context, variables []*netcdf.Variable) (*fortiblob.MetaCollection, error) {
 	ret := fortiblob.MetaCollection{
 		Parameters:    make(map[string]fortiblob.ParameterMeta),
-		LocationCount: 0,
+		NumberOfPoints: 0,
 	}
 
 	for _, v := range variables {
@@ -56,12 +56,12 @@ func getMetaCollection(ctx context.Context, variables []*netcdf.Variable) (*fort
 		meta := fortiblob.ParameterMeta{
 			Units:       units,
 			Times:       times,
-			SliceFrom:   ret.LocationCount,
+			SliceFrom:   ret.NumberOfPoints,
 			ScaleFactor: getScaleFactor(v),
 		}
 
 		ret.Parameters[v.Name] = meta
-		ret.LocationCount += len(times)
+		ret.NumberOfPoints += len(times)
 	}
 
 	return &ret, nil

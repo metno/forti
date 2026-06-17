@@ -55,7 +55,7 @@ func getSampleReader() *MemoryReader {
 				ScaleFactor: 0.1,
 			},
 		},
-		LocationCount: 3,
+		NumberOfPoints: 3,
 	}
 
 	mad := allocate(3 * 4)
