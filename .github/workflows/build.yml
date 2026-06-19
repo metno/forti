@@ -21,7 +21,7 @@ jobs:
           - xmlfrontend
     env:
       ACR_IMAGE: fortiregistry.azurecr.io/${{ matrix.service }}:${{ github.run_id }}
-      GHCR_IMAGE: ghcr.io/${{ github.repository_owner }}/forti-${{ matrix.service }}:${{ github.run_id }}
+      GHCR_IMAGE: ghcr.io/${{ github.repository }}/${{ matrix.service }}:${{ github.run_id }}
     steps:
       - uses: actions/checkout@v4
       - name: Login to ACR
