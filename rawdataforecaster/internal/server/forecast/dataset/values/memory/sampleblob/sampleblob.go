@@ -7,10 +7,10 @@ import (
 	"io"
 	"time"
 
-	"github.com/metno/forti/rawdataforecaster/pkg/fortiblob"
+	internalformat "github.com/metno/forti-internalformat"
 )
 
-func Get() fortiblob.Client {
+func Get() internalformat.Client {
 	return &client{}
 }
 
@@ -26,9 +26,9 @@ func (c *client) Latest(ctx context.Context) (map[string]int, error) {
 
 }
 
-func (c *client) GetMeta(ctx context.Context, area string, version int) (*fortiblob.DatasetMeta, error) {
+func (c *client) GetMeta(ctx context.Context, area string, version int) (*internalformat.DatasetMeta, error) {
 	if area == "a" && version == 1 {
-		return &fortiblob.DatasetMeta{
+		return &internalformat.DatasetMeta{
 			Area:             "a",
 			Version:          1,
 			TimeUntilNext:    time.Hour,
@@ -40,15 +40,15 @@ func (c *client) GetMeta(ctx context.Context, area string, version int) (*fortib
 
 var notFound = errors.New("not found")
 
-func match(area string, version int, gridid string, d *fortiblob.DatasetMeta) bool {
+func match(area string, version int, gridid string, d *internalformat.DatasetMeta) bool {
 	return area == d.Area && version == d.Version && gridid == "id_a"
 }
 
-func (c *client) GetGridInfo(ctx context.Context, d *fortiblob.DatasetMeta) ([]fortiblob.GridInfo, error) {
+func (c *client) GetGridInfo(ctx context.Context, d *internalformat.DatasetMeta) ([]internalformat.GridInfo, error) {
 	if d.Area != "a" || d.Version != 1 {
 		return nil, notFound
 	}
-	return []fortiblob.GridInfo{
+	return []internalformat.GridInfo{
 		{
 			ID:          "id_a",
 			RawDataSize: 100,
@@ -56,12 +56,12 @@ func (c *client) GetGridInfo(ctx context.Context, d *fortiblob.DatasetMeta) ([]f
 	}, nil
 }
 
-func (c *client) GetGridMeta(ctx context.Context, d *fortiblob.DatasetMeta, gridid string) (*fortiblob.MetaCollection, error) {
+func (c *client) GetGridMeta(ctx context.Context, d *internalformat.DatasetMeta, gridid string) (*internalformat.MetaCollection, error) {
 	if !match("a", 1, "id_a", d) {
 		return nil, notFound
 	}
-	return &fortiblob.MetaCollection{
-		Parameters: map[string]fortiblob.ParameterMeta{
+	return &internalformat.MetaCollection{
+		Parameters: map[string]internalformat.ParameterMeta{
 			"rr": {
 				Units: "celsius",
 				Times: []time.Time{
@@ -86,7 +86,7 @@ func (c *client) GetGridMeta(ctx context.Context, d *fortiblob.DatasetMeta, grid
 	}, nil
 }
 
-func (c *client) GetData(ctx context.Context, d *fortiblob.DatasetMeta, gridid string) (fortiblob.DataReader, error) {
+func (c *client) GetData(ctx context.Context, d *internalformat.DatasetMeta, gridid string) (internalformat.DataReader, error) {
 	if !match("a", 1, "id_a", d) {
 		return nil, notFound
 	}
@@ -100,14 +100,14 @@ func (c *client) GetData(ctx context.Context, d *fortiblob.DatasetMeta, gridid s
 	return sampleDataReader(data, 500, 2), nil
 }
 
-func (c *client) GetDataRange(ctx context.Context, d *fortiblob.DatasetMeta, hash string, from, length int) (io.ReadCloser, error) {
+func (c *client) GetDataRange(ctx context.Context, d *internalformat.DatasetMeta, hash string, from, length int) (io.ReadCloser, error) {
 	if !match("a", 1, "id_a", d) {
 		return nil, notFound
 	}
 	return nil, errors.New("not implemented")
 }
 
-func (c *client) GetLatitude(ctx context.Context, d *fortiblob.DatasetMeta, gridid string) (fortiblob.DataReader, error) {
+func (c *client) GetLatitude(ctx context.Context, d *internalformat.DatasetMeta, gridid string) (internalformat.DataReader, error) {
 	if !match("a", 1, "id_a", d) {
 		return nil, notFound
 	}
@@ -120,7 +120,7 @@ func (c *client) GetLatitude(ctx context.Context, d *fortiblob.DatasetMeta, grid
 	return sampleDataReader(data, 100, 4), nil
 }
 
-func (c *client) GetLongitude(ctx context.Context, d *fortiblob.DatasetMeta, gridid string) (fortiblob.DataReader, error) {
+func (c *client) GetLongitude(ctx context.Context, d *internalformat.DatasetMeta, gridid string) (internalformat.DataReader, error) {
 	if !match("a", 1, "id_a", d) {
 		return nil, notFound
 	}

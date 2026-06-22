@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/metno/forti/rawdataforecaster/pkg/fortiblob"
+	internalformat "github.com/metno/forti-internalformat"
 	"gocloud.dev/blob"
 	_ "gocloud.dev/blob/memblob"
 )
@@ -41,7 +41,7 @@ func Test(t *testing.T) {
 
 func addForTest(t *testing.T, bucket *blob.Bucket, area string, version int, gridid string, lat, lon []float32) Nearester {
 	ctx := context.Background()
-	datasetMeta := &fortiblob.DatasetMeta{
+	datasetMeta := &internalformat.DatasetMeta{
 		Area:    area,
 		Version: version,
 	}
@@ -53,7 +53,7 @@ func addForTest(t *testing.T, bucket *blob.Bucket, area string, version int, gri
 		[]float32{11, 10, 11, 10},
 	)
 
-	client := fortiblob.NewClientFromBucket(bucket)
+	client := internalformat.NewClientFromBucket(bucket)
 
 	n, err := Add(ctx, client, datasetMeta, gridid)
 	if err != nil {

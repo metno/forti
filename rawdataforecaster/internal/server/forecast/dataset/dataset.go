@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/metno/forti/rawdataforecaster/pkg/fortiblob"
+	internalformat "github.com/metno/forti-internalformat"
+
 	"github.com/metno/forti/rawdataforecaster/internal/server/config"
 	"github.com/metno/forti/rawdataforecaster/internal/server/forecast/dataset/index"
 	"github.com/metno/forti/rawdataforecaster/internal/server/forecast/dataset/index/grid"
@@ -38,7 +39,7 @@ type Meta struct {
 }
 
 // Download creates and returns a Dataset from the given specification.
-func Download(ctx context.Context, source fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, cfg *config.Configuration) (*Dataset, error) {
+func Download(ctx context.Context, source internalformat.Client, datasetMeta *internalformat.DatasetMeta, cfg *config.Configuration) (*Dataset, error) {
 	grids, err := source.GetGridInfo(ctx, datasetMeta)
 	if err != nil {
 		return nil, err
@@ -96,7 +97,7 @@ func Download(ctx context.Context, source fortiblob.Client, datasetMeta *fortibl
 	}, nil
 }
 
-func verifySize(maxSizes map[string]interface{}, grids []fortiblob.GridInfo, datasetMeta *fortiblob.DatasetMeta) error {
+func verifySize(maxSizes map[string]interface{}, grids []internalformat.GridInfo, datasetMeta *internalformat.DatasetMeta) error {
 	maxGiB, ok := maxSizes[datasetMeta.Area]
 	if ok {
 		var actualSize int64

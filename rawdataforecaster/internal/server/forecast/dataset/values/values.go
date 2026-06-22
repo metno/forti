@@ -4,12 +4,12 @@ package values
 import (
 	"io"
 
-	"github.com/metno/forti/rawdataforecaster/pkg/fortiblob"
+	internalformat "github.com/metno/forti-internalformat"
 )
 
 // LocationDataCollection contains forecast information for a single point
 type LocationDataCollection struct {
-	ParameterMeta map[string]fortiblob.ParameterMeta
+	ParameterMeta map[string]internalformat.ParameterMeta
 	Data          []float32
 }
 
@@ -19,7 +19,7 @@ type Reader interface {
 }
 
 // Read copies data between the two given slices, taking into consideration the scale factor.
-func Read(m *fortiblob.ParameterMeta, out []float32, in []int16) {
+func Read(m *internalformat.ParameterMeta, out []float32, in []int16) {
 	scaleFactor := m.ScaleFactor
 	if scaleFactor == 0 {
 		scaleFactor = 0.1

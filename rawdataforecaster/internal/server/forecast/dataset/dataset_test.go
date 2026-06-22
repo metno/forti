@@ -10,7 +10,8 @@ import (
 
 	_ "gocloud.dev/blob/fileblob"
 
-	"github.com/metno/forti/rawdataforecaster/pkg/fortiblob"
+	internalformat "github.com/metno/forti-internalformat"
+
 	"github.com/metno/forti/rawdataforecaster/internal/server/config"
 	"github.com/metno/forti/rawdataforecaster/internal/server/forecast/dataset/index/lookup"
 	"gocloud.dev/blob"
@@ -76,8 +77,8 @@ func downloadDataset() (*Dataset, error) {
 
 	return Download(
 		ctx,
-		fortiblob.NewClientFromBucket(store),
-		&fortiblob.DatasetMeta{
+		internalformat.NewClientFromBucket(store),
+		&internalformat.DatasetMeta{
 			Area:    "group_b",
 			Version: 2,
 		},

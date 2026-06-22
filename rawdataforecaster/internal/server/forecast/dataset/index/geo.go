@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/metno/forti/rawdataforecaster/pkg/fortiblob"
+	internalformat "github.com/metno/forti-internalformat"
 	"github.com/metno/forti/rawdataforecaster/internal/server/forecast/dataset/index/georeader"
 	"github.com/metno/forti/rawdataforecaster/internal/server/forecast/dataset/index/lookup"
 )
@@ -39,7 +39,7 @@ func init() {
 }
 
 // Add creates or returns a cached lookup object from the given reader and id.
-func Add(ctx context.Context, source fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, gridid string) (Nearester, error) {
+func Add(ctx context.Context, source internalformat.Client, datasetMeta *internalformat.DatasetMeta, gridid string) (Nearester, error) {
 
 	gridReader := georeader.New(source)
 
@@ -73,7 +73,7 @@ func Add(ctx context.Context, source fortiblob.Client, datasetMeta *fortiblob.Da
 }
 
 // getData fetches data directly from a model provider, and adds it to the cache
-func getData(ctx context.Context, gridReader *georeader.Reader, datasetMeta *fortiblob.DatasetMeta, gridid, checksum string) (Nearester, error) {
+func getData(ctx context.Context, gridReader *georeader.Reader, datasetMeta *internalformat.DatasetMeta, gridid, checksum string) (Nearester, error) {
 	geoMap, err := gridReader.Get(ctx, datasetMeta, gridid)
 	if err != nil {
 		return nil, err

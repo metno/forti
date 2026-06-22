@@ -9,7 +9,7 @@ import (
 	"errors"
 	"unsafe"
 
-	"github.com/metno/forti/rawdataforecaster/pkg/fortiblob"
+	internalformat "github.com/metno/forti-internalformat"
 	"github.com/metno/forti/rawdataforecaster/internal/server/forecast/dataset/index/grid/proj"
 )
 
@@ -21,7 +21,7 @@ type Grid struct {
 }
 
 // New creates a new Area struct, with the given Well-Known Text and Coordinate Reference System.
-func New(area fortiblob.GeographicArea) (*Grid, error) {
+func New(area internalformat.GeographicArea) (*Grid, error) {
 
 	// Check that the given SRS is valid
 	conv, err := proj.Get(area.SRS)
