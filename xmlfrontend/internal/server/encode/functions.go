@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/metno/forti/parameters/weathersymbol"
+	"github.com/metno/go-weathersymbol"
 )
 
 var functions = map[string]func(value float32, allValues *map[string]float32) (string, error){

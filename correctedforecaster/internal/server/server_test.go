@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/metno/forti/internalprotocol"
-	"github.com/metno/forti/parameters/weathersymbol"
+	"github.com/metno/go-weathersymbol"
 )
 
 func TestCorrectWithBetterTopography(t *testing.T) {
