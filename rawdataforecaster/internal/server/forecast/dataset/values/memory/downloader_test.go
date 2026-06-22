@@ -5,7 +5,7 @@ import (
 	"math"
 	"testing"
 
-	"github.com/metno/forti/fortiup/pkg/fortiblob/sampleblob"
+	"github.com/metno/forti/rawdataforecaster/pkg/fortiblob/sampleblob"
 	"github.com/metno/forti/rawdataforecaster/internal/server/forecast/dataset/values"
 )
 

@@ -11,7 +11,7 @@ import (
 	"gocloud.dev/blob"
 	_ "gocloud.dev/blob/fileblob"
 
-	"github.com/metno/forti/fortiup/pkg/fortiblob"
+	"github.com/metno/forti/rawdataforecaster/pkg/fortiblob"
 	"github.com/metno/forti/rawdataforecaster/internal/server/config"
 )
 

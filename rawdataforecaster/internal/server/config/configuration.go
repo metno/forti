@@ -3,7 +3,7 @@ package config
 import (
 	"context"
 
-	"github.com/metno/forti/fortiup/pkg/fortiblob"
+	"github.com/metno/forti/rawdataforecaster/pkg/fortiblob"
 	"github.com/metno/forti/rawdataforecaster/internal/server/forecast/dataset/values"
 	"github.com/metno/forti/rawdataforecaster/internal/server/forecast/dataset/values/blob"
 	"github.com/metno/forti/rawdataforecaster/internal/server/forecast/dataset/values/memory"

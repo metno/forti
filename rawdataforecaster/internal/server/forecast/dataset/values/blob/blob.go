@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/metno/forti/fortiup/pkg/fortiblob"
+	"github.com/metno/forti/rawdataforecaster/pkg/fortiblob"
 	"github.com/metno/forti/rawdataforecaster/internal/server/forecast/dataset/values"
 )
 

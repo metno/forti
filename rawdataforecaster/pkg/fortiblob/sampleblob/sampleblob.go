@@ -7,7 +7,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/metno/forti/fortiup/pkg/fortiblob"
+	"github.com/metno/forti/rawdataforecaster/pkg/fortiblob"
 )
 
 func Get() fortiblob.Client {

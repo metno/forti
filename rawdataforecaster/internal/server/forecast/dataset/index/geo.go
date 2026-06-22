@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/metno/forti/fortiup/pkg/fortiblob"
+	"github.com/metno/forti/rawdataforecaster/pkg/fortiblob"
 	"github.com/metno/forti/rawdataforecaster/internal/server/forecast/dataset/index/georeader"
 	"github.com/metno/forti/rawdataforecaster/internal/server/forecast/dataset/index/lookup"
 )

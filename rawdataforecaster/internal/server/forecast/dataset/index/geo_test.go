@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/metno/forti/fortiup/pkg/fortiblob"
+	"github.com/metno/forti/rawdataforecaster/pkg/fortiblob"
 	"gocloud.dev/blob"
 	_ "gocloud.dev/blob/memblob"
 )
