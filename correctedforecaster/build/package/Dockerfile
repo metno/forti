@@ -30,7 +30,6 @@ WORKDIR /src
 RUN go mod download
 
 COPY internalprotocol /src/internalprotocol
-COPY parameters/ /src/parameters/
 COPY correctedforecaster/internal/ /src/correctedforecaster/internal/
 
 RUN go test ./...

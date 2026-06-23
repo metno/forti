@@ -6,7 +6,6 @@ WORKDIR /src
 RUN go mod download
 
 COPY internalprotocol /src/internalprotocol
-COPY parameters/ /src/parameters/
 COPY jsonfrontend/internal /src/jsonfrontend/internal
 COPY jsonfrontend/pkg /src/jsonfrontend/pkg
 
