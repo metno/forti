@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package internalprotocol;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/metno/forti/internal/internalprotocol";
+
+service Forecaster {
+  rpc GetForecast(GetForecastRequest) returns (Forecast) {}
+}
+
+message GetForecastRequest {
+  float latitude = 1;
+  float longitude = 2;
+  Altitude altitude = 3;
+}
+
+message Altitude {
+  float value = 1;
+  bool override = 2;
+}
+
+enum ForecastStatus {
+  OK = 0;
+  OutsideAllGrids = 1;
+  PointTooFarAway = 2;
+}
+
+message Forecast {
+  ForecastStatus forecastStatus = 1;
+
+  ForecastMeta forecastMeta = 2;
+
+  repeated ParameterMeta parameterMeta = 3;
+  repeated float data = 4;
+}
+
+message ForecastMeta {
+  google.protobuf.Timestamp updatedAt = 1;
+  google.protobuf.Timestamp nextUpdate = 2;
+
+  Location GridLocation = 3;
+}
+
+message Location {
+  float latitude = 1;
+  float longitude = 2;
+}
+
+message ParameterMeta {
+  string parameter = 1;
+  string units = 2;
+  int32 sliceFrom = 3;
+  repeated google.protobuf.Timestamp times = 4;
+}

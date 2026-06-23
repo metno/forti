@@ -5,7 +5,7 @@ COPY go.sum /src/go.sum
 WORKDIR /src
 RUN go mod download
 
-COPY internalprotocol /src/internalprotocol
+COPY internal/internalprotocol /src/internal/internalprotocol
 COPY moxfrontend/internal /src/moxfrontend/internal
 COPY moxfrontend/pkg /src/moxfrontend/pkg
 

@@ -5,7 +5,6 @@ COPY go.sum /src/go.sum
 WORKDIR /src
 RUN go mod download
 
-COPY internalprotocol /src/internalprotocol
 COPY internal/ /src/internal/
 COPY jsonfrontend/internal /src/jsonfrontend/internal
 COPY jsonfrontend/pkg /src/jsonfrontend/pkg
