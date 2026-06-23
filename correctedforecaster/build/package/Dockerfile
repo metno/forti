@@ -29,8 +29,8 @@ COPY go.sum /src/go.sum
 WORKDIR /src
 RUN go mod download
 
+COPY internal/ /src/internal/
 COPY internalprotocol /src/internalprotocol
-COPY parameters/ /src/parameters/
 COPY correctedforecaster/internal/ /src/correctedforecaster/internal/
 
 RUN go test ./...
