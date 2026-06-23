@@ -17,7 +17,7 @@ import (
 	"github.com/metno/forti/correctedforecaster/internal/health"
 	"github.com/metno/forti/correctedforecaster/internal/lookup"
 	"github.com/metno/forti/internal/internalprotocol"
-	"github.com/metno/forti/parameters/radar"
+	"github.com/metno/forti/internal/radar"
 )
 
 func Run(upstream string, port int, topographyFiles []string) error {

@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/metno/forti/internal/internalprotocol"
-	"github.com/metno/forti/parameters/radar"
+	"github.com/metno/forti/internal/radar"
 	"github.com/metno/forti/xmlfrontend/internal/server/config"
 	"github.com/metno/forti/xmlfrontend/internal/server/encode"
 	"github.com/metno/forti/xmlfrontend/pkg/xmlformat"
