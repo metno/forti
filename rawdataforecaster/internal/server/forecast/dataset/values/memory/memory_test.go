@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/metno/forti/fortiup/pkg/fortiblob"
+	internalformat "github.com/metno/forti-internalformat"
 	"github.com/metno/forti/rawdataforecaster/internal/server/forecast/dataset/values"
 )
 
@@ -37,8 +37,8 @@ func TestRead(t *testing.T) {
 }
 
 func getSampleReader() *MemoryReader {
-	meta := fortiblob.MetaCollection{
-		Parameters: map[string]fortiblob.ParameterMeta{
+	meta := internalformat.MetaCollection{
+		Parameters: map[string]internalformat.ParameterMeta{
 			"foo": {
 				Units:       "m",
 				Times:       nil,

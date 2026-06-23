@@ -8,16 +8,17 @@ import (
 	"sync"
 	"time"
 
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/metno/forti/fortiup/pkg/fortiblob"
+	internalformat "github.com/metno/forti-internalformat"
+
 	"github.com/metno/forti/rawdataforecaster/internal/server/config"
 	"github.com/metno/forti/rawdataforecaster/internal/server/forecast/dataset"
 	"github.com/metno/forti/rawdataforecaster/internal/server/forecast/dataset/index/lookup"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 // Forecast gives the latest weather forecast for a location.
 type Forecast struct {
-	store fortiblob.Client
+	store internalformat.Client
 
 	cfg *config.Configuration
 
@@ -27,7 +28,7 @@ type Forecast struct {
 
 // New initializes an object that can be queries for forecasts. It is self-updating.
 func New(cfg *config.Configuration) (*Forecast, error) {
-	store, err := fortiblob.NewClient(cfg.Source.Bucket)
+	store, err := internalformat.NewClient(cfg.Source.Bucket)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +43,7 @@ func New(cfg *config.Configuration) (*Forecast, error) {
 	return f, nil
 }
 
-func newFromClient(store fortiblob.Client, cfg *config.Configuration) (*Forecast, error) {
+func newFromClient(store internalformat.Client, cfg *config.Configuration) (*Forecast, error) {
 	f := &Forecast{
 		store:    store,
 		cfg:      cfg,

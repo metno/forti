@@ -10,7 +10,7 @@ import (
 	"gocloud.dev/blob"
 	_ "gocloud.dev/blob/fileblob"
 
-	"github.com/metno/forti/fortiup/pkg/fortiblob"
+	internalformat "github.com/metno/forti-internalformat"
 )
 
 func Test(t *testing.T) {
@@ -25,8 +25,8 @@ func Test(t *testing.T) {
 	}
 
 	reader, err := Download(ctx,
-		fortiblob.NewClientFromBucket(store),
-		&fortiblob.DatasetMeta{
+		internalformat.NewClientFromBucket(store),
+		&internalformat.DatasetMeta{
 			Area:    "group_a",
 			Version: 1,
 		},

@@ -3,13 +3,14 @@ package memory
 import (
 	"errors"
 
-	"github.com/metno/forti/fortiup/pkg/fortiblob"
+	internalformat "github.com/metno/forti-internalformat"
+
 	"github.com/metno/forti/rawdataforecaster/internal/server/forecast/dataset/values"
 )
 
 // MemoryReader serves forecast data.
 type MemoryReader struct {
-	fortiblob.MetaCollection
+	internalformat.MetaCollection
 	mad *manuallyAllocatedData
 }
 

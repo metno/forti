@@ -7,11 +7,11 @@ import (
 	"io"
 	"log"
 
-	"github.com/metno/forti/fortiup/pkg/fortiblob"
+	internalformat "github.com/metno/forti-internalformat"
 	"github.com/metno/forti/rawdataforecaster/internal/server/forecast/dataset/values"
 )
 
-func Download(ctx context.Context, source fortiblob.Client, datasetMeta *fortiblob.DatasetMeta, gridid string, config map[string]interface{}) (values.Reader, error) {
+func Download(ctx context.Context, source internalformat.Client, datasetMeta *internalformat.DatasetMeta, gridid string, config map[string]interface{}) (values.Reader, error) {
 	d := downloader{
 		store: source,
 	}
@@ -19,16 +19,16 @@ func Download(ctx context.Context, source fortiblob.Client, datasetMeta *fortibl
 }
 
 type downloader struct {
-	store fortiblob.Client
+	store internalformat.Client
 }
 
-func newDownloader(source fortiblob.Client) *downloader {
+func newDownloader(source internalformat.Client) *downloader {
 	return &downloader{
 		store: source,
 	}
 }
 
-func (d *downloader) Get(ctx context.Context, datasetMeta *fortiblob.DatasetMeta, gridid string) (values.Reader, error) {
+func (d *downloader) Get(ctx context.Context, datasetMeta *internalformat.DatasetMeta, gridid string) (values.Reader, error) {
 
 	metaCollection, err := d.store.GetGridMeta(ctx, datasetMeta, gridid)
 	if err != nil {
@@ -46,7 +46,7 @@ func (d *downloader) Get(ctx context.Context, datasetMeta *fortiblob.DatasetMeta
 	}, nil
 }
 
-func (d *downloader) getMad(ctx context.Context, meta *fortiblob.DatasetMeta, gridid string) (*manuallyAllocatedData, error) {
+func (d *downloader) getMad(ctx context.Context, meta *internalformat.DatasetMeta, gridid string) (*manuallyAllocatedData, error) {
 	src, err := d.store.GetData(ctx, meta, gridid)
 	if err != nil {
 		return nil, err
@@ -58,7 +58,7 @@ func (d *downloader) getMad(ctx context.Context, meta *fortiblob.DatasetMeta, gr
 	return readData(src)
 }
 
-func readData(src fortiblob.DataReader) (*manuallyAllocatedData, error) {
+func readData(src internalformat.DataReader) (*manuallyAllocatedData, error) {
 	valueSize := int64(2) // sizeof(int16)
 	mad := allocate(int(src.Size() / valueSize))
 
