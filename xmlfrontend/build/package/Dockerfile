@@ -6,6 +6,7 @@ WORKDIR /src
 RUN go mod download
 
 COPY internalprotocol /src/internalprotocol
+COPY internal/ /src/internal/
 COPY xmlfrontend/internal /src/xmlfrontend/internal
 COPY xmlfrontend/pkg /src/xmlfrontend/pkg
 

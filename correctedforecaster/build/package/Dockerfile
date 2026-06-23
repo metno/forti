@@ -29,6 +29,7 @@ COPY go.sum /src/go.sum
 WORKDIR /src
 RUN go mod download
 
+COPY internal/ /src/internal/
 COPY internalprotocol /src/internalprotocol
 COPY correctedforecaster/internal/ /src/correctedforecaster/internal/
 
