@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/metno/forti/internalprotocol"
+	"github.com/metno/forti/internal/internalprotocol"
 	"github.com/metno/forti/jsonfrontend/internal/server/config"
 	"github.com/metno/forti/jsonfrontend/pkg/jsonformat"
 

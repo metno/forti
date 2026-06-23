@@ -3,7 +3,7 @@ package health
 import (
 	"context"
 
-	"github.com/metno/forti/internalprotocol"
+	"github.com/metno/forti/internal/internalprotocol"
 	"google.golang.org/grpc/health/grpc_health_v1"
 )
 

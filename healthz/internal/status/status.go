@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/metno/forti/internalprotocol"
+	"github.com/metno/forti/internal/internalprotocol"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )

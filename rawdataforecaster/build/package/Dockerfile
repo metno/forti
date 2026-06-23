@@ -52,7 +52,7 @@ COPY go.sum /src/go.sum
 WORKDIR /src
 RUN go mod download
 
-COPY internalprotocol /src/internalprotocol
+COPY internal/internalprotocol /src/internal/internalprotocol
 COPY rawdataforecaster/internal/ /src/rawdataforecaster/internal
 COPY rawdataforecaster/test/ /src/rawdataforecaster/test
 

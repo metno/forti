@@ -5,7 +5,7 @@ COPY go.sum /src/go.sum
 WORKDIR /src
 RUN go mod download
 
-COPY internalprotocol /src/internalprotocol
+COPY internal/internalprotocol /src/internal/internalprotocol
 COPY benchmarker/internal /src/benchmarker/internal
 
 COPY benchmarker/cmd /src/benchmarker/cmd

@@ -16,7 +16,7 @@ import (
 	"github.com/metno/forti/correctedforecaster/internal/correction"
 	"github.com/metno/forti/correctedforecaster/internal/health"
 	"github.com/metno/forti/correctedforecaster/internal/lookup"
-	"github.com/metno/forti/internalprotocol"
+	"github.com/metno/forti/internal/internalprotocol"
 	"github.com/metno/forti/parameters/radar"
 )
 

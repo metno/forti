@@ -8,7 +8,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/metno/forti/internalprotocol"
+	"github.com/metno/forti/internal/internalprotocol"
 	"github.com/metno/forti/xmlfrontend/internal/server/config"
 	"github.com/metno/forti/xmlfrontend/pkg/xmlformat"
 )

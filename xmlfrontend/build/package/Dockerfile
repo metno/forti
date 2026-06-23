@@ -5,7 +5,7 @@ COPY go.sum /src/go.sum
 WORKDIR /src
 RUN go mod download
 
-COPY internalprotocol /src/internalprotocol
+COPY internal/internalprotocol /src/internal/internalprotocol
 COPY parameters/ /src/parameters/
 COPY xmlfrontend/internal /src/xmlfrontend/internal
 COPY xmlfrontend/pkg /src/xmlfrontend/pkg

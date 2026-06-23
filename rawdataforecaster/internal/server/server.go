@@ -12,7 +12,7 @@ import (
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"github.com/metno/forti/internalprotocol"
+	"github.com/metno/forti/internal/internalprotocol"
 	"github.com/metno/forti/rawdataforecaster/internal/health"
 	"github.com/metno/forti/rawdataforecaster/internal/server/config"
 	"github.com/metno/forti/rawdataforecaster/internal/server/forecast"

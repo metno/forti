@@ -6,7 +6,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/metno/forti/internalprotocol"
+	"github.com/metno/forti/internal/internalprotocol"
 	"github.com/metno/forti/moxfrontend/pkg/mox"
 )
 
