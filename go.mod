@@ -5,6 +5,7 @@ go 1.26.4
 require (
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/metno/forti-internalformat v0.1.0
+	github.com/metno/go-weathersymbol v0.1.1
 	github.com/prometheus/client_golang v1.23.2
 	gocloud.dev v0.46.0
 	google.golang.org/grpc v1.80.0

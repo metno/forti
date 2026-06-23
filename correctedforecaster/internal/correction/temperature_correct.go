@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/metno/forti/internalprotocol"
-	"github.com/metno/forti/parameters/weathersymbol"
+	"github.com/metno/go-weathersymbol"
 )
 
 // UpdateTemperature performs corrections on air temperature variables, based

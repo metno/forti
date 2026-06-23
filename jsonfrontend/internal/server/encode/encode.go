@@ -8,7 +8,7 @@ import (
 	"github.com/metno/forti/jsonfrontend/internal/server/config"
 	"github.com/metno/forti/jsonfrontend/pkg/jsonformat"
 	"github.com/metno/forti/parameters/radar"
-	"github.com/metno/forti/parameters/weathersymbol"
+	"github.com/metno/go-weathersymbol"
 )
 
 func Encode(forecast *internalprotocol.Forecast) (*jsonformat.GeoJSON, error) {
