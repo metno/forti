@@ -11,7 +11,8 @@ import (
 	"gocloud.dev/blob"
 	_ "gocloud.dev/blob/fileblob"
 
-	"github.com/metno/forti/fortiup/pkg/fortiblob"
+	internalformat "github.com/metno/forti-internalformat"
+
 	"github.com/metno/forti/rawdataforecaster/internal/server/config"
 )
 
@@ -27,7 +28,7 @@ func Test(t *testing.T) {
 	}
 
 	forecast, err := newFromClient(
-		fortiblob.NewClientFromBucket(bucket),
+		internalformat.NewClientFromBucket(bucket),
 		&config.Configuration{
 			Areas: []string{"group_a", "group_b"},
 			Loader: config.Loader{

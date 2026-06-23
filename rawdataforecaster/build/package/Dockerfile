@@ -53,7 +53,6 @@ WORKDIR /src
 RUN go mod download
 
 COPY internalprotocol /src/internalprotocol
-COPY fortiup/pkg /src/fortiup/pkg
 COPY rawdataforecaster/internal/ /src/rawdataforecaster/internal
 COPY rawdataforecaster/test/ /src/rawdataforecaster/test
 

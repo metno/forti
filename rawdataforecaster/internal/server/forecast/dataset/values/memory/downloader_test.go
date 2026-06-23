@@ -5,8 +5,8 @@ import (
 	"math"
 	"testing"
 
-	"github.com/metno/forti/fortiup/pkg/fortiblob/sampleblob"
 	"github.com/metno/forti/rawdataforecaster/internal/server/forecast/dataset/values"
+	"github.com/metno/forti/rawdataforecaster/internal/server/forecast/dataset/values/memory/sampleblob"
 )
 
 func TestDownload(t *testing.T) {
