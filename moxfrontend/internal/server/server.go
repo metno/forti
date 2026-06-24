@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"github.com/metno/forti/internal/internalprotocol"
+	"github.com/metno/forti/moxfrontend/internal/mox"
 	"github.com/metno/forti/moxfrontend/internal/server/encode"
-	"github.com/metno/forti/moxfrontend/pkg/mox"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
