@@ -16,10 +16,10 @@ import (
 	"time"
 
 	"github.com/metno/forti/internal/internalprotocol"
-	"github.com/metno/forti/jsonfrontend/internal/jsonformat"
 	"github.com/metno/forti/jsonfrontend/internal/server/config"
 	"github.com/metno/forti/jsonfrontend/internal/server/encode"
 	"github.com/metno/forti/jsonfrontend/internal/server/metrics"
+	"github.com/metno/forti/jsonfrontend/pkg/jsonformat"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
