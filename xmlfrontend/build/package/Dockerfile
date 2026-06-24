@@ -7,7 +7,6 @@ RUN go mod download
 
 COPY internal/ /src/internal/
 COPY xmlfrontend/internal /src/xmlfrontend/internal
-COPY xmlfrontend/pkg /src/xmlfrontend/pkg
 
 RUN go test ./...
 

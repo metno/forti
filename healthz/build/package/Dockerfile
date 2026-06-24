@@ -6,7 +6,6 @@ WORKDIR /src
 RUN go mod download
 
 COPY jsonfrontend/pkg/ /src/jsonfrontend/pkg/
-COPY xmlfrontend/pkg/ /src/xmlfrontend/pkg/
 COPY internal/internalprotocol /src/internal/internalprotocol
 
 COPY healthz /src/healthz
