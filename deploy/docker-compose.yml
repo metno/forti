@@ -1,0 +1,47 @@
+services:
+  rawdataforecaster:
+    build:
+      context: ..
+      dockerfile: rawdataforecaster/build/package/Dockerfile
+    ports:
+      - "5052:5052"
+    volumes:
+      - ./rawdataforecaster.config.json:/config.json:ro
+      - ${FORECAST_DATA_PATH:-../data/forecast}:/data/forecast:ro
+    command: ["-config", "/config.json"]
+    networks:
+      - internal
+
+  correctedforecaster:
+    build:
+      context: ..
+      dockerfile: correctedforecaster/build/package/Dockerfile
+    profiles: ["corrected"]
+    volumes:
+      - ${TOPOGRAPHY_DATA_PATH:-../data/topography}:/data/topography:ro
+    command:
+      - "-upstream"
+      - "rawdataforecaster:5052"
+      - "-workdir"
+      - "/data/topography"
+    depends_on:
+      - rawdataforecaster
+    networks:
+      - internal
+
+  jsonfrontend:
+    build:
+      context: ..
+      dockerfile: jsonfrontend/build/package/Dockerfile
+    ports:
+      - "8080:8080"
+    command:
+      - "-upstream"
+      - "${JSONFRONTEND_UPSTREAM:-rawdataforecaster:5052}"
+    depends_on:
+      - rawdataforecaster
+    networks:
+      - internal
+
+networks:
+  internal:
