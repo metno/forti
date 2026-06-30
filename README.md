@@ -37,9 +37,9 @@ The run ID may be found by looking at the correct build on the [Actions](https:/
 
 For `fortiup`, a binary artifact is built and uploaded (rather than a docker image) when a tag matching `fortiup/*` is pushed.
 
-## Run locally
+## Getting started
 
-[How to run f2 locally](run_locally.md)
+[Getting started guide](GETTING_STARTED.md)
 
 ## Architecture
 
