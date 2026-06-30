@@ -10,7 +10,7 @@ import (
 
 	"github.com/metno/forti/internal/internalprotocol"
 	"github.com/metno/forti/xmlfrontend/internal/server/config"
-	"github.com/metno/forti/xmlfrontend/pkg/xmlformat"
+	"github.com/metno/forti/xmlfrontend/internal/xmlformat"
 )
 
 func Encode(location *internalprotocol.GetForecastRequest, forecast *internalprotocol.Forecast) *xmlformat.ForecastDocument {

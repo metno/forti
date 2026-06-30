@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/metno/forti/internal/internalprotocol"
-	"github.com/metno/forti/moxfrontend/pkg/mox"
+	"github.com/metno/forti/moxfrontend/internal/mox"
 )
 
 func EncodeNoData() *mox.ForecastDocument {

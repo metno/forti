@@ -7,7 +7,6 @@ RUN go mod download
 
 COPY internal/internalprotocol /src/internal/internalprotocol
 COPY moxfrontend/internal /src/moxfrontend/internal
-COPY moxfrontend/pkg /src/moxfrontend/pkg
 
 RUN go test ./...
 
