@@ -2,7 +2,7 @@
 
 ## Container images
 
-For all components except `fortiup`, a Docker image is built and pushed to the registry on every commit. All images from a single workflow run share the same tag, corresponding to the GitHub Actions `run_id`.
+A Docker image is built and pushed to the registry on every commit. All images from a single workflow run share the same tag, corresponding to the GitHub Actions `run_id`.
 
 For example:
 
