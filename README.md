@@ -6,40 +6,21 @@ Forti is a REST webservice that delivers weather and ocean forecast timeseries d
 
 The data sources to the service are irregular grids of data, produced by batch jobs. These batch jobs use a wide range of input datasets, and run a set of post-processing algorithms to both improve the forecast quality and to add additional forecast parameters.
 
-The application is built with Go, although with some small parts in C++.
+The application is built with Go, although with some small parts in C++. It is meant to be run as containers — each component has an associated Dockerfile.
 
 The code for the batch jobs that produce the datasets are not included in this repository.
 
-## Usage
+## Getting started
 
-The application is meant to be run as containers. Each component has an associated Dockerfile.
+[Getting started guide](docs/getting-started.md)
 
 ## Development
 
 ### Test
 
-### Build
+### CI/CD
 
-For all components, except fortiup, a docker image is built and pushed on every commit.
-They will all get the same tag, corresponding to the GitHub Actions `run_id`, which identifies a single workflow run.
-
-For example, you may end up with the following images in the registry.
-
-- fortiregistry.azurecr.io/xmlfrontend:337359
-- fortiregistry.azurecr.io/moxfrontend:337359
-- fortiregistry.azurecr.io/rawdataforecaster:337359
-- fortiregistry.azurecr.io/jsonfrontend:337359
-- fortiregistry.azurecr.io/correctedforecaster:337359
-- fortiregistry.azurecr.io/healthz:337359
-
-In this case the docker tag, 337359, corresponds to the GitHub Actions run ID when building the project.
-The run ID may be found by looking at the correct build on the [Actions](https://github.com/metno/forti/actions) page.
-
-For `fortiup`, a binary artifact is built and uploaded (rather than a docker image) when a tag matching `fortiup/*` is pushed.
-
-## Getting started
-
-[Getting started guide](GETTING_STARTED.md)
+See [docs/ci-cd.md](docs/ci-cd.md) for details on how container images are built and tagged.
 
 ## Architecture
 
