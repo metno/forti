@@ -18,10 +18,6 @@ The code for the batch jobs that produce the datasets are not included in this r
 
 ### Test
 
-### CI/CD
-
-See [docs/ci-cd.md](docs/ci-cd.md) for details on how container images are built and tagged.
-
 ## Architecture
 
 The application is made up of several binaries working together.
