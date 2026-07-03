@@ -148,6 +148,8 @@ func (s *Server) correctWithBetterTopography(request *internalprotocol.GetForeca
 	}
 
 	altitudeDiff := *modelAltitude - realAltitude
+	// Only correct when the altitude difference exceeds ±100 m. Smaller gaps are
+	// within the noise of the model grid and not worth adjusting.
 	if altitudeDiff < -100 || altitudeDiff > 100 {
 		correction.UpdateTemperature(interpreted, altitudeDiff)
 		correction.UpdateDewpointTemperature(interpreted)
