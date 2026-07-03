@@ -1,53 +1,18 @@
-# Simple Forecaster
+# rawdataforecaster
 
-Serves unmodified data from a forecast. The term 'simple' refers to the data not having been processed by forti.
+Serves raw (uncorrected) forecast data over gRPC from a blob store (Azure, S3, or local `file://`) in the [forti-internalformat](https://github.com/metno/forti-internalformat) format.
 
-## Serving data
+## Loader strategies
 
-```mermaid
-graph LR;
-server --> forecast;
-forecast --> dataset;
-dataset --> index;
-dataset --> values;
-```
+The `loader.type` config key selects how forecast data is held in memory:
 
-Four components are mainly involved in serving data: 
+| Type | Behaviour |
+|---|---|
+| `memory` | Downloads the full grid blob at startup into CGo-allocated memory (bypassing GC pressure). Zero I/O at query time. Capped by `max_size_gib`. |
+| `blob` | Downloads nothing upfront; issues a byte-range read per query (2 s timeout). |
 
-### server
+Use `memory` when latency matters and the dataset fits in RAM; use `blob` otherwise.
 
-Handles incoming grpc requests, including protobuf serialization.
+## Native dependencies
 
-### forecast
-
-Determines what is the correct group (and version) to serve data from. Forwards requests to the relevant `dataset` handler.
-
-### dataset
-
-Each object of type `dataset.Dataset` serves data for a single area/version. They maintain a list of grids for its area. A grid is a unique collection of latitude/longitude pairs within a single area. They exist because different parameters may have different grid resolutions.
-
-Handles requests for a given latitute/longitude pair. For each grid, lookup the correct index from `index`, and find relevant data from `values`.
-
-### index
-
-Handles lookup from latitude/longitude to a grid index.
-
-### values
-
-A collection of all data having the same area and grid id. 
-
-Provides a `Reader` interface, for looking up data with a given index. The index is provided by the `geo` component. There are several implementations of this interface.
-
-## Loading data
-
-`forecast` component contains a function, `Forecast.update`, that is called periodically in a goroutine. It checks a blob store for updates, and loads data if needed, by calling `dataset.Download`.
-
-## Other modules
-
-### internal.health
-
-Provides grpc healthcheck, meant for kubernetes readiness probe.
-
-### pointdata
-
-Defines internal data format. Its placement reflects that several modules in various places in the hierarchy needs access to this.
+The geographic index uses [s2geometry](https://github.com/google/s2geometry) and [PROJ](https://proj.org/) via CGo. These are pre-installed in the devcontainer; building outside it requires both libraries.
