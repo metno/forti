@@ -79,6 +79,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		metrics.OutsideAllGrids.Add(1)
 		return
 	case internalprotocol.ForecastStatus_PointTooFarAway:
+		// The point is within a grid's bounding area but too far from any grid cell.
+		// Return 200 with a GeoJSON error body rather than 4xx so that clients receive
+		// a structured response with location context instead of a plain HTTP error.
 		doc = encode.EncodeError(data, "no data at the given location")
 		metrics.PointTooFarAway.Add(1)
 	default:
@@ -193,7 +196,8 @@ func getParam(q url.Values, name string, from float32, to float32) (float32, err
 }
 
 // expires returns a randomized time.Time for use as a value to the Expires header.
-// Maximum value is current + maxOffset seconds.
+// The expiry is randomly drawn from [0.8×maxOffset, maxOffset) rather than being
+// a fixed value. This spreads cache invalidation across clients to prevent stampedes.
 // Returns current time + 1 minute if maxOffset <=0.
 func expires(current time.Time, maxOffset int) time.Time {
 	if maxOffset > 0 {

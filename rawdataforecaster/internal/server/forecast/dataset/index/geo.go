@@ -29,6 +29,10 @@ type indexID struct {
 	GridID  string
 }
 
+// idCache maps a (area, version, gridID) triple to the MD5 checksum of its lat/lon data.
+// checkSumCache maps that checksum to a shared GeoMap (the s2geometry spatial index) with
+// a reference count. Together they allow datasets with identical grid geometry to reuse
+// the same GeoMap across version updates, avoiding an expensive rebuild.
 var idCache map[indexID]string
 var checkSumCache map[string]*cachedMaps
 var cacheMutex sync.Mutex

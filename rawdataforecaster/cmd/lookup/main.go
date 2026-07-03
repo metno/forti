@@ -15,7 +15,9 @@ import (
 func main() {
 	latitude := flag.Float64("lat", 59, "latitude to query")
 	longitude := flag.Float64("lon", 11, "longitude to query")
+	altitude := flag.Float64("altitude", -1, "altitude to query; set to 0 for sea level, default -1 means not set")
 	address := flag.String("address", "localhost:5052", "Server to connect to")
+	parameter := flag.String("parameter", "", "Only show data for the given parameter")
 	flag.Parse()
 
 	// Set up a connection to the server.
@@ -33,6 +35,12 @@ func main() {
 		Latitude:  float32(*latitude),
 		Longitude: float32(*longitude),
 	}
+	if *altitude != -1 {
+		request.Altitude = &internalprotocol.Altitude{
+			Override: true,
+			Value:    float32(*altitude),
+		}
+	}
 
 	forecast, err := c.GetForecast(ctx, &request)
 	if err != nil {
@@ -46,6 +54,9 @@ func main() {
 	fmt.Printf("updated at: %v\n", forecast.ForecastMeta.UpdatedAt.AsTime())
 	fmt.Printf("next update: %v\n", forecast.ForecastMeta.NextUpdate.AsTime())
 	for _, meta := range forecast.ParameterMeta {
+		if *parameter != "" && meta.Parameter != *parameter {
+			continue
+		}
 		fmt.Printf("%s (%s):\n", meta.Parameter, meta.Units)
 		for i, t := range meta.Times {
 			value := forecast.Data[i+int(meta.SliceFrom)]

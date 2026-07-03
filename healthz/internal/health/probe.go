@@ -46,6 +46,10 @@ func NewProbeResult(serviceProblems, dataProblems map[string][]string, maxfailed
 func runProbe(conf *config.ProbeConfiguration) ProbeResult {
 	log.Println("Perform probe...")
 
+	// serviceProblems and dataProblems are tracked separately so that health can be
+	// reported on two independent dimensions: service (any location failing means the
+	// API itself is broken) vs. data (a configurable number of locations may have stale
+	// or missing data before the data dimension is considered unhealthy).
 	serviceProblems := map[string][]string{}
 	dataProblems := map[string][]string{}
 
