@@ -14,7 +14,21 @@ The code for the batch jobs that produce the datasets are not included in this r
 
 [Getting started guide](docs/getting-started.md)
 
+## Documentation
+
+### Forti JSON format
+
+Forti serializes the forecast timeseries in a custom json format, based on [GeoJSON](https://geojson.org/)
+
+The format is semantically versioned with a [jsonschema](forti.schema.v1.0.0.json) in this repo.
+
 ## Development
+
+### Release new json format version
+
+```
+go run ./jsonfrontend/cmd/generate-jsonschema -version vX.Y.Z > forti.schema.json
+```
 
 ### Test
 

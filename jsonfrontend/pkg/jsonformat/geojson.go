@@ -6,15 +6,15 @@ import (
 )
 
 type GeoJSON struct {
-	Type       string    `json:"type"`
+	Type       string    `json:"type"       jsonschema:"enum=Feature"`
 	Geometry   Geometry  `json:"geometry"`
 	Properties *Forecast `json:"properties,omitempty"`
 }
 
 type GeoJSONCoordinate float32
 type Geometry struct {
-	Type        string              `json:"type"`
-	Coordinates []GeoJSONCoordinate `json:"coordinates"`
+	Type        string              `json:"type"        jsonschema:"enum=Point"`
+	Coordinates []GeoJSONCoordinate `json:"coordinates" jsonschema:"minItems=2,maxItems=3,description=Longitude and latitude, with optional altitude as a third element"`
 }
 
 func (c GeoJSONCoordinate) MarshalJSON() ([]byte, error) {
