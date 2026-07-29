@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/metno/forti/forecast.schema.v1.0.0.json",
+  "$ref": "#/$defs/GeoJSON",
+  "$defs": {
+    "Forecast": {
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Metadata"
+        },
+        "timeseries": {
+          "items": {
+            "$ref": "#/$defs/TimeStep"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "meta",
+        "timeseries"
+      ]
+    },
+    "ForecastDetails": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "type": "object"
+    },
+    "GeoJSON": {
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "Feature"
+          ]
+        },
+        "geometry": {
+          "$ref": "#/$defs/Geometry"
+        },
+        "properties": {
+          "$ref": "#/$defs/Forecast"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "type",
+        "geometry"
+      ]
+    },
+    "Geometry": {
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "Point"
+          ]
+        },
+        "coordinates": {
+          "items": {
+            "type": "number"
+          },
+          "type": "array",
+          "maxItems": 3,
+          "minItems": 2,
+          "description": "Longitude and latitude"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "type",
+        "coordinates"
+      ]
+    },
+    "Metadata": {
+      "properties": {
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Time of the last forecast update"
+        },
+        "error": {
+          "type": "string",
+          "description": "Error message if the forecast is unavailable"
+        },
+        "units": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object",
+          "description": "Maps each forecast parameter name to its physical unit"
+        },
+        "radar_coverage": {
+          "type": "string",
+          "description": "Custom metadata used only for timeseries forecasts from radar data. Radar coverage status for the location"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "updated_at",
+        "units"
+      ]
+    },
+    "Summary": {
+      "properties": {
+        "symbol_code": {
+          "type": "string",
+          "description": "Weather symbol identifier"
+        },
+        "symbol_confidence": {
+          "type": "string",
+          "description": "Confidence level of the weather symbol"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "symbol_code"
+      ]
+    },
+    "TimeStep": {
+      "properties": {
+        "time": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Start time of the forecast interval"
+        },
+        "data": {
+          "additionalProperties": {
+            "$ref": "#/$defs/TimestepData"
+          },
+          "type": "object",
+          "description": "Forecast data keyed by interval length e.g. instance"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "time",
+        "data"
+      ]
+    },
+    "TimestepData": {
+      "properties": {
+        "summary": {
+          "$ref": "#/$defs/Summary",
+          "description": "Summary of the forecast parameters"
+        },
+        "details": {
+          "$ref": "#/$defs/ForecastDetails",
+          "description": "List of forecast parameters and their numerical values"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "details"
+      ]
+    }
+  }
+}
