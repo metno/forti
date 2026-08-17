@@ -157,9 +157,9 @@ func dewPointTemperature(humidity, temperature float64) float64 {
 	return dewPoint
 }
 
+var temperatureExpression = regexp.MustCompile("^(apparent_)?air_temperature(_.+)?$")
+
 // isTemperature determins if the given parameter name represents a temperature.
 func isTemperature(param string) bool {
 	return temperatureExpression.MatchString(param) && !strings.HasSuffix(param, "_code")
 }
-
-var temperatureExpression = regexp.MustCompile("(apparent_)?air_temperature(_.+)?")
