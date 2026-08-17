@@ -18,23 +18,7 @@ go run ./tools/download-topography/cmd/download-topography [flags]
 
 ## Prerequisites
 
-AWS CLI must be installed:
-
-```bash
-# macOS
-brew install awscli
-
-# Linux (Debian/Ubuntu)
-apt-get install awscli
-
-# Linux (RHEL/CentOS)
-yum install aws-cli
-
-# Or via pip
-pip install awscli
-```
-
-No AWS credentials are required — the Copernicus DEM is publicly available.
+None! The tool downloads tiles via HTTPS from the public Copernicus DEM S3 bucket.
 
 ## Usage
 

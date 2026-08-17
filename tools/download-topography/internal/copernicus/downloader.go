@@ -3,10 +3,10 @@ package copernicus
 import (
 	"context"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"strings"
 	"sync"
 	"sync/atomic"
 )
@@ -21,25 +21,22 @@ type DownloadStats struct {
 
 // Downloader handles parallel downloading of Copernicus DEM tiles
 type Downloader struct {
-	outputDir string
-	workers   int
+	outputDir  string
+	workers    int
+	httpClient *http.Client
 }
 
 // NewDownloader creates a new downloader
 func NewDownloader(outputDir string, workers int) *Downloader {
 	return &Downloader{
-		outputDir: outputDir,
-		workers:   workers,
+		outputDir:  outputDir,
+		workers:    workers,
+		httpClient: &http.Client{},
 	}
 }
 
 // DownloadTiles downloads all tiles using parallel workers
 func (d *Downloader) DownloadTiles(tiles []string) (*DownloadStats, error) {
-	// Check for AWS CLI
-	if err := checkAWSCLI(); err != nil {
-		return nil, err
-	}
-
 	stats := &DownloadStats{Total: len(tiles)}
 	var downloaded, notAvailable, failed atomic.Int32
 
@@ -53,7 +50,7 @@ func (d *Downloader) DownloadTiles(tiles []string) (*DownloadStats, error) {
 		go func(workerID int) {
 			defer wg.Done()
 			for tile := range jobs {
-				status, err := d.downloadTile(tile)
+				status, err := d.downloadTile(context.Background(), tile)
 				if err != nil {
 					fmt.Printf("  [%d] ✗ %s: %v\n", workerID, tile, err)
 					failed.Add(1)
@@ -96,12 +93,13 @@ const (
 	StatusFailed
 )
 
-// downloadTile downloads a single tile from S3
+// downloadTile downloads a single tile via HTTP
 // Downloads only the main DEM .tif file directly to the output directory
-func (d *Downloader) downloadTile(tileName string) (DownloadStatus, error) {
-	// The main DEM file in each tile directory
+func (d *Downloader) downloadTile(ctx context.Context, tileName string) (DownloadStatus, error) {
+	// The main DEM file
 	mainFile := tileName + ".tif"
-	s3Path := fmt.Sprintf("s3://copernicus-dem-30m/%s/%s", tileName, mainFile)
+	// Public HTTP URL for Copernicus DEM
+	url := fmt.Sprintf("https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com/%s/%s", tileName, mainFile)
 	destPath := filepath.Join(d.outputDir, mainFile)
 
 	// Create destination directory
@@ -109,36 +107,62 @@ func (d *Downloader) downloadTile(tileName string) (DownloadStatus, error) {
 		return StatusFailed, fmt.Errorf("creating destination directory: %w", err)
 	}
 
-	ctx := context.Background()
-	cmd := exec.CommandContext(ctx, "aws", "s3", "cp",
-		"--no-sign-request",
-		s3Path,
-		destPath,
-	)
-
-	output, err := cmd.CombinedOutput()
+	// Check if file already exists by getting HEAD
+	headReq, err := http.NewRequestWithContext(ctx, "HEAD", url, nil)
 	if err != nil {
-		// Check if tile doesn't exist (ocean tiles)
-		outputStr := string(output)
-		if strings.Contains(outputStr, "does not exist") ||
-			strings.Contains(outputStr, "NoSuchKey") ||
-			strings.Contains(outputStr, "The specified key does not exist") {
-			return StatusNotAvailable, nil
-		}
-		return StatusFailed, fmt.Errorf("%w: %s", err, outputStr)
+		return StatusFailed, fmt.Errorf("creating HEAD request: %w", err)
+	}
+
+	headResp, err := d.httpClient.Do(headReq)
+	if err != nil {
+		return StatusFailed, fmt.Errorf("HEAD request failed: %w", err)
+	}
+	headResp.Body.Close()
+
+	if headResp.StatusCode == http.StatusNotFound || headResp.StatusCode == http.StatusForbidden {
+		// Tile doesn't exist (ocean area)
+		return StatusNotAvailable, nil
+	}
+	if headResp.StatusCode != http.StatusOK {
+		return StatusFailed, fmt.Errorf("unexpected status code: %d", headResp.StatusCode)
+	}
+
+	// Check if local file exists and matches size (idempotent)
+	if stat, err := os.Stat(destPath); err == nil && stat.Size() == headResp.ContentLength {
+		// File already downloaded and size matches - skip
+		return StatusDownloaded, nil
+	}
+
+	// Download the file
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return StatusFailed, fmt.Errorf("creating GET request: %w", err)
+	}
+
+	resp, err := d.httpClient.Do(req)
+	if err != nil {
+		return StatusFailed, fmt.Errorf("GET request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusForbidden {
+		return StatusNotAvailable, nil
+	}
+	if resp.StatusCode != http.StatusOK {
+		return StatusFailed, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	// Create the file
+	file, err := os.Create(destPath)
+	if err != nil {
+		return StatusFailed, fmt.Errorf("creating local file: %w", err)
+	}
+	defer file.Close()
+
+	// Copy data
+	if _, err := io.Copy(file, resp.Body); err != nil {
+		return StatusFailed, fmt.Errorf("copying data: %w", err)
 	}
 
 	return StatusDownloaded, nil
-}
-
-// checkAWSCLI verifies that AWS CLI is installed
-func checkAWSCLI() error {
-	cmd := exec.Command("aws", "--version")
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("AWS CLI not found. Please install it:\n" +
-			"  macOS:   brew install awscli\n" +
-			"  Linux:   apt-get install awscli  or  yum install aws-cli\n" +
-			"  pip:     pip install awscli")
-	}
-	return nil
 }
