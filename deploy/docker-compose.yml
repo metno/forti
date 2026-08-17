@@ -1,8 +1,6 @@
 services:
   rawdataforecaster:
-    build:
-      context: ..
-      dockerfile: rawdataforecaster/build/package/Dockerfile
+    image: ${IMAGE_REPO}/rawdataforecaster:${IMAGE_TAG:-latest}
     ports:
       - "5052:5052"
     volumes:
@@ -13,9 +11,9 @@ services:
       - internal
 
   correctedforecaster:
-    build:
-      context: ..
-      dockerfile: correctedforecaster/build/package/Dockerfile
+    image: ${IMAGE_REPO}/correctedforecaster:${IMAGE_TAG:-latest}
+    ports:
+      - "5051:5051"
     profiles: ["corrected"]
     volumes:
       - ${TOPOGRAPHY_DATA_PATH:-../data/topography}:/data/topography:ro
@@ -30,9 +28,7 @@ services:
       - internal
 
   jsonfrontend:
-    build:
-      context: ..
-      dockerfile: jsonfrontend/build/package/Dockerfile
+    image: ${IMAGE_REPO}/jsonfrontend:${IMAGE_TAG:-latest}
     ports:
       - "8080:8080"
     command:

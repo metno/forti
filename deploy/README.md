@@ -25,10 +25,16 @@ By default, the Compose setup expects forecast data to be available at `../data/
 
 ## Usage
 
-Build and start the base services:
+Pull and start the base services:
 
 ```bash
-docker compose up --build
+docker compose up
+```
+
+To pin a specific release, set `IMAGE_TAG` in your `.env` file (see [Environment variables](#environment-variables)) or inline:
+
+```bash
+IMAGE_TAG=v0.8.0 docker compose up
 ```
 
 Test that the API is responding:
@@ -52,6 +58,8 @@ Both need to change together: `COMPOSE_PROFILES` starts the container, and `JSON
 
 | Variable | Default | Description |
 |---|---|---|
+| `IMAGE_REPO` | `ghcr.io/metno/forti` | Registry/repo prefix for all service images |
+| `IMAGE_TAG` | `latest` | Image tag to pull for all services (e.g. `v0.8.0`) |
 | `FORECAST_DATA_PATH` | `../data/forecast` | Path to the local forecast data directory |
 | `TOPOGRAPHY_DATA_PATH` | `../data/topography` | Path to the local topography data directory (used by `correctedforecaster`) |
 | `JSONFRONTEND_UPSTREAM` | `rawdataforecaster:5052` | gRPC upstream address for `jsonfrontend` |
