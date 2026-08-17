@@ -1,4 +1,4 @@
-FROM golang:1.26.5
+FROM golang:1.26.6
 
 COPY go.mod /src/go.mod
 COPY go.sum /src/go.sum

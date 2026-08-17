@@ -1,6 +1,6 @@
 module github.com/metno/forti
 
-go 1.26.4
+go 1.26.6
 
 require (
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
