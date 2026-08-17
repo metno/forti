@@ -9,9 +9,24 @@ This folder contains configuration for running Forti locally using Docker Compos
 
 ## Preparing data
 
+### Forecast data
+
 Forecast data can be produced using [forti-prep](https://github.com/metno/forti-prep), a companion tool that downloads and post-processes the input datasets into the format expected by Forti.
 
 By default, the Compose setup expects forecast data to be available at `../data/forecast` (relative to this folder), which corresponds to `data/forecast/` in the repository root. You can override this with the `FORECAST_DATA_PATH` environment variable.
+
+### Topography data
+
+Topography data is required for `correctedforecaster` to perform adiabatic temperature corrections. Use the [`download-topography`](../tools/download-topography/) tool to download Copernicus GLO-30 DEM tiles:
+
+```bash
+# From repository root
+go run ./tools/download-topography/cmd/download-topography \
+  --region malawi \
+  --output data/topography
+```
+
+See [`tools/download-topography/README.md`](../tools/download-topography/README.md) for more regions and options.
 
 ## Services
 
