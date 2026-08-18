@@ -37,6 +37,12 @@ func NewDownloader(outputDir string, workers int) *Downloader {
 
 // DownloadTiles downloads all tiles using parallel workers
 func (d *Downloader) DownloadTiles(tiles []string) (*DownloadStats, error) {
+
+	// Create destination directory
+	if err := os.MkdirAll(d.outputDir, 0755); err != nil {
+		return nil, fmt.Errorf("creating destination directory: %w", err)
+	}
+
 	stats := &DownloadStats{Total: len(tiles)}
 	var downloaded, notAvailable, failed atomic.Int32
 
@@ -101,11 +107,6 @@ func (d *Downloader) downloadTile(ctx context.Context, tileName string) (Downloa
 	// Public HTTP URL for Copernicus DEM
 	url := fmt.Sprintf("https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com/%s/%s", tileName, mainFile)
 	destPath := filepath.Join(d.outputDir, mainFile)
-
-	// Create destination directory
-	if err := os.MkdirAll(d.outputDir, 0755); err != nil {
-		return StatusFailed, fmt.Errorf("creating destination directory: %w", err)
-	}
 
 	// Check if file already exists by getting HEAD
 	headReq, err := http.NewRequestWithContext(ctx, "HEAD", url, nil)
