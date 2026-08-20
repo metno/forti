@@ -59,4 +59,9 @@ You should get a JSON forecast response.
 
 ## Next steps
 
-See [`deploy/README.md`](deploy/README.md) for configuration options, including how to enable `correctedforecaster` and how to override data paths.
+See [`deploy/README.md`](../deploy/README.md) for configuration options, including how to enable `correctedforecaster` and how to override data paths.
+
+For detailed component configuration:
+- [jsonfrontend configuration](../jsonfrontend/README.md)
+- [rawdataforecaster configuration](../rawdataforecaster/README.md)
+- [correctedforecaster configuration](../correctedforecaster/README.md)

@@ -22,12 +22,12 @@ The code for the batch jobs that produce the datasets are not included in this r
 
 The application is made up of several binaries working together.
 
-- **jsonfrontend**: REST API serving forecasts in JSON format (recommended)
+- **jsonfrontend**: REST API serving forecasts in JSON format (recommended) — [README](jsonfrontend/README.md)
 - **xmlfrontend**: Legacy XML REST API (deprecated, do not use for new integrations)
 - **moxfrontend**: Legacy MOX variant (deprecated, do not use for new integrations)
 - **healthz**: Monitors the overall health of the application
-- **rawdataforecaster**: Delivers forecasts through a gRPC interface, reading from cache or blob storage
-- **correctedforecaster**: Post-processes forecasts (temperature correction, etc.) and exposes them via gRPC
+- **rawdataforecaster**: Delivers forecasts through a gRPC interface, reading from cache or blob storage — [README](rawdataforecaster/README.md)
+- **correctedforecaster**: Post-processes forecasts (temperature correction, etc.) and exposes them via gRPC — [README](correctedforecaster/README.md)
 
 ### C4 container diagram
 
