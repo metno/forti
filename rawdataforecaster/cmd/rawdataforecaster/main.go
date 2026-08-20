@@ -12,15 +12,15 @@ import (
 	_ "gocloud.dev/blob/fileblob"
 	_ "gocloud.dev/blob/s3blob"
 
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/metno/forti/rawdataforecaster/internal/server"
 	"github.com/metno/forti/rawdataforecaster/internal/server/config"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
-	confFile := flag.String("config", "config.json", "Read configuration from the given file")
-	stats := flag.Bool("serve-stats", false, "serve prometheus stats")
-	port := flag.Int("port", 5052, "Listen port for incoming grpc requests.")
+	confFile := flag.String("config", "config.json", "Path to JSON configuration file (defines data source, areas, loader strategy)")
+	stats := flag.Bool("serve-stats", false, "Enable Prometheus metrics endpoint on :8080/metrics")
+	port := flag.Int("port", 5052, "gRPC server listen port")
 
 	flag.Parse()
 

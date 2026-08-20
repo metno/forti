@@ -16,12 +16,12 @@ import (
 )
 
 func main() {
-	upstream := flag.String("upstream", "localhost:5052", "get data from the given grpc server")
-	bucket := flag.String("download-from", "", "download data from the given bucket")
-	downloadTimeout := flag.Int("download-timeout", 240, "Timeout in seconds for downloading all topography files.")
-	workdir := flag.String("workdir", "/data/", "use files in the given directory")
-	port := flag.Int("port", 5051, "Listen port for incoming grpc requests.")
-	stats := flag.Bool("serve-stats", false, "serve prometheus stats")
+	upstream := flag.String("upstream", "localhost:5052", "gRPC upstream server address (typically rawdataforecaster)")
+	bucket := flag.String("download-from", "", "Bucket URL to download topography files from (e.g., 'file:///data/topography', 'azblob://...', empty to use -workdir only)")
+	downloadTimeout := flag.Int("download-timeout", 240, "Timeout in seconds for downloading topography files from bucket")
+	workdir := flag.String("workdir", "/data/", "Directory containing topography data files (used if -download-from is empty, or as download destination)")
+	port := flag.Int("port", 5051, "gRPC server listen port")
+	stats := flag.Bool("serve-stats", false, "Enable Prometheus metrics endpoint on :8080/metrics")
 
 	flag.Parse()
 
