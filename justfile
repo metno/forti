@@ -4,4 +4,7 @@ build-docker *modules="correctedforecaster healthz jsonfrontend moxfrontend rawd
     done
 
 run-docker:
+    cd deploy && docker compose up
+
+run-local-docker:
     cd deploy && docker compose up --build
