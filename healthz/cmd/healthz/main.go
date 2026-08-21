@@ -13,10 +13,10 @@ import (
 )
 
 func main() {
-	runServer := flag.Bool("run-server", false, "Run a server on port 8080, continously serving status.")
-	configFile := flag.String("config", "/etc/forti/probes.json", "Read probe configuration from the given file.")
-	upstreamGRPC := flag.String("upstream-grpc-host", "", "Check status against the given grpc server")
-	onlyCheckConfig := flag.Bool("only-check-config", false, "Do not run checks. Only verify configuration, then exit")
+	runServer := flag.Bool("run-server", false, "Run HTTP server on :8080 continuously serving health status")
+	configFile := flag.String("config", "/etc/forti/probes.json", "Path to JSON probe configuration file")
+	upstreamGRPC := flag.String("upstream-grpc-host", "", "gRPC server address to check status against (optional)")
+	onlyCheckConfig := flag.Bool("only-check-config", false, "Validate configuration file and exit without running probes")
 
 	flag.Parse()
 

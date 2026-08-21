@@ -14,21 +14,20 @@ The code for the batch jobs that produce the datasets are not included in this r
 
 [Getting started guide](docs/getting-started.md)
 
-## Development
+## API Documentation
 
-### Test
+[API Reference](docs/api-reference.md) – Complete documentation for the JSON REST API
 
 ## Architecture
 
 The application is made up of several binaries working together.
 
-- jsonfrontend and xmlfrontend: serves the REST interface.
-- healthz: monitors the overall health of the application.
-- rawdataforecaster: delivers forecast through a GRPC interface, from either a in-memory cache or from a blob storage.
-- correctedforecaster: collects data from the grpc interface, does some post-processing on the forecast and delivers the forecast through the same grpc interface.
-- Azure blob storage: Object store containing the latest version of all the forecast data.
-- Ecflow: Workflow manager specifying how and when to produce the forecast datasets.
-- PPI: Compute, job scheduling and storage system for producing the forecast datasets. Storage system contains most of source data needed to produce the datasets.
+- **jsonfrontend**: REST API serving forecasts in JSON format (recommended) — [README](jsonfrontend/README.md)
+- **xmlfrontend**: Legacy XML REST API (deprecated, do not use for new integrations)
+- **moxfrontend**: Legacy MOX variant (deprecated, do not use for new integrations)
+- **healthz**: Monitors the overall health of the application
+- **rawdataforecaster**: Delivers forecasts through a gRPC interface, reading from cache or blob storage — [README](rawdataforecaster/README.md)
+- **correctedforecaster**: Post-processes forecasts (temperature correction, etc.) and exposes them via gRPC — [README](correctedforecaster/README.md)
 
 ### C4 container diagram
 

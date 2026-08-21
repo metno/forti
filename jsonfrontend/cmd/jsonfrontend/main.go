@@ -13,10 +13,10 @@ import (
 )
 
 func main() {
-	upstream := flag.String("upstream", "localhost:5051", "get data from the given grpc server")
-	metricsPort := flag.Int("metricsPort", 9090, "serve metrics on the given port")
-	profilePort := flag.Int("profilePort", 0, "serve cpu profiles on the given port")
-	configFile := flag.String("config", "jsonformat.json", "read json formatting instructions from the given file")
+	upstream := flag.String("upstream", "localhost:5051", "gRPC upstream server address (rawdataforecaster or correctedforecaster)")
+	metricsPort := flag.Int("metricsPort", 9090, "Prometheus metrics HTTP port (0 to disable)")
+	profilePort := flag.Int("profilePort", 0, "pprof CPU profiling HTTP port (0 to disable)")
+	configFile := flag.String("config", "jsonformat.json", "Path to JSON configuration file (defines parameter mapping, time periods, HTTP headers)")
 	flag.Parse()
 
 	if err := config.Initialize(*configFile); err != nil {
