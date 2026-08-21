@@ -50,9 +50,9 @@ Supported bucket URL schemes (same as `rawdataforecaster`):
 
 ### Required Files
 
-The topography data directory must contain elevation data files matching the forecast grids used by your deployment. The specific filenames and format depend on your data source.
+The topography data directory must contain elevation data files that cover the geographic regions served by your deployment. For effective temperature correction, topography data should have higher spatial resolution than the forecast model grid.
 
-Consult your data provider for the required topography files and format.
+Topography files can be in any raster format readable by GDAL (GeoTIFF, NetCDF, HDF5, etc.). The files must contain elevation data with proper geospatial projection information.
 
 ## Architecture
 
