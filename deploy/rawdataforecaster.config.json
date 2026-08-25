@@ -1,9 +1,0 @@
-{
-  "source": {
-    "bucket": "file:///data/forecast"
-  },
-  "areas": ["meps"],
-  "loader": {
-    "type": "blob"
-  }
-}

@@ -1,15 +1,17 @@
 # Getting Started
 
-This guide walks you through running Forti locally using Docker Compose.
+This guide walks you through running Forti locally with `go run`.
+
+For a Docker Compose-based setup, see [forti-deploy](https://github.com/metno/forti-deploy).
 
 ## Prerequisites
 
-- [Docker](https://docs.docker.com/get-docker/) with Compose support
-- [just](https://just.systems/) (optional, but convenient)
+- Go 1.26 or later
+- Native dependencies for `rawdataforecaster` and `correctedforecaster` (s2geometry, PROJ) — the devcontainer (`.devcontainer/`) has everything set up
 
 ## 1. Prepare forecast data
 
-Forti reads forecast data from a local directory in [its own binary format](https://github.com/metno/forti-internalformat). You need to populate `data/forecast/` (relative to this repository root) before starting the stack — this is where Docker Compose expects data by default.
+Forti reads forecast data from a local directory in [its own binary format](https://github.com/metno/forti-internalformat). You need to populate a forecast data directory before starting the services.
 
 ### Using forti-prep (recommended)
 
@@ -21,7 +23,7 @@ cd forti-prep
 uv sync
 uv run forti-prep \
   --config sample_config.json \
-  --output-dir /path/to/forti/data/forecast \
+  --output-dir /path/to/your/forecast/data \
   --version $(date +%s) \
   your-forecast.nc
 ```
@@ -32,22 +34,27 @@ See the [forti-prep README](https://github.com/metno/forti-prep) for details on 
 
 If you have a different data source, you can produce the data directly in Forti's internal format. See [forti-internalformat](https://github.com/metno/forti-internalformat) for a full description of the format and Go code you can use to write it.
 
-## 2. Start the stack
+## 2. Start the services
 
-From the repository root, using just:
+Create a configuration file for `rawdataforecaster` that points to your forecast data directory. Set `source.bucket` to a `file://` URL:
 
-```bash
-just run-docker
+```json
+{
+  "source": {
+    "bucket": "file:///path/to/your/forecast/data"
+  }
+}
 ```
 
-Or directly with Docker Compose:
+Start the services in separate terminals:
 
 ```bash
-cd deploy
-docker compose up --build
-```
+# Terminal 1 – rawdataforecaster (gRPC on :5052)
+go run ./rawdataforecaster/cmd/rawdataforecaster -config your-config.json
 
-This starts `rawdataforecaster` and `jsonfrontend`. The first run will build the Docker images, which may take a few minutes.
+# Terminal 2 – jsonfrontend (HTTP on :8080)
+go run ./jsonfrontend/cmd/jsonfrontend -upstream localhost:5052
+```
 
 ## 3. Verify
 
@@ -59,9 +66,9 @@ You should get a JSON forecast response.
 
 ## Next steps
 
-See [`deploy/README.md`](../deploy/README.md) for configuration options, including how to enable `correctedforecaster` and how to override data paths.
-
 For detailed component configuration:
 - [jsonfrontend configuration](../jsonfrontend/README.md)
 - [rawdataforecaster configuration](../rawdataforecaster/README.md)
 - [correctedforecaster configuration](../correctedforecaster/README.md)
+
+To enable `correctedforecaster`, see the [correctedforecaster README](../correctedforecaster/README.md) for setup instructions.
