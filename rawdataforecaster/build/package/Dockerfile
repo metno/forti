@@ -1,6 +1,6 @@
-FROM ubuntu:24.04
+FROM ubuntu:26.04
 
-ARG GOLANG_VERSION=1.26.6
+ARG GOLANG_VERSION=1.27.4
 ARG TARGETARCH
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -30,7 +30,7 @@ WORKDIR /src
 
 RUN git clone https://github.com/abseil/abseil-cpp.git
 WORKDIR /src/abseil-cpp
-RUN git checkout c2435f8342c2d0ed8101cb43adfd605fdc52dca2
+RUN git checkout 20260817.0
 WORKDIR /src/abseil-cpp/build
 RUN cmake -DCMAKE_CXX_STANDARD=17 -DCMAKE_POSITION_INDEPENDENT_CODE=ON .. && \
     make && \
@@ -64,15 +64,15 @@ WORKDIR /src/rawdataforecaster/cmd/rawdataforecaster
 RUN go build
 
 
-FROM ubuntu:24.04
+FROM ubuntu:26.04
 
 ARG TARGETARCH
 
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgflags2.2 libgoogle-glog0v6t64 libssl3 \
-    libgeos-c1v5 libproj25 \
+        libgflags2.2 libgoogle-glog0v6t64 libssl3 \
+    libgeos-c1t64 libproj25 \
     ca-certificates
 
 EXPOSE 8080

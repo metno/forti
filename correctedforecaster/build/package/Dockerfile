@@ -1,6 +1,6 @@
-FROM ubuntu:24.04
+FROM ubuntu:26.04
 
-ARG GOLANG_VERSION=1.26.6
+ARG GOLANG_VERSION=1.27.4
 ARG TARGETARCH
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -40,14 +40,14 @@ WORKDIR /src/correctedforecaster/cmd/correctedforecaster
 RUN go build
 
 
-FROM ubuntu:24.04
+FROM ubuntu:26.04
 
 ARG TARGETARCH
 
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgdal34t64 ca-certificates
+    libgdal38 ca-certificates
 
 COPY --from=0 /src/correctedforecaster/cmd/correctedforecaster/correctedforecaster /usr/local/bin
 
