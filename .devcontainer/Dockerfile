@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/base:ubuntu-24.04
+FROM mcr.microsoft.com/devcontainers/base:ubuntu26.04
 
 
 RUN apt-get update && apt-get install -y \
@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y \
 
 RUN git clone https://github.com/abseil/abseil-cpp.git && \
     cd abseil-cpp && \
-    git checkout c2435f8342c2d0ed8101cb43adfd605fdc52dca2 && \
+    git checkout 20260817.0 && \
     mkdir build && \
     cd build/ && \
     cmake -DCMAKE_CXX_STANDARD=17 -DCMAKE_POSITION_INDEPENDENT_CODE=ON .. && \
@@ -37,7 +37,7 @@ RUN apt-get update && apt-get install -y \
 COPY rawdataforecaster/build/package/golang_checksums.txt /tmp/golang_checksums.txt
 
 # NOTE: When updating this, make sure to also set golang version in go.mod to the same version
-ARG GOLANG_VERSION=1.26.6
+ARG GOLANG_VERSION=1.27.4
 ARG TARGETARCH
 
 RUN \
