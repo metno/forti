@@ -44,18 +44,18 @@ jobs:
       - uses: actions/checkout@v7
       - run: govulncheck ./...
 
-  # trivy-scan:
-  #   name: Trivy Dockerfile scan
-  #   needs: [build]
-  #   runs-on: ubuntu-latest
-  #   container:
-  #     image: aquasec/trivy
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Scan all Dockerfiles
-  #       run: |
-  #         for dockerfile in */build/package/Dockerfile; do
-  #           echo "Scanning $dockerfile"
-  #           trivy fs --exit-code 1 --severity MEDIUM,HIGH,CRITICAL \
-  #             --scanners vuln,secret,license,misconfig "$dockerfile"
-  #         done
+  trivy-scan:
+    name: Trivy Dockerfile scan
+    needs: [build]
+    runs-on: ubuntu-latest
+    container:
+      image: aquasec/trivy
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan all Dockerfiles
+        run: |
+          for dockerfile in */build/package/Dockerfile; do
+            echo "Scanning $dockerfile"
+            trivy fs --exit-code 1 --severity MEDIUM,HIGH,CRITICAL \
+              --scanners vuln,secret,license,misconfig "$dockerfile"
+          done
