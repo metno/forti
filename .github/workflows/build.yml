@@ -37,6 +37,9 @@ jobs:
     name: Vulnerability check
     needs: [build]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     container:
       # Build/push the devcontainer image via the devcontainer.yml workflow when it changes.
       image: ghcr.io/${{ github.repository }}/devcontainer:latest
