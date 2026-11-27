@@ -1,4 +1,4 @@
-FROM golang:1.26.6
+FROM golang:1.27.4
 
 COPY go.mod /src/go.mod
 COPY go.sum /src/go.sum
@@ -17,7 +17,7 @@ WORKDIR /src/jsonfrontend/cmd/jsonfrontend
 RUN go build
 
 
-FROM ubuntu:24.04
+FROM ubuntu:26.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 

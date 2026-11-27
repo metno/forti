@@ -5,6 +5,9 @@ on:
     branches: ["main"]
   pull_request:
 
+permissions:
+    contents: read
+
 jobs:
   build:
     name: Build ${{ matrix.service }}
@@ -19,13 +22,13 @@ jobs:
           - rawdataforecaster
           - xmlfrontend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Build
         run: docker buildx build --platform linux/amd64,linux/arm64 -f ${{ matrix.service }}/build/package/Dockerfile .
@@ -34,6 +37,9 @@ jobs:
     name: Vulnerability check
     needs: [build]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     container:
       # Build/push the devcontainer image via the devcontainer.yml workflow when it changes.
       image: ghcr.io/${{ github.repository }}/devcontainer:latest
@@ -41,21 +47,21 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: govulncheck ./...
 
-  # trivy-scan:
-  #   name: Trivy Dockerfile scan
-  #   needs: [build]
-  #   runs-on: ubuntu-latest
-  #   container:
-  #     image: aquasec/trivy
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Scan all Dockerfiles
-  #       run: |
-  #         for dockerfile in */build/package/Dockerfile; do
-  #           echo "Scanning $dockerfile"
-  #           trivy fs --exit-code 1 --severity MEDIUM,HIGH,CRITICAL \
-  #             --scanners vuln,secret,license,misconfig "$dockerfile"
-  #         done
+  trivy-scan:
+    name: Trivy Dockerfile scan
+    needs: [build]
+    runs-on: ubuntu-latest
+    container:
+      image: aquasec/trivy
+    steps:
+      - uses: actions/checkout@v7
+      - name: Scan all Dockerfiles
+        run: |
+          for dockerfile in */build/package/Dockerfile; do
+            echo "Scanning $dockerfile"
+            trivy fs --exit-code 1 --severity MEDIUM,HIGH,CRITICAL \
+              --scanners vuln,secret,license,misconfig "$dockerfile"
+          done
